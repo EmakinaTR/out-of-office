@@ -1,0 +1,5 @@
+export const DASHBOARD = '/'
+export const REPORTS = '/reports'
+export const LEAVEREQUEST = '/leaverequest'
+export const MYREQUESTS = '/myrequests'
+export const PENDINGREQUESTS= '/pendingrequests'
