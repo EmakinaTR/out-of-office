@@ -12,37 +12,22 @@ const SignIn = (props) => {
             Auth.setLoggedIn(true);
         });
     }
-          
-    // const signInWithGoogle = () => {
-    //     const provider = new firebase.auth.GoogleAuthProvider();
-    //     firebase
-    //         .auth()
-    //         .setPersistence(firebase.auth.Auth.Persistence.SESSION)
-    //         .then(() => {
-    //             firebase
-    //                 .auth()
-    //                 .signInWithPopup(provider)
-    //                 .then(result => {
-    //                     console.log(result)
-    //                     history.push('/reports')
-    //                     Auth.setLoggedIn(true)
-    //                 })
-    //                 .catch(e => setErrors(e.message))
-    //         })
-
-    // }
-   
+    const styles = {
+        position :"absolute",
+        top :"50%",
+        left : "50%",
+        transform: "translate(-50%,-50%)",
+    }
     return (
-        <div>
-            <h1>SignIn</h1>
-            <button onClick={signInWithGoogle}  type="button">
+        <div style ={{position :'relative', marginTop : '100px', width: '100%',height:'400px'}}>
+            <h1 style={{margin:'auto', textAlign:'center'}}>SignIn</h1>
+            <button style={styles} onClick={signInWithGoogle}  type="button">
                     <img
                         src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
                         alt="logo"
                     />
                     SignIn With Google
             </button>
-            
             <span>{error}</span>
         </div>
     );

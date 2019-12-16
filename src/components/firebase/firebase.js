@@ -16,11 +16,9 @@ export default class Firebase {
         /* Google Provider */
         app.googleProvider = new app.auth.GoogleAuthProvider();
     }
-
-
     
         /* Auth API */
-     doSignInWithGoogle =() =>{ return new Promise((resolve,reject) => {
+    doSignInWithGoogle =() =>{ return new Promise((resolve,reject) => {
         app.auth().setPersistence(app.auth.Auth.Persistence.SESSION).then (() => {
             app.auth().signInWithPopup(app.googleProvider).then( results => {
              resolve(results);
