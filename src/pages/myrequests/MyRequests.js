@@ -6,7 +6,7 @@ export default function MyRequests() {
         <div>
             <p>Hello from My Requests</p>
             <DateCalendar></DateCalendar>
-            <DateFull></DateFull>
+            <DateFull width="120px"></DateFull>
         </div>
     )
 }

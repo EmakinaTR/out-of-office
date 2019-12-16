@@ -8,7 +8,7 @@ import AuthContext  from './components/session'
 import { firebaseConfig }from './components/firebase/config'
 
 function App (){
-  const [isLoggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setLoggedIn] = useState(true);
 
   const theme = createMuiTheme({
     palette: {
