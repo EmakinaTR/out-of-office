@@ -118,7 +118,6 @@ const Navigation = props => {
         }
         <main className={classes.content}>
           <div className={classes.toolbar} />
-        
             <Switch>
               {routes.map(route => (
                 <ProtectedRouteHoc
