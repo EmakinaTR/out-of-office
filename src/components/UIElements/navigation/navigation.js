@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
-import protectedRoutes from "../../constants/routes";
+import protectedRoutes from "../../../constants/routes";
 import { Switch, Link, BrowserRouter as Router } from "react-router-dom";
-import AuthContext  from "../session";
-import SignIn from "../../pages/signin";
+import AuthContext  from "../../session";
+import SignIn from "../../../pages/signin";
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -19,9 +19,8 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import { makeStyles } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import {FirebaseContext} from '../../components/firebase'
-import routes from "../../constants/routes";
-import ProtectedRouteHoc from "../protectedRouteHoc";
+import {FirebaseContext} from '../../firebase';
+import ProtectedRouteHoc from "../../protectedRouteHoc";
 
 const drawerWidth = 240;
 const Navigation = props => {
@@ -119,7 +118,7 @@ const Navigation = props => {
         <main className={classes.content}>
           <div className={classes.toolbar} />
             <Switch>
-              {routes.map(route => (
+              {protectedRoutes.map(route => (
                 <ProtectedRouteHoc
                   key={route.path}
                   isLoggedIn={isLoggedIn}

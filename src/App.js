@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Switch, BrowserRouter as Router } from "react-router-dom";
 import './App.css';
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import Navigation from './components/navigation';
+import Navigation from './components/UIElements/navigation';
 import AuthContext  from './components/session'
 
 import { firebaseConfig }from './components/firebase/config'
