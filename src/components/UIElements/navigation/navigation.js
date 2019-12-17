@@ -59,6 +59,7 @@ const Navigation = props => {
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
+      backgroundColor: '#e8e8e8',
     },
     toolbar: theme.mixins.toolbar,
   }));

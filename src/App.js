@@ -15,8 +15,8 @@ function App (){
       primary: {
         light: "#757ce8",
         main: "#000000",
-        dark: "#002884",
-        contrastText: "#fff"
+        dark: "#000000",
+        contrastText: "#fff",
       }
     }
   });
