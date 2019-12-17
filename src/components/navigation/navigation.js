@@ -15,8 +15,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import { makeStyles } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import {FirebaseContext} from '../../components/firebase'
@@ -102,12 +100,11 @@ const Navigation = props => {
           onClose={handleDrawerToggle}
         >
           <div className={classes.toolbar} />
-
           <List>
             {protectedRoutes.map((route, index) => (
               <ListItem component={Link} to={route.path} button key={index}>
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  {route.icon}
                 </ListItemIcon>
                 <ListItemText primary={route.name} />
               </ListItem>
@@ -135,6 +132,9 @@ const Navigation = props => {
     </div>
   )
 }
-
+Navigation.propTypes = {
+  title: PropTypes.string,
+  avatarText: PropTypes.string,
+};
 
 export default Navigation;

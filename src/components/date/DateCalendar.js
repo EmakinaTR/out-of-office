@@ -8,8 +8,6 @@ import Box from '@material-ui/core/Box';
 const useStyles = makeStyles({
     card: {
         maxWidth: '80px',
-        marginLeft: 500,
-        marginTop: 300,
         border: '1px solid black',
         textAlign: 'center',
         borderRadius: 0

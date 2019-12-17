@@ -5,22 +5,24 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles({
-
+    center: {
+        alignSelf: 'center'
+    }
 });
 
-export default function DateFull() {
+// Stringleri objeye çevir
+
+export default function DateFull(props) {
     const classes = useStyles();
 
     return (
-        <Grid container direction="row" className={classes.container}>
+        <Grid container direction="row">
             <Box ml={4} mr={2} textAlign="center">
-                <Typography>15 Aralık 2019</Typography>
-                <Typography>09:00</Typography>
+                <Typography style={{ width: props.width }}>15 Aralık 2019 09:00</Typography>
             </Box>
-            <ArrowForwardIosIcon />
+            <ArrowForwardIosIcon className={classes.center} />
             <Box ml={2} textAlign="center">
-                <Typography>16 Aralık 2019</Typography>
-                <Typography>09:00</Typography>
+                <Typography style={{ width: props.width }}>16 Aralık 2019 09:00</Typography>
             </Box>
         </Grid>
     )
