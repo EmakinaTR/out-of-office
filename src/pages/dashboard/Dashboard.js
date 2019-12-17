@@ -1,8 +1,7 @@
-import React from 'react';
+import React from "react";
 const Dashboard = () => (
-    <div>
-        <h1>Home Page</h1>
-        <p>The Home Page is accessible by every signed in user.</p>
-    </div>
+  <div>
+    <h1>Welcome To Dashboard</h1>
+  </div>
 );
-export default Dashboard
+export default Dashboard;
