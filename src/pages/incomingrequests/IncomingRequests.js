@@ -1,7 +1,7 @@
 import React from 'react'
 import { Paper,Container, Avatar, Grid, Typography, Badge,Fab } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
-import CustomBadge from '../../components/UIElements/customBadge/customBadge';
+import CustomBadge from '../../components/UIElements/customBadge/CustomBadge';
 import {statusBadges,leaveBadges} from '../../constants/badgeTypes';
 import DateCalendar from '../../components/UIElements/date/DateCalendar';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
