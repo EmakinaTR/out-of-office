@@ -75,7 +75,7 @@ const Navigation = props => {
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
-      backgroundColor: '#e8e8e8'
+      backgroundColor: '#e8e8e8',
     },
     toolbar: theme.mixins.toolbar
   }));
@@ -145,7 +145,7 @@ const Navigation = props => {
                       onClick={() => _onListItemClick(index)}
                       button
                       key={index}
-                      selected={index == selectedIndex}
+                      selected={index === selectedIndex}
                     >
                       <ListItemIcon>
                         <Icon>{route.icon}</Icon>
