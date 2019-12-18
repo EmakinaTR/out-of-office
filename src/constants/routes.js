@@ -5,6 +5,7 @@ import Dashboard from "../pages/dashboard";
 import MyRequests from "../pages/myrequests";
 import IncomingRequests from "../pages/incomingrequests";
 import LeaveRequestDetail from "../pages/leaveRequestDetail";
+import LeaveRequestEdit from '../pages/leaveRequestEdit';
 
 const protectedRoutes = [
   {
@@ -53,6 +54,14 @@ const protectedRoutes = [
     path: "/request-detail",
     exact: true,
     main: props => <LeaveRequestDetail {...props} />,
+    
+  },
+  {
+    // Name property will be removed, it is needed for test
+    name: "Request Edit",
+    path: "/request-edit",
+    exact: true,
+    main: props => <LeaveRequestEdit {...props} />,
     
   },
   // Default Route; Sets unless none of the pathes are given

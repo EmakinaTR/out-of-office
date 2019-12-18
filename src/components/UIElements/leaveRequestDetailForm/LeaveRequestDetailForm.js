@@ -46,10 +46,10 @@ export default function LeaveRequestForm(props) {
     const [checked, setChecked] = React.useState(true);
     const [open, setOpen] = React.useState(false);
     
-    // Lifecycle Methods
-    useEffect(() => {
-        setLabelWidth(inputLabel.current.offsetWidth);
-      }, []);
+    // // Lifecycle Methods
+    // useEffect(() => {
+    //     setLabelWidth(inputLabel.current.offsetWidth);
+    //   }, []);
       
     // Handle Methods
     const handleChange = name => event => {
@@ -84,6 +84,10 @@ export default function LeaveRequestForm(props) {
         console.log('submit')
     }
 
+    const printLeaveRequest = () => {
+        console.log("print");
+    }
+
     // Approver obj, it can be changed into props
     const approvers = [
         {
@@ -99,27 +103,7 @@ export default function LeaveRequestForm(props) {
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <h2 style={{textAlign: 'center'}}>Leave Request Detail</h2>
-                    <FormControl variant="outlined" className={classes.formControl} disabled>
-                        <InputLabel ref={inputLabel}>Leave Type</InputLabel>
-                        <NativeSelect
-                        value={state.staticLeaveType}
-                        onChange={handleChange('staticLeaveType')}
-                        labelWidth={labelWidth}
-                        inputProps={{
-                            staticLeaveType: 'staticLeaveType',
-                          }}
-                        >
-                            <option value="" />
-                            <option value={'annual_leave'}>Annual Leave</option>
-                            <option value={'excuse_leave'}>Excuse Leave</option>
-                            <option value={'0-2_hours'}>0-2 Hours</option>
-                            <option value={'remote_working'}>Remote Working</option>
-                            <option value={'unpaid_vacation'}>Unpaid Vacation</option>
-                            <option value={'marriage'}>Marriage</option>
-                            <option value={'paternity'}>Paternity Leave</option>
-                            <option value={'other'}>Other</option>
-                        </NativeSelect>
-                    </FormControl>
+                    <TextField className={classes.inputWidth} label="Leave Type" variant="outlined" margin="normal" value="Excuse Leave" InputProps={{readOnly: true,}} />
                     <Box my={2}>
                         <Divider />
                     </Box>
@@ -165,10 +149,10 @@ export default function LeaveRequestForm(props) {
                                 <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">EDIT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="secondary">PRINT</Button>
+                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary" onClick={printLeaveRequest}>PRINT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="secondary">CANCEL</Button>
+                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary">CANCEL</Button>
                             </Grid>
                         </Grid>
                     </Box>

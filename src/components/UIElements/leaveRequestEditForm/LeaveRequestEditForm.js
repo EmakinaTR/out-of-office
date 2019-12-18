@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
-export default function LeaveRequestForm(props) {
+export default function LeaveRequestEditForm(props) {
     // Styles
     const classes = useStyles();
     // Refs
@@ -35,7 +35,9 @@ export default function LeaveRequestForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // States
     const [state, setState] = useState({
-        leaveType: ''
+        // Select component's default value is coming from here, we will give
+        // this dynamically to fill leave type
+        leaveType: 'excuse_leave'
     });
     const [labelWidth, setLabelWidth] = useState(0);
     const [selectedDate, setSelectedDate] = useState(moment());
@@ -137,7 +139,7 @@ export default function LeaveRequestForm(props) {
         <Container maxWidth="lg">
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>Leave Request</h2>
+                    <h2 style={{textAlign: 'center'}}>Leave Request Edit</h2>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -277,45 +279,52 @@ export default function LeaveRequestForm(props) {
                         </Grid>
                     </Box>
                     <Box my={2}>
-                        <Grid container>
+                        <Grid item xs={12} md={6}>
+                            <Checkbox
+                            uncontrolled
+                            onChange={handleCheck}
+                            value="KVKK_valid"
+                            color="primary"
+                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                            />
+                            <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
+                            <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                            <Dialog
+                            fullScreen={fullScreen}
+                            open={open}
+                            onClose={handleDialogClose}
+                            aria-labelledby="responsive-dialog-title"
+                            >
+                                <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Let Google help apps determine location. This means sending anonymous location data to
+                                        Google, even when no apps are running.
+                                    </DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button autoFocus onClick={handleDialogClose} color="primary">
+                                        Disagree
+                                    </Button>
+                                    <Button onClick={handleDialogClose} color="primary" autoFocus>
+                                        Agree
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        </Grid>
+                    </Box>
+                    <Grid container spacing={3}>
+                        <Box clone order={{xs: 2, md: 1}}>
                             <Grid item xs={12} md={6}>
-                                <Checkbox
-                                uncontrolled
-                                onChange={handleCheck}
-                                value="KVKK_valid"
-                                color="primary"
-                                inputProps={{ 'aria-label': 'primary checkbox' }}
-                                />
-                                <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
-                                <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                <Dialog
-                                fullScreen={fullScreen}
-                                open={open}
-                                onClose={handleDialogClose}
-                                aria-labelledby="responsive-dialog-title"
-                                >
-                                    <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Let Google help apps determine location. This means sending anonymous location data to
-                                            Google, even when no apps are running.
-                                        </DialogContentText>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button autoFocus onClick={handleDialogClose} color="primary">
-                                            Disagree
-                                        </Button>
-                                        <Button onClick={handleDialogClose} color="primary" autoFocus>
-                                            Agree
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary">CANCEL</Button>
                             </Grid>
+                        </Box>
+                        <Box clone order={{xs: 1, md: 2}}>
                             <Grid item xs={12} md={6}>
                                 <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
                             </Grid>
-                        </Grid>
-                    </Box>
+                        </Box>
+                    </Grid>
                 </form>
             </Paper>
         </Container>
