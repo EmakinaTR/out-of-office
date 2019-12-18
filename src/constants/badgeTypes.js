@@ -1,5 +1,5 @@
 import { withStyles } from "@material-ui/core/styles";
-
+ 
 export const statusBadges = {
     waiting : {
         id:0,
@@ -22,7 +22,7 @@ export const statusBadges = {
         color: "#969696"
     }
 }
-
+ 
 export const leaveBadges = {
     AnnualLeave: {
         badgeContent: "Yıllık İzin",
@@ -44,4 +44,4 @@ export const leaveBadges = {
         badgeContent: "Uzaktan Çalışma",
         color: "#737373"
     }
-} 
+}

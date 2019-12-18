@@ -31,5 +31,6 @@ export default function CustomBadge(props) {
 
 CustomBadge.defaultProps = {
     backgroundColor: "primary",
-    color: "white"
-};
+    color :"white"
+}; 
+

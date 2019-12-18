@@ -1,8 +1,7 @@
 import React from 'react'
+import LeaveRequestForm from '../../components/UIElements/leaveRequestForm'
 export default function LeaveRequest() {
     return (
-        <div>
-            <p>Hello from LeaveRequest</p>
-        </div>
+        <LeaveRequestForm />
     )
 }

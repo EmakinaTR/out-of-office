@@ -28,7 +28,7 @@ function App() {
         dark: "#e0e0e0",
       }
     },
-    breakpoints: { values: breakpointValues }
+    breakpoints: {values:breakpointValues}
   });
   function readSession() {
     const user = window.sessionStorage.getItem(
