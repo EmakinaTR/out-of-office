@@ -1,49 +1,54 @@
 import React, { useState, useEffect } from "react";
-import './App.css';
+import { BrowserRouter as Router } from "react-router-dom";
+import "./App.css";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import Navigation from './components/navigation';
-import AuthContext  from './components/session';
-import { firebaseConfig }from './components/firebase/config'
+import Navigation from "./components/UIElements/navigation";
+import AuthContext from "./components/session";
+import { firebaseConfig } from "./components/firebase/config";
 
-
-
-
-function App (){
+function App() {
   const [isLoggedIn, setLoggedIn] = useState(true);
+  const breakpointValues = {
+    xs: 0,
+    sm: 576,
+    md: 768,
+    lg: 992,
+    xl: 1200,
+  };
   const theme = createMuiTheme({
     palette: {
       primary: {
         light: "#757ce8",
         main: "#000000",
-        dark: "#002884",
-        contrastText: "#fff"
+        dark: "#000000",
+        contrastText: "#fff",
       },
-      mycolor: {
-        light: "#0be300",
-        main: "#0be300",
-        dark: "#0be300",
-        contrastText: "#fff"
+      secondary: {
+        main: "#e0e0e0",
+        dark: "#e0e0e0",
       }
-    }
+    },
+    breakpoints: { values: breakpointValues }
   });
   function readSession() {
     const user = window.sessionStorage.getItem(
       `firebase:authUser:${firebaseConfig.apiKey}:[DEFAULT]`
     );
-    if (user) setLoggedIn(true)
-    console.log(user);
+    if (user) setLoggedIn(true);
   }
   useEffect(() => {
-    readSession()
-  }, [])
-  
-    return (
-      <AuthContext.Provider value={{ isLoggedIn, setLoggedIn }}>
-        <MuiThemeProvider theme={theme}>
-            <Navigation title="OOO" avatarText="D" isLoggedIn={isLoggedIn}/>
-        </MuiThemeProvider>
-      </AuthContext.Provider>
-    );
+    readSession();
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn }}>
+      <MuiThemeProvider theme={theme}>
+        <Router>
+          <Navigation title="OOO" isLoggedIn={isLoggedIn} />
+        </Router>
+      </MuiThemeProvider>
+    </AuthContext.Provider>
+  );
 }
 
 export default App;
