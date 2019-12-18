@@ -1,7 +1,117 @@
 import React from "react";
-const Dashboard = () => (
-  <div>
-    <h1>Welcome To Dashboard</h1>
-  </div>
-);
+import InfoCard from "../../components/UIElements/InfoCard/InfoCard";
+import {
+  Container,
+  Grid,
+  Card,
+  Typography,
+  Icon,
+  Button
+} from "@material-ui/core";
+
+import { makeStyles } from "@material-ui/core/styles";
+import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
+// String sources
+const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
+const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
+const REMAINING_CASUAL_LEAVE_REQUEST = "Kalan Mazeret İzni";
+const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
+const MY_LEAVE_REQUEST = "Son 5 İzin";
+
+// CUSTOM STATIC DATA
+const leaves = [
+  {
+    requesterName: "Efe Uruk",
+    leaveType: "Yıllık İzin",
+    leaveCount: "1,5 gün"
+  },
+  {
+    requesterName: "Doğukan Uçak",
+    leaveType: "Mazeret İzni",
+    leaveCount: "1 gün"
+  },
+  {
+    requesterName: "İlker Ünal",
+    leaveType: "Yıllık İzin",
+    leaveCount: "3 gün"
+  },
+  {
+    requesterName: "Efe Uruk",
+    leaveType: "Yıllık İzin",
+    leaveCount: "1,5 gün"
+  },
+  {
+    requesterName: "Doğukan Uçak",
+    leaveType: "Mazeret İzni",
+    leaveCount: "1 gün"
+  }
+];
+
+const useStyles = makeStyles(theme => ({
+  newRequestButton: {
+    width: "100%",
+    padding: theme.spacing(3),
+    paddingRight: "0.5rem",
+    alignItems: "center",
+    textTransform: "upperCase"
+  },
+  newRequestButtonText: {
+    flex: 1,
+    textAlign: "left"
+  },
+  listCard: {
+    padding: theme.spacing(3),
+    textAlign: "center"
+  }
+}));
+
+const Dashboard = () => {
+  const classes = useStyles();
+
+  return (
+    <Container>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Button
+            color="primary"
+            variant="contained"
+            className={classes.newRequestButton}
+          >
+            <Typography className={classes.newRequestButtonText}>
+              {NEW_LEAVE_REQUEST}
+            </Typography>
+            <Icon style={{ fontSize: "2rem" }}>add</Icon>
+          </Button>
+        </Grid>
+        {/* Remaining Annual Leave */}
+        <Grid item xs={12} md={6}>
+          <InfoCard text={REMAINING_ANNUAL_LEAVE_REQUEST} count={5}></InfoCard>
+        </Grid>
+        {/* Remaining Annual Leave */}
+        <Grid item xs={12} md={6}>
+          <InfoCard text={REMAINING_CASUAL_LEAVE_REQUEST} count={2}></InfoCard>
+        </Grid>
+        {/* Remaining Annual Leave */}
+        <Grid item xs={12} md={6}>
+          <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
+        </Grid>
+      </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card className={classes.listCard}>
+            {MY_LEAVE_REQUEST}
+            {leaves.map(leave => {
+              return (
+                <LeaveSummaryItem
+                  leaveType={leave.leaveType}
+                  leaveCount={leave.leaveCount}
+                ></LeaveSummaryItem>
+              );
+            })}
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
+  );
+};
 export default Dashboard;
