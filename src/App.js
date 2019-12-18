@@ -8,6 +8,13 @@ import { firebaseConfig } from "./components/firebase/config";
 
 function App() {
   const [isLoggedIn, setLoggedIn] = useState(true);
+  const breakpointValues = {
+    xs: 0,
+    sm: 576,
+    md: 768,
+    lg: 992,
+    xl: 1200,
+  };
   const theme = createMuiTheme({
     palette: {
       primary: {
@@ -15,8 +22,13 @@ function App() {
         main: "#000000",
         dark: "#000000",
         contrastText: "#fff",
+      },
+      secondary: {
+        main: "#e0e0e0",
+        dark: "#e0e0e0",
       }
-    }
+    },
+    breakpoints: {values:breakpointValues}
   });
   function readSession() {
     const user = window.sessionStorage.getItem(
