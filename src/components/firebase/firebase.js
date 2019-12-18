@@ -19,7 +19,7 @@ export default class Firebase {
     
         /* Auth API */
     doSignInWithGoogle =() =>{ return new Promise((resolve,reject) => {
-        app.auth().setPersistence(app.auth.Auth.Persistence.LOCAL).then (() => {
+        app.auth().setPersistence(app.auth.Auth.Persistence.SESSION).then (() => {
             app.auth().signInWithPopup(app.googleProvider).then( results => {
              resolve(results);
             })
@@ -30,13 +30,13 @@ export default class Firebase {
     })
     } 
 
-//     doSignInWithGoogle = () => {return new Promise((resolve, reject) => {
-//         app.auth().signInWithRedirect(app.googleProvider)
-//             .then(results => {
-//               resolve(results);
-//         })
-//         }
-//     )
+    // doSignInWithGoogle = () => {return new Promise((resolve, reject) => {
+    //     app.auth().signInWithRedirect(app.googleProvider)
+    //         .then(results => {
+    //           resolve(results);
+    //     })
+    //     }
+    // )
 // }
     
 

@@ -13,4 +13,5 @@ const ProtectedRouteHoc = ({ component: Component, isLoggedIn, ...rest }) => {
     }
     return <Redirect to={{ pathname: '/' }} />;
 };
+
 export default withRouter(ProtectedRouteHoc);
