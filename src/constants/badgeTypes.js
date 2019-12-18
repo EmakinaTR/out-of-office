@@ -2,42 +2,46 @@ import { withStyles } from "@material-ui/core/styles";
 
 export const statusBadges = {
     waiting : {
+        id:0,
         badgeContent : "Onay Bekliyor",
-        color: "#ffec45",        
+        color: "#ffde7d",        
     },
     approved : {
+        id:1,
         badgeContent: "Onaylandı",
-        color: "#0be300",
+        color: "#8cc63f",
     },
-    rejected: {
+    rejected : {
+        id:2,
         badgeContent: "Red edildi",
-        color: "#e34000"
+        color: "#ff7f41"
     },
-    cancelled:{
+    cancelled : {
+        id:3,
         badgeContent: "Cancelled",
-        color: "#737373"
+        color: "#969696"
     }
 }
 
 export const leaveBadges = {
     AnnualLeave: {
         badgeContent: "Yıllık İzin",
-        color: "#ffec45"
+        color: "#f2d6eb"
     },
     CompansateLeave: {
-        badgeContent: "Onaylandı",
-        color: "#0be300"
+        badgeContent: "Sonradan Çalışma",
+        color: "#5c94bd"
     },
     ExcuseLeave: {
-        badgeContent: "Red edildi",
-        color: "#e34000"
+        badgeContent: "Mazeret İzni",
+        color: "#1a3e59"
     },
     OtherLeave:{
-        badgeContent: "Cancelled",
-        color: "#737373"
+        badgeContent: "Diğer",
+        color: "#470938"
     },
     RemoteWork: {
-        badgeContent: "Cancelled",
+        badgeContent: "Uzaktan Çalışma",
         color: "#737373"
     }
-}
+} 
