@@ -1,176 +1,48 @@
 import React from 'react'
-import { Paper,Container, Avatar, Grid, Typography, Badge,Fab } from '@material-ui/core'
+import { Container, Box, Typography, Grid } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
-import CustomBadge from '../../components/UIElements/customBadge/CustomBadge';
-import {statusBadges,leaveBadges} from '../../constants/badgeTypes';
-import DateCalendar from '../../components/UIElements/date/DateCalendar';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import DateFull from '../../components/UIElements/date/DateFull';
-
+import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
+import IncomingRequestCard from '../../components/UIElements/incomingRequestCard';
+import { incomingRequestData } from '../../constants/dummyData';
+ 
 const useStyles = makeStyles(theme => ({
-
-    contentContainer:{
-        // backgroundColor:'red'
+ 
+    contentContainer: {
+        padding: "0",
     },
-    paper: {
-        padding: theme.spacing(2),
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-        marginBottom:'24px'
-    },
-    userInfo :{
-        display : 'flex',
-        flexDirection:'column',
-        justifyContent : 'center',
-        alignItems:'center'
-    },
-    userName:{
-        marginTop : '10px'
-    },
-    leavePeriod :{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    moreButton:{
-        backgroundColor:'transparent'
+    headerContainer: {
+        margin: theme.spacing(2)
     }
 }));
+ 
 export default function IncomingRequests(props) {
     const classes = useStyles();
     return (
-        <Container className={classes.contentContainer} container >
-            <Paper>
-                <Grid >
-                    <Grid item lg={12}>
-                        <Paper className={classes.paper}>
-                            <Grid container>
-                                <Grid className={classes.userInfo} item lg={1}>
-                                    <Avatar>İ</Avatar>
-                                    <Typography className ={classes.userName}>İlker Ünal</Typography>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={4}>
-                                    <DateFull ></DateFull>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor="blue" >1.5 Gün</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={leaveBadges.AnnualLeave.color} > {leaveBadges.AnnualLeave.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={statusBadges.approved.color}> {statusBadges.approved.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={1}>
-                                    <Fab className={classes.moreButton} size="small" >
-                                        <MoreVertIcon></MoreVertIcon>
-                                    </Fab>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                        <Paper className={classes.paper}>
-                            <Grid container>
-                                <Grid className={classes.userInfo} item lg={1}>
-                                    <Avatar>İ</Avatar>
-                                    <Typography className ={classes.userName}>İlker Ünal</Typography>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={4}>
-                                    <DateFull ></DateFull>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor="red" >1.5 Gün</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={leaveBadges.AnnualLeave.color} > {leaveBadges.AnnualLeave.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={statusBadges.approved.color}> {statusBadges.approved.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={1}>
-                                    <Fab className={classes.moreButton} size="small" >
-                                        <MoreVertIcon></MoreVertIcon>
-                                    </Fab>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                        <Paper className={classes.paper}>
-                            <Grid container>
-                                <Grid className={classes.userInfo} item lg={1}>
-                                    <Avatar>İ</Avatar>
-                                    <Typography className ={classes.userName}>İlker Ünal</Typography>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={4}>
-                                    <DateFull ></DateFull>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor="red" >1.5 Gün</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={leaveBadges.AnnualLeave.color} > {leaveBadges.AnnualLeave.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={statusBadges.approved.color}> {statusBadges.approved.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={1}>
-                                    <Fab className={classes.moreButton} size="small" >
-                                        <MoreVertIcon></MoreVertIcon>
-                                    </Fab>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                        <Paper className={classes.paper}>
-                            <Grid container>
-                                <Grid className={classes.userInfo} item lg={1}>
-                                    <Avatar>İ</Avatar>
-                                    <Typography className ={classes.userName}>İlker Ünal</Typography>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={4}>
-                                    <DateFull ></DateFull>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor="red" >1.5 Gün</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={leaveBadges.AnnualLeave.color} > {leaveBadges.AnnualLeave.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={statusBadges.approved.color}> {statusBadges.approved.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={1}>
-                                    <Fab className={classes.moreButton} size="small" >
-                                        <MoreVertIcon></MoreVertIcon>
-                                    </Fab>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                        <Paper className={classes.paper}>
-                            <Grid container>
-                                <Grid className={classes.userInfo} item lg={1}>
-                                    <Avatar>İ</Avatar>
-                                    <Typography className ={classes.userName}>İlker Ünal</Typography>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={4}>
-                                    <DateFull ></DateFull>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor="red" >1.5 Gün</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={leaveBadges.AnnualLeave.color} > {leaveBadges.AnnualLeave.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={2}>
-                                    <CustomBadge backgroundColor={statusBadges.approved.color}> {statusBadges.approved.badgeContent}</CustomBadge>
-                                </Grid>
-                                <Grid className={classes.leavePeriod} item lg={1}>
-                                    <Fab className={classes.moreButton} size="small" >
-                                        <MoreVertIcon></MoreVertIcon>
-                                    </Fab>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
+        <Container className={classes.contentContainer}  >
+ 
+            <Box >
+                <Grid className={classes.headerContainer}>
+                    <Typography spa align="center" variant="h4" >Gelen Talepler</Typography>
                 </Grid>
-            </Paper>
+                {incomingRequestData.map((data, index) => {
+                    // var statusType = statusBadges.find(type => type.id == data.status)
+                    // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+                    return (
+                        <IncomingRequestCard
+                            key={data.id}
+                            userName={data.userName}
+                            leaveTypeContent={leaveBadges.AnnualLeave.badgeContent}
+                            leaveTypeColor={leaveBadges.AnnualLeave.color}
+                            statusTypeContent={statusBadges.waiting.badgeContent}
+                            statusTypeColor={statusBadges.waiting.color}
+                            startDate={data.startDate}
+                            endDate={data.endDate}
+                            dayCount={data.dayCount}
+                            description={data.description}
+                        ></IncomingRequestCard>
+                    )
+                })}
+            </Box>
         </Container>
     )
 }
