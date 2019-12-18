@@ -80,6 +80,59 @@ export default function LeaveRequestForm(props) {
         console.log('submit')
     }
 
+    // Leave Types obj
+    // const leaveTypes = [
+    //     {
+    //         name: '',
+    //         value: ''
+    //     },
+    //     {
+    //         name: 'Annual Leave',
+    //         value: 'annual_leave'
+    //     },
+    //     {
+    //         name: 'Excuse Leave',
+    //         value: 'excuse_leave'
+    //     },
+    //     {
+    //         name: '0-2 Hours',
+    //         value: '0-2_hours'
+    //     },
+    //     {
+    //         name: 'Remote Working',
+    //         value: 'remote_working'
+    //     },
+    //     {
+    //         name: 'Unpaid Vacation',
+    //         value: 'unpaid_vacation'
+    //     },
+    //     {
+    //         name: 'Marriage',
+    //         value: 'marriage'
+    //     },
+    //     {
+    //         name: 'Paternity Leave',
+    //         value: 'paternity'
+    //     },
+    //     {
+    //         name: 'Other',
+    //         value: 'other'
+    //     },
+
+    // ]
+    
+    
+    // Approver obj, it can be changed into props
+    const approvers = [
+        {
+            name: "Onur Tepeli"
+        },
+        {
+            name: "Bekir Semih Turgut"
+        }
+    ]
+
+
     return (
         <Container maxWidth="lg">
             <Paper className={classes.root}>
@@ -93,6 +146,11 @@ export default function LeaveRequestForm(props) {
                         onChange={handleChange('leaveType')}
                         labelWidth={labelWidth}
                         >
+                            {/* {leaveTypes.map((index, name, value) => {
+                                // return <option value={leaveTypes[index].value}>{leaveTypes[index].name}</option>
+                                console.log('index -> ' + leaveTypes[1].name);
+                                
+                            })} */}
                             <option value="" />
                             <option value={'annual_leave'}>Annual Leave</option>
                             <option value={'excuse_leave'}>Excuse Leave</option>
@@ -195,29 +253,33 @@ export default function LeaveRequestForm(props) {
                             </Grid>
                         </MuiPickersUtilsProvider>
                     </Box>
-                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" disabled />
+                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} />
                     <Box my={2}>
                         <Divider />
                     </Box>
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" />
                     <Box my={3}>
-                        <Grid container>
-                            <Box alignSelf="center" marginRight={3}>
+                    <Grid container>
+                            <Grid item xs={12} md={2}>
                                 <Typography>Approver</Typography>
-                            </Box>
-                            <Box marginRight={1}>
-                                <Chip avatar={<Avatar>O</Avatar>} label="Onur Tepeli" />
-                            </Box>
-                            <Box marginRight={1}>
-                                <Chip avatar={<Avatar>B</Avatar>} label="Bekir Semih Turgut" />
-                            </Box>
+                            </Grid>
+                           <Grid item xs={12} md={5}>
+                                <Box component="span" marginRight={1}>
+                                    <Chip avatar={<Avatar>{approvers[0].name.charAt(0)}</Avatar>} label={approvers[0].name} />
+                                </Box>
+                                <Box component="span" marginRight={1}>
+                                    <Chip avatar={<Avatar>{approvers[1].name.charAt(0)}</Avatar>} label={approvers[1].name} />
+                                </Box>
+                           </Grid>
+                           {/* Offset */}
+                           <Grid item md={7} implementation="css" smDown component="hidden" />
                         </Grid>
                     </Box>
                     <Box my={2}>
                         <Grid container>
                             <Grid item xs={12} md={6}>
-                                <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                <Box component="span">Agree with Terms and Conditions</Box>
                                 <Checkbox
                                 uncontrolled
                                 onChange={handleCheck}
@@ -225,6 +287,7 @@ export default function LeaveRequestForm(props) {
                                 color="primary"
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
                                 />
+                                <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
                                 <Dialog
                                 fullScreen={fullScreen}
                                 open={open}

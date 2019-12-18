@@ -4,6 +4,7 @@ import LeaveRequest from "../pages/leaverequest";
 import Dashboard from "../pages/dashboard";
 import MyRequests from "../pages/myrequests";
 import IncomingRequests from "../pages/incomingrequests";
+import LeaveRequestDetail from "../pages/leaveRequestDetail";
 
 const protectedRoutes = [
   {
@@ -45,6 +46,14 @@ const protectedRoutes = [
     main: props => <Reports {...props} />,
     public: false,
     icon: "insert_chart_outlined"
+  },
+  {
+    // Name property will be removed, it is needed for test
+    name: "Request Detail",
+    path: "/request-detail",
+    exact: true,
+    main: props => <LeaveRequestDetail {...props} />,
+    
   },
   // Default Route; Sets unless none of the pathes are given
   {
