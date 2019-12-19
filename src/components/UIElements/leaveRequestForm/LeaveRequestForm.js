@@ -39,14 +39,11 @@ export default function LeaveRequestForm(props) {
     });
     const [labelWidth, setLabelWidth] = useState(0);
     const [selectedDate, setSelectedDate] = useState(moment());
-    const [checked, setChecked] = React.useState(true);
-    const [open, setOpen] = React.useState(false);
+    const [checked, setChecked] = useState(true);
+    const [open, setOpen] = useState(false);
+
+    const [leaveTypes, setLeaveTypes] = useState([]);
     
-    // Lifecycle Methods
-    useEffect(() => {
-        setLabelWidth(inputLabel.current.offsetWidth);
-      }, []);
-      
     // Handle Methods
     const handleChange = name => event => {
         setState({
@@ -54,7 +51,7 @@ export default function LeaveRequestForm(props) {
           [name]: event.target.value,
         });
         console.log(event.target.value);
-      };
+    };
 
     const handleDateChange = date => {
         setSelectedDate(date);
@@ -80,47 +77,29 @@ export default function LeaveRequestForm(props) {
         console.log('submit')
     }
 
-    // Leave Types obj
-    // const leaveTypes = [
-    //     {
-    //         name: '',
-    //         value: ''
-    //     },
-    //     {
-    //         name: 'Annual Leave',
-    //         value: 'annual_leave'
-    //     },
-    //     {
-    //         name: 'Excuse Leave',
-    //         value: 'excuse_leave'
-    //     },
-    //     {
-    //         name: '0-2 Hours',
-    //         value: '0-2_hours'
-    //     },
-    //     {
-    //         name: 'Remote Working',
-    //         value: 'remote_working'
-    //     },
-    //     {
-    //         name: 'Unpaid Vacation',
-    //         value: 'unpaid_vacation'
-    //     },
-    //     {
-    //         name: 'Marriage',
-    //         value: 'marriage'
-    //     },
-    //     {
-    //         name: 'Paternity Leave',
-    //         value: 'paternity'
-    //     },
-    //     {
-    //         name: 'Other',
-    //         value: 'other'
-    //     },
+    //Firebase
 
-    // ]
-    
+    // Firebase functions
+    let getAllLeaveTypes = async () => {
+        let firebasePromise = props.firebase.getAllLeaveTypes();
+        let leaveTypesArr = [];
+        if (firebasePromise !== null) {
+            await firebasePromise.then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leaveTypesArr.push(doc.data())
+                }
+                setLeaveTypes(leaveTypesArr);
+            });
+            
+        }
+    }
+
+    // Lifecycle Methods
+    useEffect(async () => {
+        setLabelWidth(inputLabel.current.offsetWidth);
+        await getAllLeaveTypes();
+    }, []);
+      
     
     // Approver obj, it can be changed into props
     const approvers = [
@@ -131,7 +110,6 @@ export default function LeaveRequestForm(props) {
             name: "Bekir Semih Turgut"
         }
     ]
-
 
     return (
         <Container maxWidth="lg">
@@ -146,20 +124,10 @@ export default function LeaveRequestForm(props) {
                         onChange={handleChange('leaveType')}
                         labelWidth={labelWidth}
                         >
-                            {/* {leaveTypes.map((index, name, value) => {
-                                // return <option value={leaveTypes[index].value}>{leaveTypes[index].name}</option>
-                                console.log('index -> ' + leaveTypes[1].name);
-                                
-                            })} */}
-                            <option value="" />
-                            <option value={'annual_leave'}>Annual Leave</option>
-                            <option value={'excuse_leave'}>Excuse Leave</option>
-                            <option value={'0-2_hours'}>0-2 Hours</option>
-                            <option value={'remote_working'}>Remote Working</option>
-                            <option value={'unpaid_vacation'}>Unpaid Vacation</option>
-                            <option value={'marriage'}>Marriage</option>
-                            <option value={'paternity'}>Paternity Leave</option>
-                            <option value={'other'}>Other</option>
+                        <option value="" />
+                        {leaveTypes.map((item, index) => {
+                            return <option key={index} value={index}>{item.name}</option>
+                        })}
                         </Select>
                     </FormControl>
                     <Box my={2}>
@@ -265,12 +233,11 @@ export default function LeaveRequestForm(props) {
                                 <Typography>Approver</Typography>
                             </Grid>
                            <Grid item xs={12} md={5}>
-                                <Box component="span" marginRight={1}>
-                                    <Chip avatar={<Avatar>{approvers[0].name.charAt(0)}</Avatar>} label={approvers[0].name} />
-                                </Box>
-                                <Box component="span" marginRight={1}>
-                                    <Chip avatar={<Avatar>{approvers[1].name.charAt(0)}</Avatar>} label={approvers[1].name} />
-                                </Box>
+                           {approvers.map((item) => {
+                                return  <Box component="span" marginRight={1}>
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} />
+                                        </Box>; 
+                            })}
                            </Grid>
                            {/* Offset */}
                            <Grid item md={7} implementation="css" smDown component="hidden" />

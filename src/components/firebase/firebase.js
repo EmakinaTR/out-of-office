@@ -74,7 +74,10 @@ export default class Firebase {
             } else {
                 fallback();
             }
-        });
+    });
 
-  
+    
+    getAllLeaveTypes = () => {
+        return this.db.collection('leave_type').get();
+    }
 }
