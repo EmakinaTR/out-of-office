@@ -27,7 +27,7 @@ const InfoCard = props => {
       <Typography className={classes.infoText}>{props.text}</Typography>
       <Typography
         style={customStyles.infoCountCustomStyle}
-        classesName={classes.infoCount}
+        className={classes.infoCount}
       >
         {props.count}
       </Typography>
