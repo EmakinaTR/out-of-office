@@ -11,12 +11,18 @@ import {
 
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
+import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
+import IncomingRequestCard from "../../components/UIElements/incomingRequestCard";
+import { incomingRequestData } from "../../constants/dummyData";
+import RequestedLeaveItem from "../../components/UIElements/RequestedLeaveItem/RequestedLeaveItem";
+
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
 const REMAINING_CASUAL_LEAVE_REQUEST = "Kalan Mazeret İzni";
 const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
 const MY_LEAVE_REQUEST = "Son 5 İzin";
+const REQUESTED_LEAVES = "Talep Edilen İzinler";
 
 // CUSTOM STATIC DATA
 const leaves = [
@@ -66,10 +72,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Dashboard = () => {
+  // IsAdmin state will be set through firebase connection
+  const [isAdmin, setIsAdmin] = React.useState(true);
   const classes = useStyles();
-
+  const incomingRequests = incomingRequestData.slice(0, 5);
   return (
-    <Container>
+    <div>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Button
@@ -97,12 +105,40 @@ const Dashboard = () => {
         </Grid>
       </Grid>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        {/* Incoming Requests - Visible Only For Admin Users */}
+        {isAdmin && (
+          <Grid item xs={12} lg={6}>
+            <Card className={classes.listCard}>
+              {REQUESTED_LEAVES}
+              {incomingRequests.map((data, index) => {
+                // var statusType = statusBadges.find(type => type.id == data.status)
+                // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+                return (
+                  <RequestedLeaveItem
+                    key={index}
+                    userName={data.userName}
+                    leaveTypeContent={leaveBadges.AnnualLeave.badgeContent}
+                    leaveTypeColor={leaveBadges.AnnualLeave.color}
+                    statusTypeContent={statusBadges.waiting.badgeContent}
+                    statusTypeColor={statusBadges.waiting.color}
+                    startDate={data.startDate}
+                    endDate={data.endDate}
+                    dayCount={data.dayCount}
+                    description={data.description}
+                  ></RequestedLeaveItem>
+                );
+              })}
+            </Card>
+          </Grid>
+        )}
+        {/* Last 5 Request */}
+        <Grid item xs={12} lg={6}>
           <Card className={classes.listCard}>
             {MY_LEAVE_REQUEST}
-            {leaves.map(leave => {
+            {leaves.map((leave, index) => {
               return (
                 <LeaveSummaryItem
+                  key={index}
                   leaveType={leave.leaveType}
                   leaveCount={leave.leaveCount}
                 ></LeaveSummaryItem>
@@ -111,7 +147,7 @@ const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
-    </Container>
+    </div>
   );
 };
 export default Dashboard;
