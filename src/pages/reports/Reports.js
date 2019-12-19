@@ -38,10 +38,9 @@ export class Reports extends React.Component {
         fontSize:'16px',
         color:'white',
         backgroundColor:'#929292',
-        '&:hover': {
-            backgroundColor: 'red',
-        },
+       
     }
+  
     render() {
         return (
             <Paper style={this.paperStyle}>
@@ -49,10 +48,20 @@ export class Reports extends React.Component {
                     //https://material-table.com/#/docs/features/remote-data
                     data={incomingRequestData}
                     title="Reports"
+                    icons={{
+                        Filter: () => <div>
+                            {/* {this.filtersArray.map((filter,index)=>{
+                            return filter
+                    })} */}
+                    </div>  }}
                     columns={[
 
-                        { title: 'Kullanıcı', field: 'userName', customFilterAndSearch: (term, rowData) => term == rowData.userName.length},
-                        { title: 'Başlangıç Tarihi', field: 'startDate' },
+                        { title: 'Kullanıcı', field: 'userName'},
+                        { title: 'Başlangıç Tarihi', field: 'startDate', 
+                        filterCellStyle: {
+                            backgroundColor:'red',
+                           
+                         } },
                         { title: 'Bitişi Tarihi', field: 'endDate' },
                         { title: 'Gün Sayısı', field: 'dayCount', filtering: false },
                         { title: 'Takım', field: 'team', },
@@ -73,7 +82,10 @@ export class Reports extends React.Component {
                         {
                             title: 'Onay Durumu',
                             field: 'status',
-                            lookup: { 0: 'Onay Bekliyor', 1: 'Onaylandı', 2: 'Red edildi', 3: 'İptal Edildi' },
+                            lookup: { 0: 'Onay Bekliyor',
+                            1: 'Onaylandı',
+                            2: 'Red edildi',
+                            3: 'İptal Edildi' },
                         },
                         
                     ]}
@@ -106,8 +118,8 @@ export class Reports extends React.Component {
                         filterCellStyle :{
                             display:'flex',
                             flexDirection:'column',
-                            justifyContent:'space-between'
-
+                            justifyContent:'space-between',
+                            alignItems:'center',
                         },
                         grouping: true,
                         exportAllData:true
@@ -137,8 +149,8 @@ export class Reports extends React.Component {
                                 
                         ),
                         FilterRow:props=>(
-                            <Drawer anchor= "right" open={this.state.showFilter} onClose={this.toggleFilter}>
-                                <MTableFilterRow  {...props} /> 
+                            <Drawer  anchor= "right" open={this.state.showFilter} onClose={this.toggleFilter}>
+                                <MTableFilterRow style={{heigth:'100%'}} {...props} /> 
                             </Drawer>
                         )
                         
