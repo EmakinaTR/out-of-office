@@ -1,18 +1,16 @@
 import React from 'react';
-import { Paper, Avatar, Grid, Typography,Fab, Hidden } from '@material-ui/core'
+import { Paper, Avatar, Grid, Typography, Fab, Hidden } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import CustomBadge from '../customBadge/CustomBadge';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
-
-
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
         color: theme.palette.text.secondary,
-        marginBottom:theme.spacing(2),
-        display:"flex",
-        alignItems:"center",
+        marginBottom: theme.spacing(2),
+        display: "flex",
+        alignItems: "center",
 
         [theme.breakpoints.up("sm")]: {
             padding: theme.spacing(2),
@@ -21,15 +19,15 @@ const useStyles = makeStyles(theme => ({
             padding: theme.spacing(3),
         },
     },
-    leftContent:{
+    leftContent: {
         display: 'flex',
         alignItems: 'center',
 
     },
-    middleContent:{
-        display:"flex",
-        alignItems:"center",
-       
+    middleContent: {
+        display: "flex",
+        alignItems: "center",
+
     },
     rightContent: {
         display: 'flex',
@@ -44,7 +42,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
-        textAlign:'left',
+        textAlign: 'left',
         [theme.breakpoints.up("md")]: {
             alignItems: "center",
         }
@@ -52,67 +50,58 @@ const useStyles = makeStyles(theme => ({
     },
     avatarImage: {
         display: "none",
-        margin:"auto",
-        marginBottom:'8px',
+        margin: "auto",
+        marginBottom: '8px',
         [theme.breakpoints.up("md")]: {
             display: "flex",
         }
 
     },
     userName: {
-        fontWeight:'bold',
+        fontWeight: 'bold',
         [theme.breakpoints.up("md")]: {
             justifyContent: 'center',
-            marginLeft:theme.spacing(0),
-            fontWeight:'bold',
+            marginLeft: theme.spacing(0),
+            fontWeight: 'bold',
         }
     },
- 
+
     moreButton: {
         backgroundColor: 'transparent',
-        
-        
+
+
     },
-    badgeContainer:{
+    badgeContainer: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        marginBottom:theme.spacing(1),
+        marginBottom: theme.spacing(1),
         [theme.breakpoints.up("xl")]: {
             marginBottom: theme.spacing(0),
             justifyContent: 'center',
         }
     },
-    leavePeriod :{
-        textAlign:'left',
+    leavePeriod: {
+        textAlign: 'left',
         marginBottom: theme.spacing(1),
         marginTop: theme.spacing(1),
         [theme.breakpoints.up("md")]: {
             textAlign: 'center',
         }
     },
-    description :{
-       overflow:"hidden",
-       
-    },
-  
-}));
+    description: {
+        overflow: "hidden",
 
-export const IncomingRequestCard = (props) =>{
+    },
+
+}));
+export const MyRequestCard = (props) => {
     const classes = useStyles();
 
     return (
         <Paper className={classes.paper}>
             <Grid container>
-                <Grid item xs={12} md={2} className={classes.leftContent} >
-                    <Grid container className={classes.userInfoInner}>
-                        <Grid item className={classes.userInfo}>
-                            <Avatar className={classes.avatarImage}>{props.userName.charAt(0)}</Avatar>
-                            <Typography className={classes.userName}>{props.userName}</Typography>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item xs={10} md={9} className={classes.middleContent} >
+                <Grid item xs={10} md={11} className={classes.middleContent} >
                     <Grid container>
                         <Grid item xs={12} md={6} >
                             <Grid container className={classes.leavePeriod}  >
@@ -136,14 +125,14 @@ export const IncomingRequestCard = (props) =>{
                             <Typography noWrap className={classes.description}>{props.description}</Typography>
                         </Grid>
                     </Grid>
-                    </Grid>
+                </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
                     <Fab className={classes.moreButton} size="small" >
                         <MoreVertIcon></MoreVertIcon>
                     </Fab>
                 </Grid>
             </Grid>
-            
+
         </Paper>
     );
 }
