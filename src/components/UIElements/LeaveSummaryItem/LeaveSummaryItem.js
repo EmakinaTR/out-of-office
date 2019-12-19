@@ -8,17 +8,10 @@ import {
   IconButton,
   Divider
 } from "@material-ui/core";
-import VisibilityIcon from "@material-ui/icons/Visibility";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import CustomBadge from "../customBadge/CustomBadge";
 
 const useStyles = makeStyles(theme => ({
-  content: {
-    flex: 1,
-    display: "flex",
-    alignItems: "center",
-    paddingLeft: theme.spacing(3),
-    paddingRight: theme.spacing(3)
-  },
   requesterName: {
     textAlign: "left"
   },
@@ -26,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     textAlign: "left"
   },
   leaveTypeContainer: {
-    textAlign: "left"
+    textAlign: "center"
   },
   dividerContainer: {
     marginTop: theme.spacing(1),
@@ -37,7 +30,7 @@ const useStyles = makeStyles(theme => ({
 const LeaveSummaryItem = props => {
   const classes = useStyles();
   return (
-    <Grid className={classes.container} container alignItems="center">
+    <Grid container alignItems="center">
       <Grid item xs={3}>
         <DateCalendar
           textFontSize="1rem"
@@ -51,11 +44,11 @@ const LeaveSummaryItem = props => {
         <CustomBadge backgroundColor="red">{props.leaveType}</CustomBadge>
       </Grid>
       <Grid item xs={2}>
-        <IconButton className={classes.detailButton}>
-          <VisibilityIcon></VisibilityIcon>
+        <IconButton color="primary" size="small">
+          <ChevronRightIcon fontSize="large"></ChevronRightIcon>
         </IconButton>
       </Grid>
-      <Grid xs={12}>
+      <Grid item xs={12}>
         <Divider className={classes.dividerContainer}></Divider>
       </Grid>
     </Grid>
@@ -65,10 +58,6 @@ const LeaveSummaryItem = props => {
 LeaveSummaryItem.propTypes = {
   leaveType: PropTypes.string,
   leaveCount: PropTypes.string
-};
-
-LeaveSummaryItem.defaultProps = {
-  // bla: 'test',
 };
 
 export default LeaveSummaryItem;
