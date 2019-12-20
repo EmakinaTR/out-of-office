@@ -12,8 +12,8 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: "nowrap",
     fontSize: "14px",
     lineHeight: "16px",
-    marginLeft: props => props.marginLeft,
-    marginRight: props => props.marginRight,
+    marginLeft: props => props.marginleft,
+    marginRight: props => props.marginright,
     // marginLeft: theme.spacing(1),
     // marginRight: theme.spacing(1),
     [theme.breakpoints.up("sm")]: {
