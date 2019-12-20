@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
@@ -35,11 +35,15 @@ export default function LeaveRequestForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // States
     const [state, setState] = useState({
-        leaveType: ''
+        leaveType: '',
+        description: '',
+        protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
-    const [selectedDate, setSelectedDate] = useState(moment());
-    const [checked, setChecked] = useState(true);
+    const [selectedStartDate, setSelectedStartDate] = useState(moment());
+    const [selectedEndDate, setSelectedEndDate] = useState(moment());
+    const [duration, setDuration] = useState('');
+    const [checked, setChecked] = useState(false);
     const [open, setOpen] = useState(false);
 
     const [leaveTypes, setLeaveTypes] = useState([]);
@@ -53,14 +57,27 @@ export default function LeaveRequestForm(props) {
         console.log(event.target.value);
     };
 
-    const handleDateChange = date => {
-        setSelectedDate(date);
+    const handleStartDateChange = date => {
+        setSelectedStartDate(date._d);
         console.log(date._d);
     }
 
+    const handleEndDateChange = date => {
+        setSelectedEndDate(date._d);
+        console.log(date._d);
+    }
+
+    const handleDuration = async (selectedEndDate, selectedStartDate) => {
+        // I used parseInt to prevent duration to be stringified in firebase
+        let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
+        setDuration(duration);
+        console.log(duration);
+    }
+
+
     const handleCheck = event => {
         setChecked(event.target.checked);
-        console.log(event.target.value)
+        console.log(event.target.checked)
     }
 
     const handleDialogOpen = () => {
@@ -72,9 +89,21 @@ export default function LeaveRequestForm(props) {
         setOpen(false);
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('submit')
+        const processedBy = props.auth().uid;
+        const isCancelled = false;
+        const status = 0;
+        const requestedDate = new Date().toString();
+        const {leaveType, description, protocolNumber}  = state;
+        const isPrivacyPolicyApproved = checked;
+        let startDate = selectedStartDate.toString();
+        let endDate = selectedStartDate.toString();
+        let requestFormObj = {requestedDate, processedBy, leaveType, startDate, endDate, duration,
+            description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
+        await props.firebase.sendNewLeaveRequest(requestFormObj)
+        console.log(requestFormObj)
     }
 
     //Firebase
@@ -95,9 +124,9 @@ export default function LeaveRequestForm(props) {
     }
 
     // Lifecycle Methods
-    useEffect(async () => {
+    useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
-        await getAllLeaveTypes();
+        getAllLeaveTypes();
     }, []);
       
     
@@ -139,7 +168,7 @@ export default function LeaveRequestForm(props) {
                         margin="normal"
                         label="Start Date and Time"
                         type="datetime-local"
-                        defaultValue={moment()}
+                        defaultValue={new Date()}
                         className={classes.inputWidth}
                         InputLabelProps={{
                         shrink: true,
@@ -150,7 +179,7 @@ export default function LeaveRequestForm(props) {
                         margin="normal"
                         label="End Date and Time"
                         type="datetime-local"
-                        defaultValue="2017-05-24T10:30"
+                        defaultValue={new Date()}
                         className={classes.inputWidth}
                         InputLabelProps={{
                         shrink: true,
@@ -169,8 +198,8 @@ export default function LeaveRequestForm(props) {
                                     format='MM/DD/YYYY'
                                     minDate={new Date()}
                                     margin="normal"
-                                    value={selectedDate}
-                                    onChange={date => handleDateChange(date)}
+                                    value={selectedStartDate}
+                                    onChange={handleStartDateChange}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change date',
                                     }}
@@ -181,8 +210,8 @@ export default function LeaveRequestForm(props) {
                                     className={classes.inputWidth}
                                     margin="normal"
                                     label="Start Time"
-                                    value={selectedDate}
-                                    onChange={handleDateChange}
+                                    value={selectedStartDate}
+                                    onChange={handleStartDateChange}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change time',
                                     }}
@@ -199,8 +228,8 @@ export default function LeaveRequestForm(props) {
                                     format='MM/DD/YYYY'
                                     minDate={new Date()}
                                     margin="normal"
-                                    value={selectedDate}
-                                    onChange={date => handleDateChange(date)}
+                                    value={selectedEndDate}
+                                    onChange={handleEndDateChange}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change date',
                                     }}
@@ -211,8 +240,8 @@ export default function LeaveRequestForm(props) {
                                     className={classes.inputWidth}
                                     margin="normal"
                                     label="End Time"
-                                    value={selectedDate}
-                                    onChange={handleDateChange}
+                                    value={selectedEndDate}
+                                    onChange={handleEndDateChange}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change time',
                                     }}
@@ -221,12 +250,15 @@ export default function LeaveRequestForm(props) {
                             </Grid>
                         </MuiPickersUtilsProvider>
                     </Box>
-                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} />
+                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
+                    onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
                     <Box my={2}>
                         <Divider />
                     </Box>
-                    <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" />
-                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" />
+                    <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
+                    onChange={handleChange('description')} value={state.description} />
+                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" 
+                    onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
                     <Box my={3}>
                     <Grid container>
                             <Grid item xs={12} md={2}>
@@ -240,16 +272,16 @@ export default function LeaveRequestForm(props) {
                             })}
                            </Grid>
                            {/* Offset */}
-                           <Grid item md={7} implementation="css" smDown component="hidden" />
+                           <Grid item md={7} implementation="css" smdown="true" component="hidden" />
                         </Grid>
                     </Box>
                     <Box my={2}>
                         <Grid container>
                             <Grid item xs={12} md={6}>
                                 <Checkbox
-                                uncontrolled
+                                checked={checked}
                                 onChange={handleCheck}
-                                value="KVKK_valid"
+                                value={checked}
                                 color="primary"
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
                                 />

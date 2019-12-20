@@ -7,7 +7,7 @@ import AuthContext from "./components/session";
 import { firebaseConfig } from "./components/firebase/config";
 
 function App() {
-  const [isLoggedIn, setLoggedIn] = useState(true);
+  const [isLoggedIn, setLoggedIn] = useState(false);
   const breakpointValues = {
     xs: 0,
     sm: 576,
@@ -34,14 +34,18 @@ function App() {
     const user = window.sessionStorage.getItem(
       `firebase:authUser:${firebaseConfig.apiKey}:[DEFAULT]`
     );
-    if (user) setLoggedIn(true);
+    if (user) {
+      setLoggedIn(true);
+      return JSON.parse(user);
+    }
+    
   }
   useEffect(() => {
     readSession();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn }}>
+    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession }}>
       <MuiThemeProvider theme={theme}>
         <Router>
           <Navigation title="OOO" isLoggedIn={isLoggedIn} />

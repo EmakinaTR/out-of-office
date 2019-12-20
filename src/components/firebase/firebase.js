@@ -78,6 +78,10 @@ export default class Firebase {
 
     
     getAllLeaveTypes = () => {
-        return this.db.collection('leave_type').get();
+        return this.db.collection('leaveType').get();
+    }
+
+    sendNewLeaveRequest = (leaveRequestObj) => {
+        this.db.collection('leaveRequests').add(leaveRequestObj);
     }
 }
