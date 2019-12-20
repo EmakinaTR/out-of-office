@@ -18,15 +18,11 @@ function App() {
   let theme = createMuiTheme({
     palette: {
       primary: {
-        light: "#757ce8",
-        main: "#000000",
-        dark: "#000000",
-        contrastText: "#fff",
+        main: "#212121",
         __TEST__: "#aaaaaa"
       },
       secondary: {
-        main: "#e0e0e0",
-        dark: "#e0e0e0"
+        main: "#008fd4"
       }
     },
     breakpoints: { values: breakpointValues }

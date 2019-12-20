@@ -81,7 +81,7 @@ const Dashboard = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Button
-            color="primary"
+            color="secondary"
             variant="contained"
             className={classes.newRequestButton}
           >
