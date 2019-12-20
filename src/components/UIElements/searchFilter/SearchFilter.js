@@ -1,8 +1,8 @@
-import React from 'react';
-import { InputBase}from '@material-ui/core';
+import React, { useState } from 'react';
+import { InputBase,Input }from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import {  makeStyles } from '@material-ui/core/styles';
-const SearchFilter = (props)=> {
+const SearchFilter = ({onChange})=> {
     const useStyles = makeStyles(theme => ({
         root: {
             flexGrow: 1,
@@ -32,27 +32,39 @@ const SearchFilter = (props)=> {
         },
         inputRoot: {
             color: 'inherit',
+            
         },
         inputInput: {
+            overflow: 'hidden',
             padding: theme.spacing(1, 1, 1, 7),
             transition: theme.transitions.create('width'),
             width: '100%',
-            [theme.breakpoints.up('sm')]: {
-                width: 120,
-                '&:focus': {
-                    width: 200,
-                },
-            },
+            // [theme.breakpoints.up('sm')]: {
+            //     width: 120,
+            //     '&:focus': {
+            //         width: 200,
+            //     },
+            // },
         },
     }));
+    const [searchQuery,setSearchQuery]=useState('');
     const classes = useStyles();
+   
+    const onChangeHandler =(e)=>{
+        setSearchQuery(e.target.value);
+        onChange(e.target.value);
+    }
     return (
         <div className={classes.search}>
             <div className={classes.searchIcon}>
                 <SearchIcon />
             </div>
-            <InputBase
+            <Input
                 placeholder="Search…"
+                
+                type="text"
+                value={searchQuery}
+                onChange={onChangeHandler}
                 classes={{
                     root: classes.inputRoot,
                     input: classes.inputInput,

@@ -24,11 +24,9 @@ export function OrderByFilter() {
     const changeDirection = () =>{
         setDirection(!downDirecrtion) ;
     }
-
     const handleToggle = () => {
         setOpen(prevOpen => !prevOpen);
     };
-
     const handleClose = event => {
         if (anchorRef.current && anchorRef.current.contains(event.target)) {
             return;
@@ -36,7 +34,6 @@ export function OrderByFilter() {
 
         setOpen(false);
     };
-
     return (
         <Grid container direction="column" alignItems="center">
             <Grid item xs={12}>
@@ -59,12 +56,13 @@ export function OrderByFilter() {
                         <ArrowDropDownIcon  />
                     </Button>
                 </ButtonGroup>
-                <Popper open={open}  anchorEl={anchorRef.current} role={undefined}  transition disablePortal>
+                <Popper open={open} style={{ zIndex: 2}} placement="bottom" anchorEl={anchorRef.current} role={undefined}  transition disablePortal>
                     {({ TransitionProps, placement }) => (
                         <Grow
                             {...TransitionProps}
                             style={{
                                 transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                                
                             }}
                         >
                             <Paper>
