@@ -74,7 +74,14 @@ export default class Firebase {
             } else {
                 fallback();
             }
-        });
+    });
 
-  
+    
+    getAllLeaveTypes = () => {
+        return this.db.collection('leaveType').get();
+    }
+
+    sendNewLeaveRequest = (leaveRequestObj) => {
+        this.db.collection('leaveRequests').add(leaveRequestObj);
+    }
 }

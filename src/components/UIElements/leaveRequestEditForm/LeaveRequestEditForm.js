@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
-export default function LeaveRequestForm(props) {
+export default function LeaveRequestEditForm(props) {
     // Styles
     const classes = useStyles();
     // Refs
@@ -35,19 +35,20 @@ export default function LeaveRequestForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // States
     const [state, setState] = useState({
-        leaveType: '',
-        description: '',
-        protocolNumber: '',
+        // Select component's default value is coming from here, we will give
+        // this dynamically to fill leave type
+        leaveType: 'excuse_leave'
     });
     const [labelWidth, setLabelWidth] = useState(0);
-    const [selectedStartDate, setSelectedStartDate] = useState(moment());
-    const [selectedEndDate, setSelectedEndDate] = useState(moment());
-    const [duration, setDuration] = useState('');
-    const [checked, setChecked] = useState(false);
-    const [open, setOpen] = useState(false);
-
-    const [leaveTypes, setLeaveTypes] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(moment());
+    const [checked, setChecked] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
     
+    // Lifecycle Methods
+    useEffect(() => {
+        setLabelWidth(inputLabel.current.offsetWidth);
+      }, []);
+      
     // Handle Methods
     const handleChange = name => event => {
         setState({
@@ -55,29 +56,16 @@ export default function LeaveRequestForm(props) {
           [name]: event.target.value,
         });
         console.log(event.target.value);
-    };
+      };
 
-    const handleStartDateChange = date => {
-        setSelectedStartDate(date._d);
+    const handleDateChange = date => {
+        setSelectedDate(date);
         console.log(date._d);
     }
-
-    const handleEndDateChange = date => {
-        setSelectedEndDate(date._d);
-        console.log(date._d);
-    }
-
-    const handleDuration = async (selectedEndDate, selectedStartDate) => {
-        // I used parseInt to prevent duration to be stringified in firebase
-        let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
-        setDuration(duration);
-        console.log(duration);
-    }
-
 
     const handleCheck = event => {
         setChecked(event.target.checked);
-        console.log(event.target.checked)
+        console.log(event.target.value)
     }
 
     const handleDialogOpen = () => {
@@ -89,46 +77,52 @@ export default function LeaveRequestForm(props) {
         setOpen(false);
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         console.log('submit')
-        const processedBy = props.auth().uid;
-        const isCancelled = false;
-        const status = 0;
-        const requestedDate = new Date().toString();
-        const {leaveType, description, protocolNumber}  = state;
-        const isPrivacyPolicyApproved = checked;
-        let startDate = selectedStartDate.toString();
-        let endDate = selectedStartDate.toString();
-        let requestFormObj = {requestedDate, processedBy, leaveType, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
-        await props.firebase.sendNewLeaveRequest(requestFormObj)
-        console.log(requestFormObj)
     }
 
-    //Firebase
+    // Leave Types obj
+    // const leaveTypes = [
+    //     {
+    //         name: '',
+    //         value: ''
+    //     },
+    //     {
+    //         name: 'Annual Leave',
+    //         value: 'annual_leave'
+    //     },
+    //     {
+    //         name: 'Excuse Leave',
+    //         value: 'excuse_leave'
+    //     },
+    //     {
+    //         name: '0-2 Hours',
+    //         value: '0-2_hours'
+    //     },
+    //     {
+    //         name: 'Remote Working',
+    //         value: 'remote_working'
+    //     },
+    //     {
+    //         name: 'Unpaid Vacation',
+    //         value: 'unpaid_vacation'
+    //     },
+    //     {
+    //         name: 'Marriage',
+    //         value: 'marriage'
+    //     },
+    //     {
+    //         name: 'Paternity Leave',
+    //         value: 'paternity'
+    //     },
+    //     {
+    //         name: 'Other',
+    //         value: 'other'
+    //     },
 
-    // Firebase functions
-    let getAllLeaveTypes = async () => {
-        let firebasePromise = props.firebase.getAllLeaveTypes();
-        let leaveTypesArr = [];
-        if (firebasePromise !== null) {
-            await firebasePromise.then(snapshot => {
-                for (let doc of snapshot.docs) {
-                    leaveTypesArr.push(doc.data())
-                }
-                setLeaveTypes(leaveTypesArr);
-            });
-            
-        }
-    }
-
-    // Lifecycle Methods
-    useEffect(() => {
-        setLabelWidth(inputLabel.current.offsetWidth);
-        getAllLeaveTypes();
-    }, []);
-      
+    // ]
+    
     
     // Approver obj, it can be changed into props
     const approvers = [
@@ -140,11 +134,12 @@ export default function LeaveRequestForm(props) {
         }
     ]
 
+
     return (
         <Container maxWidth="lg">
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>Leave Request</h2>
+                    <h2 style={{textAlign: 'center'}}>Leave Request Edit</h2>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -153,10 +148,20 @@ export default function LeaveRequestForm(props) {
                         onChange={handleChange('leaveType')}
                         labelWidth={labelWidth}
                         >
-                        <option value="" />
-                        {leaveTypes.map((item, index) => {
-                            return <option key={index} value={index}>{item.name}</option>
-                        })}
+                            {/* {leaveTypes.map((index, name, value) => {
+                                // return <option value={leaveTypes[index].value}>{leaveTypes[index].name}</option>
+                                console.log('index -> ' + leaveTypes[1].name);
+                                
+                            })} */}
+                            <option value="" />
+                            <option value={'annual_leave'}>Annual Leave</option>
+                            <option value={'excuse_leave'}>Excuse Leave</option>
+                            <option value={'0-2_hours'}>0-2 Hours</option>
+                            <option value={'remote_working'}>Remote Working</option>
+                            <option value={'unpaid_vacation'}>Unpaid Vacation</option>
+                            <option value={'marriage'}>Marriage</option>
+                            <option value={'paternity'}>Paternity Leave</option>
+                            <option value={'other'}>Other</option>
                         </Select>
                     </FormControl>
                     <Box my={2}>
@@ -168,7 +173,7 @@ export default function LeaveRequestForm(props) {
                         margin="normal"
                         label="Start Date and Time"
                         type="datetime-local"
-                        defaultValue={new Date()}
+                        defaultValue={moment()}
                         className={classes.inputWidth}
                         InputLabelProps={{
                         shrink: true,
@@ -179,7 +184,7 @@ export default function LeaveRequestForm(props) {
                         margin="normal"
                         label="End Date and Time"
                         type="datetime-local"
-                        defaultValue={new Date()}
+                        defaultValue="2017-05-24T10:30"
                         className={classes.inputWidth}
                         InputLabelProps={{
                         shrink: true,
@@ -198,8 +203,8 @@ export default function LeaveRequestForm(props) {
                                     format='MM/DD/YYYY'
                                     minDate={new Date()}
                                     margin="normal"
-                                    value={selectedStartDate}
-                                    onChange={handleStartDateChange}
+                                    value={selectedDate}
+                                    onChange={date => handleDateChange(date)}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change date',
                                     }}
@@ -210,8 +215,8 @@ export default function LeaveRequestForm(props) {
                                     className={classes.inputWidth}
                                     margin="normal"
                                     label="Start Time"
-                                    value={selectedStartDate}
-                                    onChange={handleStartDateChange}
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change time',
                                     }}
@@ -228,8 +233,8 @@ export default function LeaveRequestForm(props) {
                                     format='MM/DD/YYYY'
                                     minDate={new Date()}
                                     margin="normal"
-                                    value={selectedEndDate}
-                                    onChange={handleEndDateChange}
+                                    value={selectedDate}
+                                    onChange={date => handleDateChange(date)}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change date',
                                     }}
@@ -240,8 +245,8 @@ export default function LeaveRequestForm(props) {
                                     className={classes.inputWidth}
                                     margin="normal"
                                     label="End Time"
-                                    value={selectedEndDate}
-                                    onChange={handleEndDateChange}
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
                                     KeyboardButtonProps={{
                                         'aria-label': 'change time',
                                     }}
@@ -250,71 +255,76 @@ export default function LeaveRequestForm(props) {
                             </Grid>
                         </MuiPickersUtilsProvider>
                     </Box>
-                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
-                    onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
+                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} />
                     <Box my={2}>
                         <Divider />
                     </Box>
-                    <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                    onChange={handleChange('description')} value={state.description} />
-                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" 
-                    onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
+                    <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" />
+                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" />
                     <Box my={3}>
                     <Grid container>
                             <Grid item xs={12} md={2}>
                                 <Typography>Approver</Typography>
                             </Grid>
                            <Grid item xs={12} md={5}>
-                           {approvers.map((item) => {
-                                return  <Box component="span" marginRight={1}>
-                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} />
-                                        </Box>; 
-                            })}
+                                <Box component="span" marginRight={1}>
+                                    <Chip avatar={<Avatar>{approvers[0].name.charAt(0)}</Avatar>} label={approvers[0].name} />
+                                </Box>
+                                <Box component="span" marginRight={1}>
+                                    <Chip avatar={<Avatar>{approvers[1].name.charAt(0)}</Avatar>} label={approvers[1].name} />
+                                </Box>
                            </Grid>
                            {/* Offset */}
-                           <Grid item md={7} implementation="css" smdown="true" component="hidden" />
+                           <Grid item md={7} implementation="css" smDown component="hidden" />
                         </Grid>
                     </Box>
                     <Box my={2}>
-                        <Grid container>
+                        <Grid item xs={12} md={6}>
+                            <Checkbox
+                            uncontrolled
+                            onChange={handleCheck}
+                            value="KVKK_valid"
+                            color="primary"
+                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                            />
+                            <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
+                            <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                            <Dialog
+                            fullScreen={fullScreen}
+                            open={open}
+                            onClose={handleDialogClose}
+                            aria-labelledby="responsive-dialog-title"
+                            >
+                                <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Let Google help apps determine location. This means sending anonymous location data to
+                                        Google, even when no apps are running.
+                                    </DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button autoFocus onClick={handleDialogClose} color="primary">
+                                        Disagree
+                                    </Button>
+                                    <Button onClick={handleDialogClose} color="primary" autoFocus>
+                                        Agree
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        </Grid>
+                    </Box>
+                    <Grid container spacing={3}>
+                        <Box clone order={{xs: 2, md: 1}}>
                             <Grid item xs={12} md={6}>
-                                <Checkbox
-                                checked={checked}
-                                onChange={handleCheck}
-                                value={checked}
-                                color="primary"
-                                inputProps={{ 'aria-label': 'primary checkbox' }}
-                                />
-                                <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
-                                <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                <Dialog
-                                fullScreen={fullScreen}
-                                open={open}
-                                onClose={handleDialogClose}
-                                aria-labelledby="responsive-dialog-title"
-                                >
-                                    <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Let Google help apps determine location. This means sending anonymous location data to
-                                            Google, even when no apps are running.
-                                        </DialogContentText>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button autoFocus onClick={handleDialogClose} color="primary">
-                                            Disagree
-                                        </Button>
-                                        <Button onClick={handleDialogClose} color="primary" autoFocus>
-                                            Agree
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary">CANCEL</Button>
                             </Grid>
+                        </Box>
+                        <Box clone order={{xs: 1, md: 2}}>
                             <Grid item xs={12} md={6}>
                                 <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
                             </Grid>
-                        </Grid>
-                    </Box>
+                        </Box>
+                    </Grid>
                 </form>
             </Paper>
         </Container>
