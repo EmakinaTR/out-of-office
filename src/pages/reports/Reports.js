@@ -22,7 +22,6 @@ export class Reports extends React.Component {
         });
     }
     handleChange(e) {
-        console.log(e.target.value);
         this.setState({ term: e.target.value });
     }
     paperStyle ={
@@ -56,17 +55,17 @@ export class Reports extends React.Component {
                     </div>  }}
                     columns={[
 
-                        { title: 'Kullanıcı', field: 'userName'},
-                        { title: 'Başlangıç Tarihi', field: 'startDate', 
+                        { title: 'User', field: 'userName'},
+                        { title: 'Start Date', field: 'startDate', 
                         filterCellStyle: {
                             backgroundColor:'red',
                            
-                         } },
-                        { title: 'Bitişi Tarihi', field: 'endDate' },
-                        { title: 'Gün Sayısı', field: 'dayCount', filtering: false },
-                        { title: 'Takım', field: 'team', },
+                         }},
+                        { title: 'End Date', field: 'endDate' },
+                        { title: 'Day Count', field: 'dayCount', filtering: false },
+                        { title: 'Team', field: 'team', },
                         {
-                            title: 'İzin Tipi',
+                            title: 'Leave Type',
                             field: 'leaveType',
                             lookup: {
                                 0: 'Annual Leave',
@@ -80,12 +79,12 @@ export class Reports extends React.Component {
                             },
                         },
                         {
-                            title: 'Onay Durumu',
+                            title: 'Status',
                             field: 'status',
-                            lookup: { 0: 'Onay Bekliyor',
-                            1: 'Onaylandı',
+                            lookup: { 0: 'Waiting Approve',
+                            1: 'Approved',
                             2: 'Red edildi',
-                            3: 'İptal Edildi' },
+                            3: 'Cancelled' },
                         },
                         
                     ]}
