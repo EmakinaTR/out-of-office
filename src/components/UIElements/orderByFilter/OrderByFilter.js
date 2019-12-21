@@ -5,25 +5,15 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import {makeStyles} from '@material-ui/core/styles';
 
-const options = ['Date', 'Leave Type', 'Name'];
 
-export function OrderByFilter() {
+
+export function OrderByFilter(props) {
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef(null);
-    const [selectedIndex, setSelectedIndex] = React.useState(1);
-    const [downDirecrtion, setDirection] = React.useState(true); // 0 is down direction - 1 is up direction
-
-    const handleClick = () => {
-        console.info(`You clicked ${options[selectedIndex]}`);
-    };
-
-    const handleMenuItemClick = (event, index) => {
-        setSelectedIndex(index);
+    const handleMenuItemClick = (event) => {
+        props.onSelectedFilterTypeChanged(event);
         setOpen(false);
     };
-    const changeDirection = () =>{
-        setDirection(!downDirecrtion) ;
-    }
     const handleToggle = () => {
         setOpen(prevOpen => !prevOpen);
     };
@@ -31,19 +21,19 @@ export function OrderByFilter() {
         if (anchorRef.current && anchorRef.current.contains(event.target)) {
             return;
         }
-
         setOpen(false);
     };
     return (
         <Grid container direction="column" alignItems="center">
             <Grid item xs={12}>
                 <ButtonGroup variant="contained" color="secondary" ref={anchorRef} aria-label="split button">
-                    <Button onClick={changeDirection}>
-                        {downDirecrtion ?
+                    <Button onClick={props.onFilterDirectionChanged}>
+                        {props.currentDirection ?
                             <ArrowDownward style={{ marginRight: '12px' }}></ArrowDownward> :
                             <ArrowUpward style={{ marginRight: '12px' }}></ArrowUpward>
                         }
-                        {options[selectedIndex]}</Button>
+                        {props.options[props.selectedFilterType].name}
+                    </Button>
                     <Button
                         color="secondary"
                         size="small"
@@ -68,13 +58,14 @@ export function OrderByFilter() {
                             <Paper>
                                 <ClickAwayListener  onClickAway={handleClose}>
                                     <MenuList id="split-button-menu">
-                                        {options.map((option, index) => (
+                                        {Object.keys(props.options).map((option) => (
                                             <MenuItem
                                                 key={option}
-                                                selected={index === selectedIndex}
-                                                onClick={event => handleMenuItemClick(event, index)}
+                                                value={option}
+                                                selected={option === props.selectedFilterType}
+                                                onClick={handleMenuItemClick}
                                             >
-                                                {option}
+                                                {props.options[option].name}
                                             </MenuItem>
                                         ))}
                                     </MenuList>

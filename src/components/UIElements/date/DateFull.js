@@ -4,6 +4,9 @@ import { Typography, Box } from "@material-ui/core";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import { makeStyles } from "@material-ui/styles";
 import PropTypes from "prop-types";
+import moment from 'moment';
+import 'moment/locale/tr';
+moment().locale('tr')
 const useStyles = makeStyles(theme => ({
   mainContainer: {
     display: "flex",
@@ -26,7 +29,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function DateFull(props) {
   const classes = useStyles(props);
-
+  moment.locale();   
   return (
     <Grid
       container
@@ -35,11 +38,11 @@ export default function DateFull(props) {
       wrap="nowrap"
     >
       <Box mr={1}>
-        <Typography className={classes.dateText}>{props.startDate}</Typography>
+        <Typography className={classes.dateText}>{moment(props.startDate).format('lll')}</Typography>
       </Box>
       <ArrowForwardIosIcon className={classes.center} size="medium" />
       <Box ml={1}>
-        <Typography className={classes.dateText}>{props.endDate}</Typography>
+        <Typography className={classes.dateText}>{moment(props.endDate).format('lll')}</Typography>
       </Box>
     </Grid>
   );

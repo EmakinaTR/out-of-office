@@ -4,7 +4,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import CustomBadge from '../customBadge/CustomBadge';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
-
+import moment from 'moment';
+import 'moment/locale/tr';
+moment().locale('tr')
 
 const useStyles = makeStyles(theme => ({
     paper: {
@@ -97,7 +99,11 @@ const useStyles = makeStyles(theme => ({
     },
   
 }));
-
+const getDayCount = (endDate,startDate) =>{
+    let oneDay = 1000 * 60 * 60 * 24;
+    let dayCount = (new Date(endDate) - new Date(startDate))/oneDay;
+    return Math.round(dayCount);
+}
 export const IncomingRequestCard = (props) =>{
     const classes = useStyles();
 
@@ -127,7 +133,7 @@ export const IncomingRequestCard = (props) =>{
                             <CustomBadge backgroundColor={props.statusTypeColor}> {props.statusTypeContent}</CustomBadge>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={3} sm={4} md={2} md={2}>
-                            <CustomBadge backgroundColor="blue" >{props.dayCount + " gün"}</CustomBadge>
+                            <CustomBadge backgroundColor="blue" >{getDayCount(props.endDate,props.startDate) +" day"}</CustomBadge>
                         </Grid>
                         <Grid item align className={classes.badgeContainer} xs={4} sm={4} md={2}>
                             <CustomBadge backgroundColor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>
