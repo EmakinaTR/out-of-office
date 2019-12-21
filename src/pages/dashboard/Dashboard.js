@@ -117,10 +117,10 @@ const Dashboard = () => {
                   <RequestedLeaveItem
                     key={index}
                     userName={data.userName}
-                    leaveTypeContent={leaveBadges.AnnualLeave.badgeContent}
-                    leaveTypeColor={leaveBadges.AnnualLeave.color}
-                    statusTypeContent={statusBadges.waiting.badgeContent}
-                    statusTypeColor={statusBadges.waiting.color}
+                    leaveTypeContent={leaveBadges[data.leaveType].badgeContent}
+                    leaveTypeColor={leaveBadges[data.leaveType].color}
+                    statusTypeContent={statusBadges[data.status].badgeContent}
+                    statusTypeColor={statusBadges[data.status].color}
                     startDate={data.startDate}
                     endDate={data.endDate}
                     dayCount={data.dayCount}
