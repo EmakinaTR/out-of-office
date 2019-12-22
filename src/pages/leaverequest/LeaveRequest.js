@@ -6,7 +6,7 @@ export default function LeaveRequest() {
     const { readSession } = useContext(AuthContext);
     return (
         <FirebaseContext.Consumer>
-            {firebase => <LeaveRequestForm firebase  = {firebase} auth={ readSession } /> }
+            {firebase => <LeaveRequestForm firebase = { firebase } auth = { readSession } /> }
         </FirebaseContext.Consumer>
     )
 }
