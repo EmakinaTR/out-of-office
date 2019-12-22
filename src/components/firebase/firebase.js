@@ -13,13 +13,14 @@ export default class Firebase {
         /* Firebase APIs */
         this.auth = app.auth();
         this.db = app.firestore();
+        this.storage = app.storage();
         /* Google Provider */
         app.googleProvider = new app.auth.GoogleAuthProvider();
     }
     
         /* Auth API */
     doSignInWithGoogle =() =>{ return new Promise((resolve,reject) => {
-        app.auth().setPersistence(app.auth.Auth.Persistence.SESSION).then (() => {
+        app.auth().setPersistence(app.auth.Auth.Persistence.LOCAL).then (() => {
             app.auth().signInWithPopup(app.googleProvider).then( results => {
              resolve(results);
             })
@@ -30,20 +31,20 @@ export default class Firebase {
     })
     } 
 
-    // doSignInWithGoogle = () => {return new Promise((resolve, reject) => {
-    //     app.auth().signInWithRedirect(app.googleProvider)
-    //         .then(results => {
-    //           resolve(results);
-    //     })
-    //     }
-    // )
+//     doSignInWithGoogle = () => {return new Promise((resolve, reject) => {
+//         app.auth().signInWithRedirect(app.googleProvider)
+//             .then(results => {
+//               resolve(results);
+//         })
+//         }
+//     )
 // }
     
 
     doSignOut = () =>  app.auth.signOut();
     // *** User API ***
 
-    user = uid => this.db.doc(`users/${uid}`);
+    // user = uid => this.db.doc(`users/${uid}`);
     users = () => this.db.collection('users');
 
     // *** Merge Auth and DB User API *** //

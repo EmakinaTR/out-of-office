@@ -5,7 +5,7 @@ import defaultProps from "prop-types";
 import PropTypes from "prop-types";
 const useStyles = makeStyles(theme => ({
   root: {
-    backgroundColor: props => props.backgroundColor,
+    backgroundColor: props => props.badgecolor,
     color: props => props.color,
     padding: "5px 6px",
     borderRadius: "10px",

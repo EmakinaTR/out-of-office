@@ -115,7 +115,7 @@ const RequestedLeaveItem = props => {
           <Grid className={classes.badgeContainer} item xs={12}>
             <CustomBadge
               marginright="0.5rem"
-              backgroundColor={props.statusTypeColor}
+              badgecolor={props.statusTypeColor}
             >
               {props.statusTypeContent}
             </CustomBadge>
@@ -124,7 +124,7 @@ const RequestedLeaveItem = props => {
               {props.dayCount + " gün"}
             </CustomBadge>
 
-            <CustomBadge backgroundColor={props.leaveTypeColor}>
+            <CustomBadge badgecolor={props.leaveTypeColor}>
               {props.leaveTypeContent}
             </CustomBadge>
           </Grid>

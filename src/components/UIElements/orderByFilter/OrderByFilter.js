@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState,useRef} from 'react';
 import { Grid, Button, ButtonGroup, Grow, Paper, Popper, MenuItem, MenuList, Select, InputLabel, FormControl } from '@material-ui/core';
 import { ArrowDownward,ArrowUpward} from '@material-ui/icons';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -8,8 +8,8 @@ import {makeStyles} from '@material-ui/core/styles';
 
 
 export function OrderByFilter(props) {
-    const [open, setOpen] = React.useState(false);
-    const anchorRef = React.useRef(null);
+    const [open, setOpen] = useState(false);
+    const anchorRef = useRef(null);
     const handleMenuItemClick = (event) => {
         props.onSelectedFilterTypeChanged(event);
         setOpen(false);
