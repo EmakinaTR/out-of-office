@@ -41,7 +41,7 @@ const LeaveSummaryItem = props => {
         <Typography>{props.leaveCount}</Typography>
       </Grid>
       <Grid className={classes.leaveTypeContainer} item xs={5}>
-        <CustomBadge backgroundColor="red">{props.leaveType}</CustomBadge>
+        <CustomBadge badgecolor="red">{props.leaveType}</CustomBadge>
       </Grid>
       <Grid item xs={2}>
         <IconButton color="primary" size="small">

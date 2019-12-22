@@ -130,13 +130,13 @@ export const IncomingRequestCard = (props) =>{
                             </Grid>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={5} sm={4} md={2} md={2}>
-                            <CustomBadge backgroundColor={props.statusTypeColor}> {props.statusTypeContent}</CustomBadge>
+                            <CustomBadge badgecolor={props.statusTypeColor}> {props.statusTypeContent}</CustomBadge>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={3} sm={4} md={2} md={2}>
-                            <CustomBadge backgroundColor="blue" >{getDayCount(props.endDate,props.startDate) +" day"}</CustomBadge>
+                            <CustomBadge badgecolor="tomato" >{getDayCount(props.endDate,props.startDate) +" day"}</CustomBadge>
                         </Grid>
                         <Grid item align className={classes.badgeContainer} xs={4} sm={4} md={2}>
-                            <CustomBadge backgroundColor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>
+                            <CustomBadge badgecolor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>
                         </Grid>
                         <Grid xs={12}>
                             <Typography noWrap className={classes.description}>{props.description}</Typography>
