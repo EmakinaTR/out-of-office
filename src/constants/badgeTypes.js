@@ -39,7 +39,6 @@ export const leaveBadges = {
     color: "#737373"
   }
 };
-
 export const getBadgeColor = (theme, type) => {
   const color = leaveBadges[type].color;
   console.log("Theme Color: ", theme.palette.primary[color]);

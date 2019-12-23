@@ -42,7 +42,6 @@ function App() {
       setLoggedIn(true);
       return JSON.parse(user);
     }
-    
   }
   useEffect(() => {
     readSession();
