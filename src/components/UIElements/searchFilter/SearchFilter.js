@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { InputBase,Input }from '@material-ui/core';
+import { InputBase,Input,Box }from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import {  makeStyles } from '@material-ui/core/styles';
 const SearchFilter = ({onChange})=> {
     const useStyles = makeStyles(theme => ({
-        root: {
+        search: {
+           display: 'flex',
+           flexDirection: 'row',
+           flex: '1 0',
+           alignItems: 'center'
+        }
+        /* root: {
             flexGrow: 1,
         },
         search: {
@@ -45,7 +51,7 @@ const SearchFilter = ({onChange})=> {
             //         width: 200,
             //     },
             // },
-        },
+        }, */
     }));
     const [searchQuery,setSearchQuery]=useState('');
     const classes = useStyles();
@@ -56,9 +62,20 @@ const SearchFilter = ({onChange})=> {
     }
     return (
         <div className={classes.search}>
+            <SearchIcon />
+            <Input
+                placeholder="Search…"
+                type="text"
+                value={searchQuery}
+                onChange={onChangeHandler}
+                inputProps={{ 'aria-label': 'search' }}
+            />
+        </div>
+/*         <div className={classes.search}>
             <div className={classes.searchIcon}>
-                <SearchIcon />
+                
             </div>
+            <SearchIcon />
             <Input
                 placeholder="Search…"
                 
@@ -71,7 +88,7 @@ const SearchFilter = ({onChange})=> {
                 }}
                 inputProps={{ 'aria-label': 'search' }}
             />
-        </div>
+        </div> */
     );
 }
 export default SearchFilter;

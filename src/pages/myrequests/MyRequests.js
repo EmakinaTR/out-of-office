@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         padding: "0",
     },
     headerContainer: {
-        margin: theme.spacing(2)
+        //margin: theme.spacing(2)
     }
 }));
 const orderByFilterOptions = {
@@ -84,15 +84,14 @@ export default function MyRequests(props) {
             <Box >
                 <Grid container className={classes.headerContainer}>
                     <Grid item xs={12} lg={4}>
-                        <Typography variant="h4" >My Requests</Typography>
+                    <Typography variant="h5" component="h2">My Requests</Typography>
+                      
                     </Grid>
-                    <Grid item xs={12} md={6} lg={3} >
+                    <Grid item xs={12} lg={8} >
                         <SearchFilter
                             onChange={onSearchQueryChange}
                         >
                         </SearchFilter>
-                    </Grid>
-                    <Grid item xs={9} md={4} lg={3}>
                         <OrderByFilter
                             options={orderByFilterOptions}
                             onFilterDirectionChanged={onFilterDirectionChanged}
@@ -102,8 +101,6 @@ export default function MyRequests(props) {
                         >
 
                         </OrderByFilter>
-                    </Grid>
-                    <Grid item xs={3} md={2} lg={2}>
                         <FilterBox
                             onFilterBoxClick={onFilterBoxClick}
                             filterBoxState={filterBoxState}
