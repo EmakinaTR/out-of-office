@@ -121,7 +121,7 @@ const Dashboard = () => {
                     statusTypeColor={statusBadges[data.status].color}
                     startDate={data.startDate}
                     endDate={data.endDate}
-                    dayCount={data.dayCount}
+                    duration={data.duration}
                     description={data.description}
                   ></RequestedLeaveItem>
                 );

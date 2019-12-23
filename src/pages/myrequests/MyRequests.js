@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect,useContext} from 'react'
 import { Container, Box, Typography, Grid,Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
@@ -28,7 +28,7 @@ const orderByFilterOptions = {
         name: 'End Date'
     },
     2: {
-        key: 'dayCount',
+        key: 'duration',
         name: 'Day Count'
     },
 };
@@ -117,7 +117,7 @@ export default function MyRequests(props) {
                     // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
                     return (
                         <MyRequestsCard
-                            key={data.id}
+                            key={index}
                             userName={data.userName}
                             leaveTypeContent={leaveBadges[data.leaveType].badgeContent}
                             leaveTypeColor={leaveBadges[data.leaveType].color}
@@ -125,7 +125,7 @@ export default function MyRequests(props) {
                             statusTypeColor={statusBadges[data.status].color}
                             startDate={data.startDate}
                             endDate={data.endDate}
-                            dayCount={data.dayCount}
+                            duration={data.duration}
                             description={data.description}
                         ></MyRequestsCard>
                     )

@@ -86,6 +86,9 @@ export default class Firebase {
   getAllLeaveTypes = () => {
     return this.db.collection("leaveType").get();
   };
+  getLeaveRequestsWaitingToApprove = () => {
+    return this.db.collection("leaveRequests").get();
+  };
 
   sendNewLeaveRequest = leaveRequestObj => {
     this.db.collection("leaveRequests").add(leaveRequestObj);

@@ -31,11 +31,23 @@ export const leaveBadges = {
     color: "#1a3e59"
   },
   3: {
-    badgeContent: "Other Leave",
+    badgeContent: "Marriage",
     color: "#470938"
   },
   4: {
-    badgeContent: "Remote Work",
+    badgeContent: "Other Leave",
+    color: "#737373"
+  },
+   5: {
+    badgeContent: "Parental",
+    color: "#737373"
+  },
+  6: {
+    badgeContent: "Remote Working",
+    color: "#737373"
+  },
+  7: {
+    badgeContent: "Unpaid Vacation",
     color: "#737373"
   }
 };

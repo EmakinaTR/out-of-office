@@ -99,10 +99,10 @@ const useStyles = makeStyles(theme => ({
     },
   
 }));
-const getDayCount = (endDate,startDate) =>{
+const getduration = (endDate,startDate) =>{
     let oneDay = 1000 * 60 * 60 * 24;
-    let dayCount = (new Date(endDate) - new Date(startDate))/oneDay;
-    return Math.round(dayCount);
+    let duration = (new Date(endDate) - new Date(startDate))/oneDay;
+    return Math.round(duration);
 }
 export const IncomingRequestCard = (props) =>{
     const classes = useStyles();
@@ -133,7 +133,7 @@ export const IncomingRequestCard = (props) =>{
                             <CustomBadge badgecolor={props.statusTypeColor}> {props.statusTypeContent}</CustomBadge>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={3} sm={4} md={2} md={2}>
-                            <CustomBadge badgecolor="tomato" >{getDayCount(props.endDate,props.startDate) +" day"}</CustomBadge>
+                            <CustomBadge badgecolor="tomato" >{getduration(props.endDate,props.startDate) +" day"}</CustomBadge>
                         </Grid>
                         <Grid item align className={classes.badgeContainer} xs={4} sm={4} md={2}>
                             <CustomBadge badgecolor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>

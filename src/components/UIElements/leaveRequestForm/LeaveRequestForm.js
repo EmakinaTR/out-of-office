@@ -45,7 +45,6 @@ export default function LeaveRequestForm(props) {
     const [duration, setDuration] = useState('');
     const [checked, setChecked] = useState(false);
     const [open, setOpen] = useState(false);
-
     const [leaveTypes, setLeaveTypes] = useState([]);
     
     // Handle Methods
