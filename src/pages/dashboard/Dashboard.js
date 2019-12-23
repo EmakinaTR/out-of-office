@@ -111,8 +111,6 @@ const Dashboard = () => {
             <Card className={classes.listCard}>
               {REQUESTED_LEAVES}
               {incomingRequests.map((data, index) => {
-                // var statusType = statusBadges.find(type => type.id == data.status)
-                // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
                 return (
                   <RequestedLeaveItem
                     key={index}
