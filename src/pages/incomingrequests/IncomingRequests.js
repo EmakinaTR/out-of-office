@@ -63,13 +63,37 @@ export default function IncomingRequests(props) {
     const onSelectedFilterTypeChanged = (e) => {
         setSelectedFilterType(e.target.value);
     }
-    const sortDataByTypeAscDesc = (filterBoxState,isDescending,data,filterType) =>{
-        if (filterBoxState != undefined && filterBoxState.length != 0){
-            data = data.filter((item) => {
-                return item.startDate >= filterBoxState.startDate &&
-                    item.endDate <= filterBoxState.endDate;
-            });
+
+    const filterData = (data, filterBoxState) => {
+        if (filterBoxState != undefined && filterBoxState.length != 0) {
+            if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
+                data = data.filter((item) => {
+                    console.log("leavetype")
+                    return filterBoxState.leaveType == item.leaveType;
+                })
+                console.log(data)
+            }
+            if (filterBoxState.startDate != undefined ) {
+                data = data.filter((item) => {
+                    console.log("start")
+                    return item.startDate >= filterBoxState.startDate;
+                });
+                console.log(data)
+
+            }
+            if (filterBoxState.endDate != undefined) {
+                data = data.filter((item) => {
+                    console.log("end")
+                    return item.endDate <= filterBoxState.endDate;
+                });
+                console.log(data)
+
+            }
         }
+        setDataList([...data]);
+    }
+    const sortDataByTypeAscDesc = (isDescending,data,filterType) =>{
+        
         data.sort(function (a, b) {
             if (isDescending) {
                 return (b[filterType] > a[filterType]) ? 1 : ((b[filterType] < a[filterType]) ? -1 : 0);
@@ -80,11 +104,11 @@ export default function IncomingRequests(props) {
         setDataList([...data]);
     }
     useEffect(() => {
-        sortDataByTypeAscDesc(filterBoxState,isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
+        filterData(incomingRequestData,filterBoxState)
+        sortDataByTypeAscDesc(isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
     }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
-   
         <Container className={classes.contentContainer}  >
             <Box >
                 <Grid container className={classes.headerContainer}>
