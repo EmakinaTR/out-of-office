@@ -10,7 +10,7 @@ const SignIn = (props) => {
     const signInWithGoogle = () =>{
         firebase.doSignInWithGoogle().then((result)=>{
             Auth.setLoggedIn(true);
-            console.log(result);
+            // console.log(result);
             setErrors(error)
         });
     }
