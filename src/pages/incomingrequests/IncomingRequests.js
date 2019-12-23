@@ -1,4 +1,4 @@
-import React,{useState,useEffect}from 'react'
+import React,{useState,useEffect,useContext}from 'react'
 import { Container, Box, Typography, Grid, Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
@@ -7,8 +7,10 @@ import { incomingRequestData } from '../../constants/dummyData';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
 import OrderByFilter from '../../components/UIElements/orderByFilter';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import { render } from '@testing-library/react';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
+import { FirebaseContext } from "../../components/firebase";
+
+
 
 const useStyles = makeStyles(theme => ({
     contentContainer: {
@@ -33,7 +35,7 @@ const orderByFilterOptions = {
         name: 'Name'
     },
     3: {
-        key: 'dayCount',
+        key: 'duration',
         name: 'Day Count'
     },
   
@@ -46,6 +48,8 @@ export default function IncomingRequests(props) {
     const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
     const [filterBoxState, setFilterBoxState] =useState();
+    const firebaseContext = useContext(FirebaseContext);
+
     const onSearchQueryChange = (value) => {
         let filteredDataList = incomingRequestData;
         filteredDataList = filteredDataList.filter((data) => {
@@ -63,6 +67,21 @@ export default function IncomingRequests(props) {
     const onSelectedFilterTypeChanged = (e) => {
         setSelectedFilterType(e.target.value);
     }
+    
+    // let getAllLeaveTypes = async () => {
+    //     let firebasePromise = firebaseContext.getLeaveRequestsWaitingToApprove();
+    //     // console.log(firebaseContext)
+    //     let leaveRequestArray = [];
+    //     if (firebasePromise !== null) {
+    //         await firebasePromise.then(snapshot => {
+    //             for (let doc of snapshot.docs) {
+    //                 leaveRequestArray.push(doc.data())
+    //             }
+    //             // setDataList(leaveRequestArray);
+    //         });
+    //     }
+    //     console.log(leaveRequestArray)
+    // }
 
     const filterData = (data, filterBoxState) => {
         if (filterBoxState != undefined && filterBoxState.length != 0) {
@@ -71,14 +90,12 @@ export default function IncomingRequests(props) {
                     console.log("leavetype")
                     return filterBoxState.leaveType == item.leaveType;
                 })
-                console.log(data)
             }
             if (filterBoxState.startDate != undefined ) {
                 data = data.filter((item) => {
                     console.log("start")
                     return item.startDate >= filterBoxState.startDate;
                 });
-                console.log(data)
 
             }
             if (filterBoxState.endDate != undefined) {
@@ -87,7 +104,6 @@ export default function IncomingRequests(props) {
                     return item.endDate <= filterBoxState.endDate;
                 });
                 console.log(data)
-
             }
         }
         setDataList([...data]);
@@ -104,8 +120,9 @@ export default function IncomingRequests(props) {
         setDataList([...data]);
     }
     useEffect(() => {
-        filterData(incomingRequestData,filterBoxState)
+        // getAllLeaveTypes()
         sortDataByTypeAscDesc(isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
+        filterData(incomingRequestData, filterBoxState)
     }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
@@ -147,13 +164,13 @@ export default function IncomingRequests(props) {
                         <IncomingRequestCard
                             key={index}
                             userName={data.userName}
-                            leaveTypeContent={leaveBadges[data.leaveType].badgeContent}
-                            leaveTypeColor={leaveBadges[data.leaveType].color}
-                            statusTypeContent={statusBadges[data.status].badgeContent}
-                            statusTypeColor={statusBadges[data.status].color}
+                            leaveTypeContent={leaveBadges[parseInt(data.leaveType)].badgeContent}
+                            leaveTypeColor={leaveBadges[parseInt(data.leaveType)].color}
+                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
+                            statusTypeColor={statusBadges[parseInt(data.status)].color}
                             startDate={data.startDate}
                             endDate={data.endDate}
-                            dayCount={data.dayCount}
+                            duration={data.duration}
                             description={data.description}
                         ></IncomingRequestCard>
                     )

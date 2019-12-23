@@ -121,7 +121,7 @@ const RequestedLeaveItem = props => {
             </CustomBadge>
 
             <CustomBadge marginright="0.5rem" backgroundColor="blue">
-              {props.dayCount + " gün"}
+              {props.duration + " gün"}
             </CustomBadge>
 
             <CustomBadge badgecolor={props.leaveTypeColor}>

@@ -24,10 +24,6 @@ function App(props) {
     }
   });
 
-
-function App() {
-  const [isLoggedIn, setLoggedIn] = useState(false);
-
   const breakpointValues = {
     xs: 0,
     sm: 576,

@@ -62,7 +62,7 @@ export class Reports extends React.Component {
                            
                          }},
                         { title: 'End Date', field: 'endDate' },
-                        { title: 'Day Count', field: 'dayCount', filtering: false },
+                        { title: 'Day Count', field: 'duration', filtering: false },
                         { title: 'Team', field: 'team', },
                         {
                             title: 'Leave Type',
