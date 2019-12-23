@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center'
     },
     formControl: {
-        margin: theme.spacing(1, 0),
+        margin: theme.spacing(0, 0),
         minWidth: 120,
         width: '100%'
     },
@@ -149,6 +149,7 @@ export default function LeaveRequestForm(props) {
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
+                    <Box>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -162,7 +163,7 @@ export default function LeaveRequestForm(props) {
                             return <option key={index} value={index}>{item.name}</option>
                         })}
                         </Select>
-                    </FormControl>
+                    </FormControl></Box>
                     <Box display={{xs: 'block', md: 'none'}}>
                         <TextField
                         margin="normal"
