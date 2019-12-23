@@ -106,7 +106,7 @@ const RequestedLeaveItem = props => {
         <Grid container>
           <Grid item xs={12}>
             <DateFull
-              justifyContent={isLargeScreen ? "center" : "flex-start"}
+              justifycontent={isLargeScreen ? "center" : "flex-start"}
               className={classes.dateFull}
               startDate={props.startDate}
               endDate={props.endDate}
