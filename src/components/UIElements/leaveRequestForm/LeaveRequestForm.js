@@ -58,13 +58,14 @@ export default function LeaveRequestForm(props) {
     };
 
     const handleStartDateChange = date => {
-        setSelectedStartDate(date._d);
-        console.log(date._d);
+        console.log(date.format("MMMM Do, YYYY [at] h:mm:ss a [UTC+3]"));
+        setSelectedStartDate(date);
+        console.log('START DATE: -> ', date);
     }
 
     const handleEndDateChange = date => {
-        setSelectedEndDate(date._d);
-        console.log(date._d);
+        setSelectedEndDate(date);
+        console.log('END DATE: -> ', date);
     }
 
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
@@ -95,15 +96,17 @@ export default function LeaveRequestForm(props) {
         const processedBy = props.auth().uid;
         const isCancelled = false;
         const status = 0;
-        const requestedDate = new Date().toString();
+        const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
         const {leaveType, description, protocolNumber}  = state;
         const isPrivacyPolicyApproved = checked;
-        let startDate = selectedStartDate.toString();
-        let endDate = selectedStartDate.toString();
-        let requestFormObj = {requestedDate, processedBy, leaveType, startDate, endDate, duration,
+        const startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedStartDate._d);
+        const endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedEndDate._d);
+        
+        const requestFormObj = { requestedDate, processedBy, leaveType, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj)
+        console.log(startDate);
     }
 
     //Firebase
@@ -127,6 +130,7 @@ export default function LeaveRequestForm(props) {
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
+        
     }, []);
       
     
@@ -164,7 +168,6 @@ export default function LeaveRequestForm(props) {
                     </Box>
                     <Box display={{xs: 'block', md: 'none'}}>
                         <TextField
-                        id="datetime-local"
                         margin="normal"
                         label="Start Date and Time"
                         type="datetime-local"
@@ -175,7 +178,6 @@ export default function LeaveRequestForm(props) {
                         }}
                         />
                         <TextField
-                        id="datetime-local"
                         margin="normal"
                         label="End Date and Time"
                         type="datetime-local"
@@ -196,7 +198,7 @@ export default function LeaveRequestForm(props) {
                                     label="Start Date"
                                     variant="inline"
                                     format='MM/DD/YYYY'
-                                    minDate={new Date()}
+                                    minDate={moment()}
                                     margin="normal"
                                     value={selectedStartDate}
                                     onChange={handleStartDateChange}
@@ -226,7 +228,7 @@ export default function LeaveRequestForm(props) {
                                     label="End Date"
                                     variant="inline"
                                     format='MM/DD/YYYY'
-                                    minDate={new Date()}
+                                    minDate={moment()}
                                     margin="normal"
                                     value={selectedEndDate}
                                     onChange={handleEndDateChange}

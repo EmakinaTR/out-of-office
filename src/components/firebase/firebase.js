@@ -1,4 +1,4 @@
-import app from 'firebase'
+import app from 'firebase';
 import 'firebase/auth'
 import 'firebase/database'
 import { firebaseConfig } from './config';
@@ -83,6 +83,10 @@ export default class Firebase {
     }
 
     sendNewLeaveRequest = (leaveRequestObj) => {
-        this.db.collection('leaveRequests').add(leaveRequestObj);
+       this.db.collection('leaveRequests').add(leaveRequestObj);
+    }
+
+    convertMomentObjectToFirebaseTimestamp = (momentObj) => {
+        return app.firestore.Timestamp.fromDate(momentObj);
     }
 }
