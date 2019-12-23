@@ -21,7 +21,7 @@ import { useTheme } from "@material-ui/core/styles";
 import { FirebaseContext } from "../../firebase";
 import ProtectedRouteHoc from "../../protectedRouteHoc";
 import { withRouter, useHistory } from "react-router-dom";
-
+import LaunchScreen from "../launchScreen/LaunchScreen";
 const drawerWidth = 240;
 const Navigation = props => {
   const { isLoggedIn } = useContext(AuthContext);
@@ -89,7 +89,6 @@ const Navigation = props => {
     selectedIndex state indicates the active route
   */
   const activeIndex = _getCurrentRouteIndex(props.location.pathname);
-
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(activeIndex);
   const matches = useMediaQuery(theme.breakpoints.up("sm"));
@@ -160,7 +159,7 @@ const Navigation = props => {
             </List>
           </Drawer>
         ) : (
-          <SignIn></SignIn>
+          <LaunchScreen></LaunchScreen>
         )}
         <main className={classes.content}>
           <div className={classes.toolbar} />

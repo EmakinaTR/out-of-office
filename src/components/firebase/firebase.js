@@ -1,102 +1,105 @@
-import app from 'firebase';
-import 'firebase/auth'
-import 'firebase/database'
-import { firebaseConfig } from './config';
+import app from "firebase";
+import "firebase/auth";
+import "firebase/database";
+import { firebaseConfig } from "./config";
 
 export default class Firebase {
+  constructor() {
+    app.initializeApp(firebaseConfig);
+    /* Helper */
+    this.fieldValue = app.firestore.FieldValue;
+    this.emailAuthProvider = app.auth.EmailAuthProvider;
+    /* Firebase APIs */
+    this.auth = app.auth();
+    this.db = app.firestore();
+    this.storage = app.storage();
+    /* Google Provider */
+    app.googleProvider = new app.auth.GoogleAuthProvider();
+  }
 
-    constructor() {
-        app.initializeApp(firebaseConfig);
-        /* Helper */
-        this.fieldValue = app.firestore.FieldValue;
-        this.emailAuthProvider = app.auth.EmailAuthProvider;
-        /* Firebase APIs */
-        this.auth = app.auth();
-        this.db = app.firestore();
-        this.storage = app.storage();
-        /* Google Provider */
-        app.googleProvider = new app.auth.GoogleAuthProvider();
-    }
-    
-        /* Auth API */
-    doSignInWithGoogle =() =>{ return new Promise((resolve,reject) => {
-        app.auth().setPersistence(app.auth.Auth.Persistence.SESSION).then (() => {
-            app.auth().signInWithPopup(app.googleProvider).then( results => {
-             resolve(results);
+ /* Auth API */
+  doSignInWithGoogle = () => {
+    return new Promise((resolve, reject) => {
+      app
+        .auth()
+        .setPersistence(app.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+          app
+            .auth()
+            .signInWithRedirect(app.googleProvider)
+            .then(results => {
+              window.currentUser = app.auth().currentUser;
+              resolve(results);
             })
             .catch(error => {
-                reject(error);
+              reject(error);
             });
-        })
-    })
-    } 
+        });
+    });
+  };
 
-//     doSignInWithGoogle = () => {return new Promise((resolve, reject) => {
-//         app.auth().signInWithRedirect(app.googleProvider)
-//             .then(results => {
-//               resolve(results);
-//         })
-//         }
-//     )
-// }
-    
+  //     doSignInWithGoogle = () => {return new Promise((resolve, reject) => {
+  //         app.auth().signInWithRedirect(app.googleProvider)
+  //             .then(results => {
+  //               resolve(results);
+  //         })
+  //         }
+  //     )
+  // }
 
-    doSignOut = () =>  app.auth.signOut();
-    // *** User API ***
+  doSignOut = () => app.auth.signOut();
+  // *** User API ***
 
-    // user = uid => this.db.doc(`users/${uid}`);
-    users = () => this.db.collection('users');
+  // user = uid => this.db.doc(`users/${uid}`);
+  users = () => this.db.collection("users");
 
-    // *** Merge Auth and DB User API *** //
-    onAuthUserListener = (next, fallback) =>
-        this.auth.onAuthStateChanged(authUser => {
-            if (authUser) {
-                this.user(authUser.uid)
-                    .get()
-                    .then(snapshot => {
-                        const dbUser = snapshot.data();
+  // *** Merge Auth and DB User API *** //
+  onAuthUserListener = (next, fallback) =>
+    this.auth.onAuthStateChanged(authUser => {
+      if (authUser) {
+        this.user(authUser.uid)
+          .get()
+          .then(snapshot => {
+            const dbUser = snapshot.data();
 
-                        // // default empty roles
-                        // if (!dbUser.roles) {
-                        //     dbUser.roles = {};
-                        // }
+            // // default empty roles
+            // if (!dbUser.roles) {
+            //     dbUser.roles = {};
+            // }
 
-                        // merge auth and db user
-                        authUser = {
-                            uid: authUser.uid,
-                            email: authUser.email,
-                            emailVerified: authUser.emailVerified,
-                            providerData: authUser.providerData,
-                            ...dbUser,
-                        };
+            // merge auth and db user
+            authUser = {
+              uid: authUser.uid,
+              email: authUser.email,
+              emailVerified: authUser.emailVerified,
+              providerData: authUser.providerData,
+              ...dbUser
+            };
 
-                        next(authUser);
-                    });
-            } else {
-                fallback();
-            }
+            next(authUser);
+          });
+      } else {
+        fallback();
+      }
     });
 
-    
-    getAllLeaveTypes = () => {
-        return this.db.collection('leaveType').get();
-    }
+  getAllLeaveTypes = () => {
+    return this.db.collection("leaveType").get();
+  };
 
-    sendNewLeaveRequest = (leaveRequestObj) => {
-       this.db.collection('leaveRequests').add(leaveRequestObj);
-    }
+  sendNewLeaveRequest = leaveRequestObj => {
+    this.db.collection("leaveRequests").add(leaveRequestObj);
+  };
 
-    convertMomentObjectToFirebaseTimestamp = (momentObj) => {
-        return app.firestore.Timestamp.fromDate(momentObj);
-    }
+  convertMomentObjectToFirebaseTimestamp = (momentObj) => {
+     return app.firestore.Timestamp.fromDate(momentObj);
+  }
 
-    convertUidToFirebaseRef = (uid) => {
-        return this.db.collection('users').doc(uid);
-    }
+  convertUidToFirebaseRef = (uid) => {
+      return this.db.collection('users').doc(uid);
+  }
 
-    convertLeaveTypeToFirebaseRef = (leaveType) => {
-        return this.db.collection('leaveType').doc(leaveType);
-    }
-
-    
+  convertLeaveTypeToFirebaseRef = (leaveType) => {
+      return this.db.collection('leaveType').doc(leaveType);
+  }
 }
