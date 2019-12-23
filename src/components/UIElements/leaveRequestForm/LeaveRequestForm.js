@@ -148,7 +148,7 @@ export default function LeaveRequestForm(props) {
         <Container maxWidth="lg">
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>Leave Request</h2>
+                    <h2 style={{textAlign: 'center'}}>New Leave Request</h2>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select

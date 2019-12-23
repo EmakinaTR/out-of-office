@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import protectedRoutes from "../../../constants/routes";
 import { Switch, Link, BrowserRouter as Router } from "react-router-dom";
 import AuthContext from "../../session";
@@ -21,13 +21,12 @@ import { useTheme } from "@material-ui/core/styles";
 import { FirebaseContext } from "../../firebase";
 import ProtectedRouteHoc from "../../protectedRouteHoc";
 import { withRouter, useHistory } from "react-router-dom";
-
+import LaunchScreen from "../launchScreen/LaunchScreen";
 const drawerWidth = 240;
 const Navigation = props => {
   const { isLoggedIn } = useContext(AuthContext);
   const firebase = useContext(FirebaseContext);
   const history = useHistory();
-
   const _getCurrentRouteIndex = location => {
     let activeIndex = protectedRoutes.findIndex(route => {
       return route.path === location;
@@ -75,20 +74,21 @@ const Navigation = props => {
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
-      backgroundColor: '#e8e8e8',
-      minHeight:'94.8vh'
+      backgroundColor: "#e8e8e8",
+      minHeight: "94.8vh"
     },
     toolbar: theme.mixins.toolbar
   }));
   const theme = useTheme();
   const classes = useStyles();
+  const Auth = useContext(AuthContext);
+  const user = Auth.readSession();
   /*
     States:
     mobileOpen state is controlled by Menu Button to toggle drawer
     selectedIndex state indicates the active route
   */
   const activeIndex = _getCurrentRouteIndex(props.location.pathname);
-
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(activeIndex);
   const matches = useMediaQuery(theme.breakpoints.up("sm"));
@@ -119,7 +119,7 @@ const Navigation = props => {
               {props.title}
             </Typography>
             {/* <Avatar className={classes.avatar}>{props.avatarText}</Avatar> */}
-            <Avatar src={props.user?.photoURL}></Avatar>
+            <Avatar src={user?.photoURL}></Avatar>
           </Toolbar>
         </AppBar>
         {/* Side Nav Bar */}
@@ -159,7 +159,7 @@ const Navigation = props => {
             </List>
           </Drawer>
         ) : (
-          <SignIn></SignIn>
+          <LaunchScreen></LaunchScreen>
         )}
         <main className={classes.content}>
           <div className={classes.toolbar} />
