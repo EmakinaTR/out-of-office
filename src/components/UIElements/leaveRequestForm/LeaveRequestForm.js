@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
@@ -72,7 +72,8 @@ export default function LeaveRequestForm(props) {
         // I used parseInt to prevent duration to be stringified in firebase
         let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
         setDuration(duration);
-        console.log(duration);
+        console.log('Duration -> ', duration);
+       
     }
 
 
@@ -93,7 +94,8 @@ export default function LeaveRequestForm(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('submit')
-        const processedBy = props.auth().uid;
+        const uid = props.auth().uid;
+        const processedBy = props.firebase.convertUidToFirebaseRef(uid);
         const isCancelled = false;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
@@ -105,8 +107,7 @@ export default function LeaveRequestForm(props) {
         const requestFormObj = { requestedDate, processedBy, leaveType, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj)
-        console.log(requestFormObj)
-        console.log(startDate);
+        console.log(requestFormObj);
     }
 
     //Firebase
@@ -130,7 +131,6 @@ export default function LeaveRequestForm(props) {
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
-        
     }, []);
       
     
@@ -144,7 +144,7 @@ export default function LeaveRequestForm(props) {
         }
     ]
 
-    return (
+    return (           
         <Container maxWidth="lg">
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
@@ -196,6 +196,7 @@ export default function LeaveRequestForm(props) {
                                     disableToolbar
                                     className={classes.inputWidth}
                                     label="Start Date"
+                                    name="selectedStartDate"
                                     variant="inline"
                                     format='MM/DD/YYYY'
                                     minDate={moment()}
@@ -230,6 +231,7 @@ export default function LeaveRequestForm(props) {
                                     format='MM/DD/YYYY'
                                     minDate={moment()}
                                     margin="normal"
+                                    name="selectedEndDate"
                                     value={selectedEndDate}
                                     onChange={handleEndDateChange}
                                     KeyboardButtonProps={{
@@ -267,8 +269,8 @@ export default function LeaveRequestForm(props) {
                                 <Typography>Approver</Typography>
                             </Grid>
                            <Grid item xs={12} md={5}>
-                           {approvers.map((item) => {
-                                return  <Box component="span" marginRight={1}>
+                           {approvers.map((item, index) => {
+                                return  <Box key={index} component="span" marginRight={1}>
                                             <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} />
                                         </Box>; 
                             })}

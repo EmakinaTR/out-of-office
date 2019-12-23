@@ -7,7 +7,7 @@ import AuthContext from "./components/session";
 import { firebaseConfig } from "./components/firebase/config";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 function App() {
-  const [isLoggedIn, setLoggedIn] = useState(true);
+  const [isLoggedIn, setLoggedIn] = useState(false);
   const breakpointValues = {
     xs: 0,
     sm: 576,

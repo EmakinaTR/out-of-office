@@ -20,7 +20,7 @@ export default class Firebase {
     
         /* Auth API */
     doSignInWithGoogle =() =>{ return new Promise((resolve,reject) => {
-        app.auth().setPersistence(app.auth.Auth.Persistence.LOCAL).then (() => {
+        app.auth().setPersistence(app.auth.Auth.Persistence.SESSION).then (() => {
             app.auth().signInWithPopup(app.googleProvider).then( results => {
              resolve(results);
             })
@@ -89,4 +89,10 @@ export default class Firebase {
     convertMomentObjectToFirebaseTimestamp = (momentObj) => {
         return app.firestore.Timestamp.fromDate(momentObj);
     }
+
+    convertUidToFirebaseRef = (uid) => {
+        return this.db.collection('users').doc(uid);
+    }
+
+    
 }
