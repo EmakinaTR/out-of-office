@@ -94,5 +94,9 @@ export default class Firebase {
         return this.db.collection('users').doc(uid);
     }
 
+    convertLeaveTypeToFirebaseRef = (leaveType) => {
+        return this.db.collection('leaveType').doc(leaveType);
+    }
+
     
 }

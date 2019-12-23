@@ -100,11 +100,12 @@ export default function LeaveRequestForm(props) {
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
         const {leaveType, description, protocolNumber}  = state;
+        const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
         const startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedStartDate._d);
         const endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedEndDate._d);
         
-        const requestFormObj = { requestedDate, processedBy, leaveType, startDate, endDate, duration,
+        const requestFormObj = { requestedDate, processedBy, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj);
