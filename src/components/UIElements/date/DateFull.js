@@ -10,7 +10,7 @@ moment().locale('tr')
 const useStyles = makeStyles(theme => ({
   mainContainer: {
     display: "flex",
-    justifyContent: props => props.justifyContent
+    justifyContent: props => props.justifycontent
   },
   center: {
     fontSize: "16px",
@@ -49,8 +49,8 @@ export default function DateFull(props) {
 }
 
 DateFull.propTypes = {
-  justifyContent: PropTypes.string
+  justifycontent: PropTypes.string
 };
 DateFull.defaultProps = {
-  justifyContent: "flex-start"
+  justifycontent: "flex-start"
 };

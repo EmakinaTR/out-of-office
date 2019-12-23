@@ -81,7 +81,7 @@ const Dashboard = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Button
-            color="primary"
+            color="secondary"
             variant="contained"
             className={classes.newRequestButton}
           >
@@ -107,7 +107,7 @@ const Dashboard = () => {
       <Grid container spacing={3}>
         {/* Incoming Requests - Visible Only For Admin Users */}
         {isAdmin && (
-          <Grid item xs={12} lg={6}>
+          <Grid item xs={12} md={12} lg={6}>
             <Card className={classes.listCard}>
               {REQUESTED_LEAVES}
               {incomingRequests.map((data, index) => {
@@ -132,7 +132,7 @@ const Dashboard = () => {
           </Grid>
         )}
         {/* Last 5 Request */}
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} md={12} lg={6}>
           <Card className={classes.listCard}>
             {MY_LEAVE_REQUEST}
             {leaves.map((leave, index) => {
