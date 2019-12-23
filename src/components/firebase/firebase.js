@@ -17,7 +17,7 @@ export default class Firebase {
     app.googleProvider = new app.auth.GoogleAuthProvider();
   }
 
-  /* Auth API */
+ /* Auth API */
   doSignInWithGoogle = () => {
     return new Promise((resolve, reject) => {
       app
@@ -91,7 +91,15 @@ export default class Firebase {
     this.db.collection("leaveRequests").add(leaveRequestObj);
   };
 
-  convertMomentObjectToFirebaseTimestamp = momentObj => {
-    return app.firestore.Timestamp.fromDate(momentObj);
-  };
+  convertMomentObjectToFirebaseTimestamp = (momentObj) => {
+     return app.firestore.Timestamp.fromDate(momentObj);
+  }
+
+  convertUidToFirebaseRef = (uid) => {
+      return this.db.collection('users').doc(uid);
+  }
+
+  convertLeaveTypeToFirebaseRef = (leaveType) => {
+      return this.db.collection('leaveType').doc(leaveType);
+  }
 }
