@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import protectedRoutes from "../../../constants/routes";
 import { Switch, Link, BrowserRouter as Router } from "react-router-dom";
 import AuthContext from "../../session";
@@ -27,7 +27,6 @@ const Navigation = props => {
   const { isLoggedIn } = useContext(AuthContext);
   const firebase = useContext(FirebaseContext);
   const history = useHistory();
-
   const _getCurrentRouteIndex = location => {
     let activeIndex = protectedRoutes.findIndex(route => {
       return route.path === location;
@@ -75,13 +74,15 @@ const Navigation = props => {
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
-      backgroundColor: '#e8e8e8',
-      minHeight:'94.8vh'
+      backgroundColor: "#e8e8e8",
+      minHeight: "94.8vh"
     },
     toolbar: theme.mixins.toolbar
   }));
   const theme = useTheme();
   const classes = useStyles();
+  const Auth = useContext(AuthContext);
+  const user = Auth.readSession();
   /*
     States:
     mobileOpen state is controlled by Menu Button to toggle drawer
@@ -119,7 +120,7 @@ const Navigation = props => {
               {props.title}
             </Typography>
             {/* <Avatar className={classes.avatar}>{props.avatarText}</Avatar> */}
-            <Avatar src={props.user?.photoURL}></Avatar>
+            <Avatar src={user?.photoURL}></Avatar>
           </Toolbar>
         </AppBar>
         {/* Side Nav Bar */}
