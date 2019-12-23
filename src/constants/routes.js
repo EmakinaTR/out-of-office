@@ -17,7 +17,7 @@ const protectedRoutes = [
     icon: "dashboard"
   },
   {
-    name: "Leave Request",
+    name: "New Leave Request",
     path: "/leaverequest",
     exact: true,
     main: props => <LeaveRequest {...props} />,
