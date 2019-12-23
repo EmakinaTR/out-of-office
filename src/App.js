@@ -31,7 +31,7 @@ function App() {
   const isLarge = useMediaQuery(theme.breakpoints.up("md"));
   const _spacing = theme.spacing;
   theme.spacing = value => {
-    value = isLarge ? value : value * 0.6;
+    value = isLarge ? value : value * 1;
     return _spacing(value);
   };
   function readSession() {
