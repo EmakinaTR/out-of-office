@@ -75,7 +75,6 @@ export default class Firebase {
               providerData: authUser.providerData,
               ...dbUser
             };
-
             next(authUser);
           });
       } else {
@@ -86,10 +85,24 @@ export default class Firebase {
   getAllLeaveTypes = () => {
     return this.db.collection("leaveType").get();
   };
-  getLeaveRequestsWaitingToApprove = () => {
-    return this.db.collection("leaveRequests").get();
+  getSpecificLeaveType = (docReference) => {
+    return this.db.doc(docReference).get();
   };
 
+  getReferenceDocument (docRef){
+    return this.db.doc(docRef);
+  }
+  getAllLeaveRequests = () => {
+    return this.db.collection("leaveRequests").get();
+  };
+  
+  getLeaveRequestsWaitingToApprove = () => {
+    return this.db.collection("leaveRequests").where("status", "==" ,"0").get();
+  };
+
+  setLeaveStatus = (documentID, newStatus) => {
+    return this.db.collection("leaveRequests").doc(documentID).update({'status': newStatus});
+  }
   sendNewLeaveRequest = leaveRequestObj => {
     this.db.collection("leaveRequests").add(leaveRequestObj);
   };
