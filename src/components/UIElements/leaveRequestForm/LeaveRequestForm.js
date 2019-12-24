@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center'
     },
     formControl: {
-        margin: theme.spacing(0, 0),
+        // margin: theme.spacing(0, 0),
         minWidth: 120,
         width: '100%'
     },
@@ -153,7 +153,7 @@ export default function LeaveRequestForm(props) {
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
-                    <Box>
+                    <Box marginTop={2}>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -194,7 +194,7 @@ export default function LeaveRequestForm(props) {
                     </Box>
                     <Box display={{xs: 'none', md: 'block'}}>
                         <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <Grid container spacing={3}>
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
                                     <KeyboardDatePicker
                                     clearable
@@ -223,7 +223,7 @@ export default function LeaveRequestForm(props) {
                                     />
                                 </Grid>
                             </Grid>
-                            <Grid container spacing={3}>
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
                                     <KeyboardDatePicker
                                     className={classes.inputWidth}
@@ -257,7 +257,7 @@ export default function LeaveRequestForm(props) {
                     onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                     onChange={handleChange('description')} value={state.description} />
-                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" 
+                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
                     onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
                     <Box my={3}>
                     
@@ -270,9 +270,7 @@ export default function LeaveRequestForm(props) {
                                         
                                         
                             })}
-                           
-                           {/* Offset */}
-                        
+                                                 
                     </Box>
                     <Box my={2}>
                         <Grid container spacing={2}>
