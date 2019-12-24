@@ -68,15 +68,28 @@ export default function IncomingRequests(props) {
     const onSelectedFilterTypeChanged = (e) => {
         setSelectedFilterType(e.target.value);
     }
+    const changeFormStatusHandler = async (documentID,type) => {
+        console.log(documentID,type)
+        let newArray
+        await firebaseContext.setLeaveStatus(documentID, type)
+            .then(
+            setDataList(dataList.filter(function (obj) {
+                console.log(obj.id)
+                return obj.documentID !== documentID;
+            }))
+            )
+            .catch(err => console.log(err));
+    }
     
     let getAllLeaveRequests = async () => {
         let leaveRequestPromise = firebaseContext.getAllLeaveRequests();
         let leaveRequestArray = [];
         if (leaveRequestPromise !== null) {
             await leaveRequestPromise.then(snapshot => {
-                for (let doc of snapshot.docs) {
+                snapshot.docs.map((doc,index) => {
                     leaveRequestArray.push(doc.data())
-                }
+                    leaveRequestArray[index].documentID = doc.id;
+                })
             });
         }
         await Promise.all(leaveRequestArray.map(async(item)=>{
@@ -86,8 +99,7 @@ export default function IncomingRequests(props) {
             });
 
         }))
-
-        
+      
          setDataList([...leaveRequestArray])
     }
 
@@ -166,7 +178,6 @@ export default function IncomingRequests(props) {
                 </Grid>
                 {dataList ? dataList.map((data, index) => {
                     if(data.status == 0)
-                        console.log(data)
                     return (
                         // <p>{data}</p>
                         <IncomingRequestCard
@@ -180,6 +191,8 @@ export default function IncomingRequests(props) {
                             endDate={data.endDate.seconds}
                             duration={data.duration}
                             description={data.description}
+                            documentID = {data.documentID}
+                            changeFormStatusHandler={changeFormStatusHandler}
                         ></IncomingRequestCard>
                     )
                 }) 

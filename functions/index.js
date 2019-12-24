@@ -26,18 +26,6 @@ exports.createUser = functions.auth.user().onCreate(async (userRecord, context) 
     });
 });
 
-
-// exports.insertUserRole = functions.firestore.document('/teams/{documentId}')
-//     .onUpdate((change, context) => {
-//         const teamID = context.params.documentId;
-//         return admin.firestore().collection('users').doc('users')
-//             .set({ members: [userID] }, { merge: true })
-//             .catch(err => {
-//             console.log(err);
-//             return;
-//     });
-// });
-
 exports.sendEmail = functions.firestore.document('teams/{leadUser}')
     .onUpdate( async (change, context) => {
         console.log(change);
@@ -54,11 +42,10 @@ exports.sendEmail = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
 });
 
-exports.getTeamLeavesByUserID = functions.https.onRequest( async (req, res) => {
+exports.getTeamLeavesByUserID = functions.https.onRequest( async (req, res) => { // isCancelled + recruitmentDate + authUser 
     const userID = req.query.user;
     let teamMemmbers = [];
     let leaveRequestArray = [];
-
     
     await admin.firestore().collection('teams').where('leadUser', "==", userID).get() // Check if user is team lead
         .then(snapshot => {

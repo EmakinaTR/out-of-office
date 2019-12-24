@@ -1,14 +1,14 @@
-import React from 'react';
-import { Paper, Avatar, Grid, Typography,Fab, Hidden } from '@material-ui/core'
+import React,{useContext} from 'react';
+import { Paper, Avatar, Grid, Typography} from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import CustomBadge from '../customBadge/CustomBadge';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
 import moment from 'moment';
 import 'moment/locale/tr';
 import MoreDialog from '../moreDialog';
+import { FirebaseContext } from "../../firebase";
+import { render } from '@testing-library/react';
 moment().locale('tr')
-
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
@@ -103,7 +103,10 @@ const useStyles = makeStyles(theme => ({
 
 export const IncomingRequestCard = (props) =>{
     const classes = useStyles();
-
+    const firebaseContext = useContext(FirebaseContext);
+    const detailHandler = (e) => {
+        console.log(e.target.value);
+    }
     return (
         <Paper className={classes.paper}>
             <Grid container>
@@ -141,7 +144,10 @@ export const IncomingRequestCard = (props) =>{
                     </Grid>
                     </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
-                   <MoreDialog document={props.documentID}></MoreDialog>
+                   <MoreDialog 
+                   changeFormStatusHandler={props.changeFormStatusHandler} 
+                   detailHandler={detailHandler}
+                   document={props.documentID}></MoreDialog>
                 </Grid>
             </Grid>
             

@@ -100,6 +100,9 @@ export default class Firebase {
     return this.db.collection("leaveRequests").where("status", "==" ,"0").get();
   };
 
+  setLeaveStatus = (documentID, newStatus) => {
+    return this.db.collection("leaveRequests").doc(documentID).update({'status': newStatus});
+  }
   sendNewLeaveRequest = leaveRequestObj => {
     this.db.collection("leaveRequests").add(leaveRequestObj);
   };
