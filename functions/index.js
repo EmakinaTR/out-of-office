@@ -42,8 +42,8 @@ exports.sendEmail = functions.firestore.document('teams/{leadUser}')
     .onUpdate( async (change, context) => {
         console.log(change);
         
-        const newApproverID = change.after.get();
-        const retiredApproverID = change.before.get();
+        let newApproverID = change.after.get("leadUser");
+        let retiredApproverID = change.before.get("leadUser");
         console.log("new " + newApproverID);
         console.log("ret " + retiredApproverID);
 
