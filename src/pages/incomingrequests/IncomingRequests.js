@@ -80,7 +80,7 @@ export default function IncomingRequests(props) {
         }
         await Promise.all(leaveRequestArray.map(async(item)=>{
             const leaveTypeReference = item.leaveTypeRef;
-            await firebaseContext.getReferenceDocument(leaveTypeReference.path).onSnapshot(documentSnapshot =>  {
+            await firebaseContext.getReferenceDocument(leaveTypeReference.path).get().then(documentSnapshot =>  {
                 item.leaveType = documentSnapshot.data();
             });
 
