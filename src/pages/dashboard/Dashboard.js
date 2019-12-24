@@ -6,7 +6,8 @@ import {
   Card,
   Typography,
   Icon,
-  Button
+  Button,
+  Box
 } from "@material-ui/core";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -90,7 +91,8 @@ const Dashboard = () => {
   
 
   return (
-    <div>
+    <Container maxWidth="xl">
+      <Box marginY={4}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Button
@@ -117,6 +119,8 @@ const Dashboard = () => {
           <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
         </Grid>
       </Grid>
+      
+      
       <Grid container spacing={3}>
         {/* Incoming Requests - Visible Only For Admin Users */}
         {isAdmin && (
@@ -158,7 +162,8 @@ const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
-    </div>
+      </Box>
+      </Container>
   );
 };
 export default Dashboard;

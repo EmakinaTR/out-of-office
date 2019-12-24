@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
+import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center'
     },
     formControl: {
-        margin: theme.spacing(1, 0),
+        margin: theme.spacing(0, 0),
         minWidth: 120,
         width: '100%'
     },
@@ -57,7 +57,7 @@ export default function LeaveRequestForm(props) {
     };
 
     const handleStartDateChange = date => {
-        console.log(date.format("MMMM Do, YYYY [at] h:mm:ss a [UTC+3]"));
+        // console.log(date.format("MMMM Do, YYYY [at] h:mm:ss a [UTC+3]"));
         setSelectedStartDate(date);
         console.log('START DATE: -> ', date);
     }
@@ -72,7 +72,6 @@ export default function LeaveRequestForm(props) {
         let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
         setDuration(duration);
         console.log('Duration -> ', duration);
-       
     }
 
 
@@ -92,9 +91,12 @@ export default function LeaveRequestForm(props) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         console.log('submit')
         const uid = props.auth().uid;
-        const processedBy = props.firebase.convertUidToFirebaseRef(uid);
+        const processedBy = " ";
+        const createdBy = props.firebase.convertUidToFirebaseRef(uid);
+        const requesterName = props.auth().displayName;
         const isCancelled = false;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
@@ -104,10 +106,11 @@ export default function LeaveRequestForm(props) {
         const startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedStartDate._d);
         const endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedEndDate._d);
         
-        const requestFormObj = { requestedDate, processedBy, leaveTypeRef, startDate, endDate, duration,
+        const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj);
+        
     }
 
     //Firebase
@@ -120,10 +123,10 @@ export default function LeaveRequestForm(props) {
             await firebasePromise.then(snapshot => {
                 for (let doc of snapshot.docs) {
                     leaveTypesArr.push(doc.data())
+                    
                 }
                 setLeaveTypes(leaveTypesArr);
             });
-            
         }
     }
 
@@ -146,9 +149,11 @@ export default function LeaveRequestForm(props) {
 
     return (           
         <Container maxWidth="lg">
+            <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>New Leave Request</h2>
+                    <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
+                    <Box>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -162,26 +167,25 @@ export default function LeaveRequestForm(props) {
                             return <option key={index} value={index}>{item.name}</option>
                         })}
                         </Select>
-                    </FormControl>
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
+                    </FormControl></Box>
                     <Box display={{xs: 'block', md: 'none'}}>
                         <TextField
                         margin="normal"
                         label="Start Date and Time"
                         type="datetime-local"
-                        defaultValue={new Date()}
                         className={classes.inputWidth}
+                        value={selectedStartDate}
+                        onChange={handleStartDateChange}
                         InputLabelProps={{
                         shrink: true,
                         }}
                         />
                         <TextField
                         margin="normal"
-                        label="End Date and Time"
+                        id="datetime-local"
+                        label="Next appointment"
                         type="datetime-local"
-                        defaultValue={new Date()}
+                        defaultValue="2017-05-24T10:30"
                         className={classes.inputWidth}
                         InputLabelProps={{
                         shrink: true,
@@ -193,11 +197,9 @@ export default function LeaveRequestForm(props) {
                             <Grid container spacing={3}>
                                 <Grid item xs={12} md={6}>
                                     <KeyboardDatePicker
-                                    disableToolbar
+                                    clearable
                                     className={classes.inputWidth}
                                     label="Start Date"
-                                    name="selectedStartDate"
-                                    variant="inline"
                                     format='MM/DD/YYYY'
                                     minDate={moment()}
                                     margin="normal"
@@ -224,14 +226,11 @@ export default function LeaveRequestForm(props) {
                             <Grid container spacing={3}>
                                 <Grid item xs={12} md={6}>
                                     <KeyboardDatePicker
-                                    disableToolbar
                                     className={classes.inputWidth}
                                     label="End Date"
-                                    variant="inline"
                                     format='MM/DD/YYYY'
                                     minDate={moment()}
                                     margin="normal"
-                                    name="selectedEndDate"
                                     value={selectedEndDate}
                                     onChange={handleEndDateChange}
                                     KeyboardButtonProps={{
@@ -256,41 +255,47 @@ export default function LeaveRequestForm(props) {
                     </Box>
                     <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                     onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                     onChange={handleChange('description')} value={state.description} />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" 
                     onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
                     <Box my={3}>
-                    <Grid container>
-                            <Grid item xs={12} md={2}>
-                                <Typography>Approver</Typography>
-                            </Grid>
-                           <Grid item xs={12} md={5}>
-                           {approvers.map((item, index) => {
-                                return  <Box key={index} component="span" marginRight={1}>
-                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} />
+                    
+                        <Typography variant="caption" component="div">Approver</Typography>
+
+                           {approvers.map((item) => {
+                                return  <Box component="span">
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
                                         </Box>; 
+                                        
+                                        
                             })}
-                           </Grid>
+                           
                            {/* Offset */}
-                           <Grid item md={7} implementation="css" smdown="true" component="hidden" />
-                        </Grid>
+                        
                     </Box>
                     <Box my={2}>
-                        <Grid container>
-                            <Grid item xs={12} md={6}>
-                                <Checkbox
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} lg={6}>
+                                <Grid container direction="row" alignItems="center">
+                                <Grid item><Checkbox
+                            id="kvkk"
                                 checked={checked}
                                 onChange={handleCheck}
                                 value={checked}
                                 color="primary"
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
-                                />
-                                <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
+                                /></Grid> 
+                                <Grid item xs>
+                                <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
                                 <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                    </Grid> 
+                                 </Grid> 
+                            
+                                
+                              
+                                
+                                
                                 <Dialog
                                 fullScreen={fullScreen}
                                 open={open}
@@ -314,13 +319,14 @@ export default function LeaveRequestForm(props) {
                                     </DialogActions>
                                 </Dialog>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} lg={6}>
                                 <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
                             </Grid>
                         </Grid>
                     </Box>
                 </form>
             </Paper>
+            </Box>
         </Container>
     )
 }

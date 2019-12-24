@@ -1,5 +1,5 @@
 import React, { useState,useRef,useEffect} from 'react';
-import { Grid, Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem} from '@material-ui/core';
+import { Grid, Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem, Badge, IconButton, Box} from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { statusBadges, leaveBadges } from '../../../constants/badgeTypes';
@@ -73,12 +73,13 @@ export function FilterBox(props) {
     // useEffect(() => {
     // }, [state]);
     return (
-        <Grid container direction="column" alignItems="center">
-            <Grid item xs={12}>
-                <Button style={{position: 'relative'}} ref={anchorRef} color={props.filterBoxState != undefined && props.filterBoxState.length != 0  ? "primary" : "secondary"} variant="contained" component="span" onClick={handleToggle}>
-                    <FilterListIcon></FilterListIcon>
-                    
-                </Button>
+        <Box>
+            <IconButton aria-label="show-hide filters" ref={anchorRef} onClick={handleToggle}>
+            <Badge color="secondary" variant="dot" invisible={props.filterBoxState !== undefined && props.filterBoxState.length !== 0  ? false : true} ><FilterListIcon /></Badge>
+            </IconButton>
+                {/* <Button style={{position: 'relative'}} ref={anchorRef} color= variant="outlined" component="span" onClick={handleToggle}>
+                <Badge color="primary" variant="dot" invisible={props.filterBoxState != undefined && props.filterBoxState.length != 0  ? "primary" : ""} ><FilterListIcon fontSize="small" /></Badge>
+                </Button> */}
                 <Popper open={open} style={{zIndex:2 }} placement="bottom" anchorEl={anchorRef.current} role={undefined} transition disablePortal>
                     {({ TransitionProps, placement }) => (
                         <Grow
@@ -147,7 +148,6 @@ export function FilterBox(props) {
                         </Grow>
                     )}
                 </Popper>
-            </Grid>
-        </Grid>
+            </Box>
     );
 }

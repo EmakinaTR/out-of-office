@@ -100,6 +100,7 @@ export default function LeaveRequestForm(props) {
 
     return (
         <Container maxWidth="lg">
+            <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <h2 style={{textAlign: 'center'}}>Leave Request Detail</h2>
@@ -158,6 +159,7 @@ export default function LeaveRequestForm(props) {
                     </Box>
                 </form>
             </Paper>
+            </Box>
         </Container>
     )
 }
