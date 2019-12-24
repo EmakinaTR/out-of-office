@@ -9,6 +9,7 @@ import OrderByFilter from '../../components/UIElements/orderByFilter';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import { FirebaseContext } from "../../components/firebase";
+import LaunchScreen from '../../components/UIElements/launchScreen'
 
 
 
@@ -43,7 +44,7 @@ const orderByFilterOptions = {
 
 export default function IncomingRequests(props) {
     const classes = useStyles();
-    const [dataList, setDataList] = useState(incomingRequestData);
+    const [dataList, setDataList] = useState();
     const [searchQuery, setsearchQuery] = useState('');
     const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
@@ -161,7 +162,7 @@ export default function IncomingRequests(props) {
                             </FilterBox>
                     </Grid>
                 </Grid>
-                {dataList.map((data, index) => {
+                {dataList ? dataList.map((data, index) => {
                     if(data.status == 0)
                         console.log(data)
                     return (
@@ -173,13 +174,15 @@ export default function IncomingRequests(props) {
                             leaveTypeColor={data.leaveType?.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data.startDate}
-                            endDate={data.endDate}
+                            startDate={data.startDate?.seconds}
+                            endDate={data.endDate.seconds}
                             duration={data.duration}
                             description={data.description}
                         ></IncomingRequestCard>
                     )
-                })}
+                }) 
+            :
+            <LaunchScreen></LaunchScreen>}
             </Box>
         </Container>
     )

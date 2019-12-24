@@ -6,6 +6,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
 import moment from 'moment';
 import 'moment/locale/tr';
+import MoreDialog from '../moreDialog';
 moment().locale('tr')
 
 const useStyles = makeStyles(theme => ({
@@ -99,11 +100,7 @@ const useStyles = makeStyles(theme => ({
     },
   
 }));
-const getduration = (endDate,startDate) =>{
-    let oneDay = 1000 * 60 * 60 * 24;
-    let duration = (new Date(endDate) - new Date(startDate))/oneDay;
-    return Math.round(duration);
-}
+
 export const IncomingRequestCard = (props) =>{
     const classes = useStyles();
 
@@ -144,9 +141,7 @@ export const IncomingRequestCard = (props) =>{
                     </Grid>
                     </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
-                    <Fab className={classes.moreButton} size="small" >
-                        <MoreVertIcon></MoreVertIcon>
-                    </Fab>
+                   <MoreDialog></MoreDialog>
                 </Grid>
             </Grid>
             
