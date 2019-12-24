@@ -113,7 +113,7 @@ export const IncomingRequestCard = (props) =>{
                 <Grid item xs={12} md={2} className={classes.leftContent} >
                     <Grid container className={classes.userInfoInner}>
                         <Grid item className={classes.userInfo}>
-                            <Avatar className={classes.avatarImage}>{props.userName.charAt(0)}</Avatar>
+                            <Avatar className={classes.avatarImage}>{props.userName?.charAt(0)}</Avatar>
                             <Typography className={classes.userName}>{props.userName}</Typography>
                         </Grid>
                     </Grid>
@@ -133,7 +133,7 @@ export const IncomingRequestCard = (props) =>{
                             <CustomBadge badgecolor={props.statusTypeColor}> {props.statusTypeContent}</CustomBadge>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={3} sm={4} md={2} md={2}>
-                            <CustomBadge badgecolor="tomato" >{getduration(props.endDate,props.startDate) +" day"}</CustomBadge>
+                            <CustomBadge badgecolor="tomato">{props.duration +" day"}</CustomBadge>
                         </Grid>
                         <Grid item align className={classes.badgeContainer} xs={4} sm={4} md={2}>
                             <CustomBadge badgecolor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>

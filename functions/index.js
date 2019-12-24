@@ -13,10 +13,12 @@ exports.createUser = functions.auth.user().onCreate(async (userRecord, context) 
         createdDate: admin.firestore.Timestamp.fromDate(new Date())
     }
     return admin.firestore().collection('users').doc(userRecord.uid)
-        .set(userDoc).then(writeResult => {
+        .set(userDoc)
+        .then(writeResult => {
             console.log('User Created result:', writeResult);
             return;
-        }).catch(err => {
+        })
+        .catch(err => {
             console.log(err);
             return;
     });
@@ -31,6 +33,6 @@ exports.insertUserRole = functions.firestore.document('/users/{documentId}')
             .catch(err => {
             console.log(err);
             return;
-        });
     });
+});
 

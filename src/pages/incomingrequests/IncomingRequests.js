@@ -68,20 +68,25 @@ export default function IncomingRequests(props) {
         setSelectedFilterType(e.target.value);
     }
     
-    // let getAllLeaveTypes = async () => {
-    //     let firebasePromise = firebaseContext.getLeaveRequestsWaitingToApprove();
-    //     // console.log(firebaseContext)
-    //     let leaveRequestArray = [];
-    //     if (firebasePromise !== null) {
-    //         await firebasePromise.then(snapshot => {
-    //             for (let doc of snapshot.docs) {
-    //                 leaveRequestArray.push(doc.data())
-    //             }
-    //             // setDataList(leaveRequestArray);
-    //         });
-    //     }
-    //     console.log(leaveRequestArray)
-    // }
+    let getAllLeaveRequests = async () => {
+        let leaveRequestPromise = firebaseContext.getAllLeaveRequests();
+        let leaveRequestArray = [];
+        if (leaveRequestPromise !== null) {
+            await leaveRequestPromise.then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leaveRequestArray.push(doc.data())
+                }
+            });
+        }
+        await Promise.all(leaveRequestArray.map(async(item)=>{
+            const leaveTypeReference = item.leaveTypeRef;
+            await firebaseContext.getReferenceDocument(leaveTypeReference.path).onSnapshot(documentSnapshot =>  {
+                item.leaveType = documentSnapshot.data();
+            });
+
+        }))
+         setDataList([...leaveRequestArray])
+    }
 
     const filterData = (data, filterBoxState) => {
         if (filterBoxState != undefined && filterBoxState.length != 0) {
@@ -103,7 +108,6 @@ export default function IncomingRequests(props) {
                     console.log("end")
                     return item.endDate <= filterBoxState.endDate;
                 });
-                console.log(data)
             }
         }
         setDataList([...data]);
@@ -120,9 +124,9 @@ export default function IncomingRequests(props) {
         setDataList([...data]);
     }
     useEffect(() => {
-        // getAllLeaveTypes()
-        sortDataByTypeAscDesc(isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
-        filterData(incomingRequestData, filterBoxState)
+        getAllLeaveRequests()
+        // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+        // filterData(dataList, filterBoxState)
     }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
@@ -159,13 +163,14 @@ export default function IncomingRequests(props) {
                 </Grid>
                 {dataList.map((data, index) => {
                     if(data.status == 0)
+                        console.log(data)
                     return (
                         // <p>{data}</p>
                         <IncomingRequestCard
                             key={index}
-                            userName={data.userName}
-                            leaveTypeContent={leaveBadges[parseInt(data.leaveType)].badgeContent}
-                            leaveTypeColor={leaveBadges[parseInt(data.leaveType)].color}
+                            userName={data.requesterName}
+                            leaveTypeContent={data.leaveType?.name}
+                            leaveTypeColor={data.leaveType?.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
                             startDate={data.startDate}
