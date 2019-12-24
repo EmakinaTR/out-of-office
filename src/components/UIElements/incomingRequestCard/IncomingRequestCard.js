@@ -141,7 +141,7 @@ export const IncomingRequestCard = (props) =>{
                     </Grid>
                     </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
-                   <MoreDialog></MoreDialog>
+                   <MoreDialog document={props.documentID}></MoreDialog>
                 </Grid>
             </Grid>
             

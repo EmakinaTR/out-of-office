@@ -54,7 +54,7 @@ export default function IncomingRequests(props) {
     const onSearchQueryChange = (value) => {
         let filteredDataList = incomingRequestData;
         filteredDataList = filteredDataList.filter((data) => {
-            return data.userName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
+            return data.requesterName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
         })
         setDataList(filteredDataList);
     }
