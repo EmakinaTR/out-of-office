@@ -10,12 +10,24 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 
 const useStyles = makeStyles(theme => ({
-
     contentContainer: {
-        padding: "0",
+        // padding:0
     },
     headerContainer: {
-        margin: theme.spacing(2)
+        //margin: theme.spacing(2)
+    },
+    listControls: {
+        '& :first-child': {
+            flexGrow: 1,
+            [theme.breakpoints.up('lg')]: {
+                flexGrow: 0
+            },
+         },
+        justifyContent: "flex-start",
+        [theme.breakpoints.up('lg')]: {
+            justifyContent: "flex-end",
+        },
+        
     }
 }));
 const orderByFilterOptions = {
@@ -79,20 +91,23 @@ export default function MyRequests(props) {
         sortDataByTypeAscDesc(filterBoxState, isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
     }, [selectedFilterType, isDescending, filterBoxState])
     return (
-        <Container className={classes.contentContainer}  >
-
-            <Box >
-                <Grid container className={classes.headerContainer}>
+        <Container maxWidth="xl">
+        <Box marginY={3}>
+            <Box marginBottom={2}>
+                <Grid container className={classes.headerContainer}  alignItems="center">
                     <Grid item xs={12} lg={4}>
-                        <Typography variant="h4" >My Requests</Typography>
+                    <Typography variant="h5" component="h2">My Requests</Typography>
+                      
                     </Grid>
-                    <Grid item xs={12} md={6} lg={3} >
+                    <Grid item xs={12} lg={8} >
+                        <Grid container alignItems="center" spacing={2} className={classes.listControls} wrap="nowrap">
+                        <Grid item>
                         <SearchFilter
                             onChange={onSearchQueryChange}
                         >
                         </SearchFilter>
-                    </Grid>
-                    <Grid item xs={9} md={4} lg={3}>
+                        </Grid>
+                        <Grid item>
                         <OrderByFilter
                             options={orderByFilterOptions}
                             onFilterDirectionChanged={onFilterDirectionChanged}
@@ -102,16 +117,17 @@ export default function MyRequests(props) {
                         >
 
                         </OrderByFilter>
-                    </Grid>
-                    <Grid item xs={3} md={2} lg={2}>
+                        </Grid>
+                        <Grid item>
                         <FilterBox
                             onFilterBoxClick={onFilterBoxClick}
                             filterBoxState={filterBoxState}
                         >
-                        </FilterBox>
+                        </FilterBox></Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
-                
+                </Box>
                 {dataList.map((data, index) => {
                     // var statusType = statusBadges.find(type => type.id == data.status)
                     // var leaveType = leaveBadges.find(type => type.id == data.leaveType)

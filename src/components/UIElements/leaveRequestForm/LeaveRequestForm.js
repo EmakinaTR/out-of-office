@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
+import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center'
     },
     formControl: {
-        margin: theme.spacing(1, 0),
+        margin: theme.spacing(0, 0),
         minWidth: 120,
         width: '100%'
     },
@@ -146,9 +146,11 @@ export default function LeaveRequestForm(props) {
 
     return (           
         <Container maxWidth="lg">
+            <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>New Leave Request</h2>
+                    <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
+                    <Box>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -162,10 +164,7 @@ export default function LeaveRequestForm(props) {
                             return <option key={index} value={index}>{item.name}</option>
                         })}
                         </Select>
-                    </FormControl>
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
+                    </FormControl></Box>
                     <Box display={{xs: 'block', md: 'none'}}>
                         <TextField
                         margin="normal"
@@ -256,41 +255,45 @@ export default function LeaveRequestForm(props) {
                     </Box>
                     <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                     onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                     onChange={handleChange('description')} value={state.description} />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" 
                     onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
                     <Box my={3}>
-                    <Grid container>
-                            <Grid item xs={12} md={2}>
-                                <Typography>Approver</Typography>
-                            </Grid>
-                           <Grid item xs={12} md={5}>
-                           {approvers.map((item, index) => {
-                                return  <Box key={index} component="span" marginRight={1}>
-                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} />
+                    
+                        <Typography variant="caption" component="div">Approver</Typography>
+
+                           {approvers.map((item) => {
+                                return  <Box component="span">
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
                                         </Box>; 
                             })}
-                           </Grid>
+                           
                            {/* Offset */}
-                           <Grid item md={7} implementation="css" smdown="true" component="hidden" />
-                        </Grid>
+                        
                     </Box>
                     <Box my={2}>
-                        <Grid container>
-                            <Grid item xs={12} md={6}>
-                                <Checkbox
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} lg={6}>
+                                <Grid container direction="row" alignItems="center">
+                                <Grid item><Checkbox
+                            id="kvkk"
                                 checked={checked}
                                 onChange={handleCheck}
                                 value={checked}
                                 color="primary"
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
-                                />
-                                <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
+                                /></Grid> 
+                                <Grid item xs>
+                                <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
                                 <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                    </Grid> 
+                                 </Grid> 
+                            
+                                
+                              
+                                
+                                
                                 <Dialog
                                 fullScreen={fullScreen}
                                 open={open}
@@ -314,13 +317,14 @@ export default function LeaveRequestForm(props) {
                                     </DialogActions>
                                 </Dialog>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} lg={6}>
                                 <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
                             </Grid>
                         </Grid>
                     </Box>
                 </form>
             </Paper>
+            </Box>
         </Container>
     )
 }

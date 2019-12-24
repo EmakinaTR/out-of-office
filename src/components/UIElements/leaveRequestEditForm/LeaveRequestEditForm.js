@@ -137,6 +137,7 @@ export default function LeaveRequestEditForm(props) {
 
     return (
         <Container maxWidth="lg">
+            <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <h2 style={{textAlign: 'center'}}>Leave Request Edit</h2>
@@ -327,6 +328,7 @@ export default function LeaveRequestEditForm(props) {
                     </Grid>
                 </form>
             </Paper>
+            </Box>
         </Container>
     )
 }

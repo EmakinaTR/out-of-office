@@ -24,26 +24,24 @@ export function OrderByFilter(props) {
         setOpen(false);
     };
     return (
-        <Grid container direction="column" alignItems="center">
+        <Grid container direction="column" alignItems="right">
             <Grid item xs={12}>
-                <ButtonGroup variant="contained" color="secondary" ref={anchorRef} aria-label="split button">
+                <ButtonGroup variant="outlined" size="small" ref={anchorRef} aria-label="split button">
                     <Button onClick={props.onFilterDirectionChanged}>
                         {props.currentDirection ?
-                            <ArrowDownward style={{ marginRight: '12px' }}></ArrowDownward> :
-                            <ArrowUpward style={{ marginRight: '12px' }}></ArrowUpward>
+                            <ArrowDownward fontSize="small" style={{ marginRight: '12px' }}></ArrowDownward> :
+                            <ArrowUpward fontSize="small" style={{ marginRight: '12px' }}></ArrowUpward>
                         }
                         {props.options[props.selectedFilterType].name}
                     </Button>
                     <Button
-                        color="secondary"
-                        size="small"
                         aria-controls={open ? 'split-button-menu' : undefined}
                         aria-expanded={open ? 'true' : undefined}
                         aria-label="select merge strategy"
                         aria-haspopup="menu"
                         onClick={handleToggle}
                     >
-                        <ArrowDropDownIcon  />
+                        <ArrowDropDownIcon fontSize="small" />
                     </Button>
                 </ButtonGroup>
                 <Popper open={open} style={{ zIndex: 2}} placement="bottom" anchorEl={anchorRef.current} role={undefined}  transition disablePortal>
