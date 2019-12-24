@@ -11,7 +11,7 @@ import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 
 const useStyles = makeStyles(theme => ({
     contentContainer: {
-        padding:0
+        // padding:0
     },
     headerContainer: {
         //margin: theme.spacing(2)
@@ -91,8 +91,8 @@ export default function MyRequests(props) {
         sortDataByTypeAscDesc(filterBoxState, isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
     }, [selectedFilterType, isDescending, filterBoxState])
     return (
-        <Container className={classes.contentContainer}  >
-
+        <Container maxWidth="xl">
+        <Box marginY={3}>
             <Box marginBottom={2}>
                 <Grid container className={classes.headerContainer}  alignItems="center">
                     <Grid item xs={12} lg={4}>
@@ -146,7 +146,7 @@ export default function MyRequests(props) {
                         ></MyRequestsCard>
                     )
                 })}
-            
+            </Box>
         </Container>
     )
 }

@@ -2,7 +2,7 @@ import React,{useState} from 'react';
 import MaterialTable,
 { MTableToolbar, MTableFilterRow,MTableHeader} from 'material-table';
 import { incomingRequestData } from '../../constants/dummyData';
-import { Typography,Chip,Button, Paper,Drawer,List,ListItem,ListItemIcon,ListItemText } from '@material-ui/core';
+import { Typography,Chip,Button, Paper,Drawer,List,ListItem,ListItemIcon,ListItemText, Container, Box } from '@material-ui/core';
 import FilterListIcon from '@material-ui/icons/FilterList';
 export class Reports extends React.Component {
     constructor(props) {
@@ -42,6 +42,8 @@ export class Reports extends React.Component {
   
     render() {
         return (
+            <Container maxWidth="xl">
+                <Box marginY={4}>
             <Paper style={this.paperStyle}>
                 <MaterialTable style={this.tableStyle}
                     //https://material-table.com/#/docs/features/remote-data
@@ -156,7 +158,8 @@ export class Reports extends React.Component {
                     }}
                 />
             </Paper>
-            
+            </Box>
+        </Container>
         )
     }
 }

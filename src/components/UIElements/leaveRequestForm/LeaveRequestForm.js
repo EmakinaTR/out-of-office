@@ -147,6 +147,7 @@ export default function LeaveRequestForm(props) {
 
     return (           
         <Container maxWidth="lg">
+            <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
@@ -324,6 +325,7 @@ export default function LeaveRequestForm(props) {
                     </Box>
                 </form>
             </Paper>
+            </Box>
         </Container>
     )
 }
