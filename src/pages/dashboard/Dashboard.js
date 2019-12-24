@@ -105,10 +105,7 @@ const Dashboard = () => {
         <Grid item xs={12} md={6}>
           <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
         </Grid>
-      </Grid>
-      
-      
-      <Grid container spacing={3}>
+ 
         {/* Incoming Requests - Visible Only For Admin Users */}
         {isAdmin && (
           <Grid item xs={12} md={12} lg={6}>
@@ -134,7 +131,7 @@ const Dashboard = () => {
           </Grid>
         )}
         {/* Last 5 Request */}
-        <Grid item xs={12} md={12} lg={6}>
+        <Grid item xs={12} md={12} lg={isAdmin ? 6:12}>
           <Card className={classes.listCard}>
             {MY_LEAVE_REQUEST}
             {leaves.map((leave, index) => {
