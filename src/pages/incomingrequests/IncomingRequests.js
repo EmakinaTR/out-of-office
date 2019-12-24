@@ -86,6 +86,8 @@ export default function IncomingRequests(props) {
             });
 
         }))
+
+        
          setDataList([...leaveRequestArray])
     }
 
