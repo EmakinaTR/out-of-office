@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const firebase = require('firebase');
 admin.initializeApp();
 
 
@@ -63,3 +64,45 @@ exports.getMyRequests = functions.https.onCall( async (req, res) => { // isCance
     
     res.send(leaveRequestArray)
 });
+
+exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // isCancelled + recruitmentDate + authUser 
+    const userID = data.user;
+    console.log("REQ:: ", data);
+    let teamMemmbers = [];
+    let leaveRequestArray = [];
+    
+    await admin.firestore().collection('teams').where('leadUser', "==", userID).get() // Check if user is team lead
+        .then(snapshot => {
+           if(!snapshot.empty){ // If he/she is, get members of the team
+               teamMemmbers = snapshot.docs[0].data().members;
+           }
+           else{
+                res("No data to display")
+           }
+        }).catch(err => console.log(err))
+    if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
+        await Promise.all(teamMemmbers.map(async (member) => {
+            console.log("member " +member)
+            await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
+                then(querySnapshot  => {
+                    console.log("izin snapshot", querySnapshot );
+                    querySnapshot.docs.map(doc => {
+                        const docObject = doc.data();
+                        docObject.id = doc.id;
+                        leaveRequestArray.push(docObject);                      
+                    })
+                }).catch(err=>console.log(err));
+        }))
+        await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+            await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+                item.leaveType = documentSnapshot.data();
+            });
+        }))
+    }
+    return leaveRequestArray;
+});
+
+exports.Test = functions.https.onCall(async (data,context) => {
+    const id = firebase.auth().currentUser.getIdToken();
+    return id;
+})
