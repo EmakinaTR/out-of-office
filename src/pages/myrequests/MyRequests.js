@@ -70,12 +70,13 @@ export default function MyRequests(props) {
     }
 
     let getMyRequests = async () => {
-        let leaveRequestPromise = firebaseContext.getMyRequests();
         let leaveRequestArray = [];
-        await firebaseContext.getIncomingRequests(window.currentUser.uid)
+        await firebaseContext.getMyRequests()
             .then(result => {
                 console.log(result);
                 setDataList([...result]);
+                console.log(result)
+
             });
     }
 
@@ -174,12 +175,12 @@ export default function MyRequests(props) {
                         <MyRequestsCard
                             key={index}
                             userName={data.userName}
-                            leaveTypeContent={leaveBadges[data.leaveType].badgeContent}
-                            leaveTypeColor={leaveBadges[data.leaveType].color}
-                            statusTypeContent={statusBadges[data.status].badgeContent}
-                            statusTypeColor={statusBadges[data.status].color}
-                            startDate={data.startDate}
-                            endDate={data.endDate}
+                            leaveTypeContent={data.leaveType?.name}
+                            leaveTypeColor={data.leaveType?.color}
+                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
+                            statusTypeColor={statusBadges[parseInt(data.status)].color}
+                            startDate={data.startDate.seconds}
+                            endDate={data.endDate.seconds}
                             duration={data.duration}
                             description={data.description}
                         ></MyRequestsCard>
