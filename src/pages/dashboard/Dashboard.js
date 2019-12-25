@@ -7,7 +7,8 @@ import {
   Typography,
   Icon,
   Button,
-  Box
+  Box,
+  Paper
 } from "@material-ui/core";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -22,8 +23,8 @@ const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
 const REMAINING_CASUAL_LEAVE_REQUEST = "Kalan Mazeret İzni";
 const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
-const MY_LEAVE_REQUEST = "Son 5 İzin";
-const REQUESTED_LEAVES = "Talep Edilen İzinler";
+const MY_LEAVE_REQUEST = "My Leaves";
+const REQUESTED_LEAVES = "Incoming Requests";
 
 // CUSTOM STATIC DATA
 const leaves = [
@@ -67,8 +68,8 @@ const useStyles = makeStyles(theme => ({
     textAlign: "left"
   },
   listCard: {
-    padding: theme.spacing(3),
-    textAlign: "center"
+    // padding: theme.spacing(3),
+    // textAlign: "center"
   }
 }));
 
@@ -80,74 +81,115 @@ const Dashboard = () => {
   return (
     <Container maxWidth="xl">
       <Box marginY={4}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Button
-            color="secondary"
-            variant="contained"
-            className={classes.newRequestButton}
-          >
-            <Typography className={classes.newRequestButtonText}>
-              {NEW_LEAVE_REQUEST}
-            </Typography>
-            <Icon style={{ fontSize: "2rem" }}>add</Icon>
-          </Button>
-        </Grid>
-        {/* Remaining Annual Leave */}
-        <Grid item xs={12} md={6}>
-          <InfoCard text={REMAINING_ANNUAL_LEAVE_REQUEST} count={5}></InfoCard>
-        </Grid>
-        {/* Remaining Annual Leave */}
-        <Grid item xs={12} md={6}>
-          <InfoCard text={REMAINING_CASUAL_LEAVE_REQUEST} count={2}></InfoCard>
-        </Grid>
-        {/* Remaining Annual Leave */}
-        <Grid item xs={12} md={6}>
-          <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
-        </Grid>
- 
-        {/* Incoming Requests - Visible Only For Admin Users */}
-        {isAdmin && (
-          <Grid item xs={12} md={12} lg={6}>
-            <Card className={classes.listCard}>
-              {REQUESTED_LEAVES}
-              {incomingRequests.map((data, index) => {
+        <Grid container spacing={3}>
+          <Grid item xs={12} lg={6}>
+            <Button
+              color="primary"
+              variant="contained"
+              className={classes.newRequestButton}
+            >
+              <Typography className={classes.newRequestButtonText}>
+                {NEW_LEAVE_REQUEST}
+              </Typography>
+              <Icon style={{ fontSize: "2rem" }}>add</Icon>
+            </Button>
+          </Grid>
+          {/* Remaining Annual Leave */}
+          <Grid item xs={12} lg={6}>
+            <InfoCard
+              text={REMAINING_ANNUAL_LEAVE_REQUEST}
+              count={5}
+            ></InfoCard>
+          </Grid>
+          {/* Remaining Annual Leave */}
+          <Grid item xs={12} lg={6}>
+            <InfoCard
+              text={REMAINING_CASUAL_LEAVE_REQUEST}
+              count={2}
+            ></InfoCard>
+          </Grid>
+          {/* Remaining Annual Leave */}
+          <Grid item xs={12} lg={6}>
+            <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
+          </Grid>
+
+          {/* Incoming Requests - Visible Only For Admin Users */}
+          {isAdmin && (
+            <Grid item xs={12} lg={6}>
+              <Paper className={classes.listCard}>
+                <Box
+                  paddingY={1}
+                  paddingX={2}
+                  style={{ borderBottom: "solid 1px #ddd" }}
+                >
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Box fontWeight={500} fontSize="large">
+                      {REQUESTED_LEAVES}
+                    </Box>
+
+                    <Button href="#text-buttons" size="small">All</Button>
+                  </Box>
+                </Box>
+                {incomingRequests.map((data, index) => {
+                  return (
+                    <RequestedLeaveItem
+                      key={index}
+                      userName={data.userName}
+                      leaveTypeContent={
+                        leaveBadges[data.leaveType].badgeContent
+                      }
+                      leaveTypeColor={leaveBadges[data.leaveType].color}
+                      statusTypeContent={statusBadges[data.status].badgeContent}
+                      statusTypeColor={statusBadges[data.status].color}
+                      startDate={data.startDate}
+                      endDate={data.endDate}
+                      duration={data.duration}
+                      description={data.description}
+                    ></RequestedLeaveItem>
+                  );
+                })}
+              </Paper>
+            </Grid>
+          )}
+          {/* Last 5 Request */}
+          <Grid item xs={12} lg={isAdmin ? 6 : 12}>
+          <Paper className={classes.listCard}>
+                <Box
+                  paddingY={1}
+                  paddingX={2}
+                  style={{ borderBottom: "solid 1px #ddd" }}
+                >
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    >
+                      <Box fontWeight={500} fontSize="large">
+                        {MY_LEAVE_REQUEST}
+                      </Box>
+                      <Button href="#text-buttons" size="small">All</Button>
+                  </Box>
+                </Box>
+              {leaves.map((leave, index) => {
                 return (
-                  <RequestedLeaveItem
+                  <LeaveSummaryItem
                     key={index}
-                    userName={data.userName}
-                    leaveTypeContent={leaveBadges[data.leaveType].badgeContent}
-                    leaveTypeColor={leaveBadges[data.leaveType].color}
-                    statusTypeContent={statusBadges[data.status].badgeContent}
-                    statusTypeColor={statusBadges[data.status].color}
-                    startDate={data.startDate}
-                    endDate={data.endDate}
-                    duration={data.duration}
-                    description={data.description}
-                  ></RequestedLeaveItem>
+                    leaveType={leave.leaveType}
+                    leaveCount={leave.leaveCount}
+                  ></LeaveSummaryItem>
                 );
               })}
-            </Card>
+            </Paper>
           </Grid>
-        )}
-        {/* Last 5 Request */}
-        <Grid item xs={12} md={12} lg={isAdmin ? 6:12}>
-          <Card className={classes.listCard}>
-            {MY_LEAVE_REQUEST}
-            {leaves.map((leave, index) => {
-              return (
-                <LeaveSummaryItem
-                  key={index}
-                  leaveType={leave.leaveType}
-                  leaveCount={leave.leaveCount}
-                ></LeaveSummaryItem>
-              );
-            })}
-          </Card>
         </Grid>
-      </Grid>
       </Box>
-      </Container>
+    </Container>
   );
 };
 export default Dashboard;
