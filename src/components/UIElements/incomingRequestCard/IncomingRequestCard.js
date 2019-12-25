@@ -1,4 +1,4 @@
-import React,{useContext} from 'react';
+import React,{useContext, useState, useEffect} from 'react';
 import { Paper, Avatar, Grid, Typography} from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import CustomBadge from '../customBadge/CustomBadge';
@@ -8,7 +8,9 @@ import 'moment/locale/tr';
 import MoreDialog from '../moreDialog';
 import { FirebaseContext } from "../../firebase";
 import { render } from '@testing-library/react';
+import { Redirect, useHistory } from 'react-router-dom';
 moment().locale('tr')
+
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
@@ -103,9 +105,13 @@ const useStyles = makeStyles(theme => ({
 
 export const IncomingRequestCard = (props) =>{
     const classes = useStyles();
+    let history = useHistory();
     const firebaseContext = useContext(FirebaseContext);
-    const detailHandler = (e) => {
-        console.log(e.target.value);
+    const detailHandler = (document) => {
+        history.push({
+            pathname: '/request-detail',
+            search: '?formId='+ document,
+        })
     }
     return (
         <Paper className={classes.paper}>

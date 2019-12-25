@@ -1,13 +1,16 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
-
 import NativeSelect from '@material-ui/core/NativeSelect';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+const queryString = require('query-string');
+
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -27,6 +30,7 @@ const useStyles = makeStyles(theme => ({
   }));
 
 export default function LeaveRequestForm(props) {
+    const location = useLocation();
     // Styles
     const classes = useStyles();
     // Refs
@@ -46,10 +50,10 @@ export default function LeaveRequestForm(props) {
     const [checked, setChecked] = React.useState(true);
     const [open, setOpen] = React.useState(false);
     
-    // // Lifecycle Methods
-    // useEffect(() => {
-    //     setLabelWidth(inputLabel.current.offsetWidth);
-    //   }, []);
+    // Lifecycle Methods
+    useEffect(() => {
+        console.log(queryString.parse(location.search))
+      }, []);
       
     // Handle Methods
     const handleChange = name => event => {
