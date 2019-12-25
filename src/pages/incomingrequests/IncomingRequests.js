@@ -126,8 +126,8 @@ export default function IncomingRequests(props) {
     }
     useEffect(() => {
         getAllLeaveRequests()
-        // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
-        // filterData(dataList, filterBoxState)
+        sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+        filterData(dataList, filterBoxState)
     }, [selectedFilterType, isDescending, filterBoxState])
     
     return (

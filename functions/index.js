@@ -44,7 +44,6 @@ exports.sendEmail = functions.firestore.document('teams/{leadUser}')
 });
 
 exports.getMyRequests = functions.https.onCall( async (req, res) => { // isCancelled + recruitmentDate + authUser 
-    const userID = req.query.user;
     let leaveRequestArray = [];
 
     await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
