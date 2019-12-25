@@ -169,7 +169,7 @@ export default function MyRequests(props) {
                 </Grid>
                 </Box>
                 {dataList ? dataList.map((data, index) => {
-                    // var statusType = statusBadges.find(type => type.id == data.status)
+                    // var statusType = statusBadges.find(ty pe => type.id == data.status)
                     // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
                     return (
                         <MyRequestsCard
