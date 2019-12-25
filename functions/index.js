@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 
-exports.createUser = functions.auth.user().onCreate(async (userRecord, context) => {
+exports.onCreateUser = functions.auth.user().onCreate(async (userRecord, context) => {
     displayName = userRecord.displayName.split(' ')
     userDoc = {
         email : userRecord.email,
@@ -27,7 +27,7 @@ exports.createUser = functions.auth.user().onCreate(async (userRecord, context) 
     });
 });
 
-exports.sendEmail = functions.firestore.document('teams/{leadUser}')
+exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
     .onUpdate( async (change, context) => {
         console.log(change);
         
