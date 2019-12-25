@@ -38,11 +38,11 @@ export default function DateFull(props) {
       wrap="nowrap"
     >
       <Box mr={1}>
-        <Typography className={classes.dateText}>{moment(props.startDate).format('lll')}</Typography>
+        <Typography className={classes.dateText}>{moment(new Date(props.startDate._seconds*1000)).format('lll')}</Typography>
       </Box>
       <ArrowForwardIosIcon className={classes.center} size="medium" />
       <Box ml={1}>
-        <Typography className={classes.dateText}>{moment(props.endDate).format('lll')}</Typography>
+        <Typography className={classes.dateText}>{moment(new Date(props.endDate._seconds * 1000)).format('lll')}</Typography>
       </Box>
     </Grid>
   );
