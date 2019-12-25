@@ -78,7 +78,6 @@ export default function LeaveRequestForm(props) {
     const handleDateTimeLocalStart = date => {
         setDateTimeLocalStart(date.target.value);
         console.log('LOCALTIMESTART', dateTimeLocalStart)
-        
     }
 
     const handleDateTimeLocalEnd = date => {
@@ -113,10 +112,16 @@ export default function LeaveRequestForm(props) {
         const {leaveType, description, protocolNumber}  = state;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
-        const startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
-        const endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
-        // const startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedStartDate._d);
-        // const endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedEndDate._d);
+        let startDate = moment()._d;
+        let endDate = moment()._d;
+        if ((screenSize() > 768)) {
+            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
+            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
+        }
+        else {
+            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
+            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+        }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
@@ -141,10 +146,19 @@ export default function LeaveRequestForm(props) {
         }
     }
 
+    let screenSize = () => {
+       return window.innerWidth;
+    }
+
+    const addResizeEvent = async () => {
+        await window.addEventListener('resize', screenSize);
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
+        addResizeEvent();
     }, []);
       
     
@@ -161,6 +175,7 @@ export default function LeaveRequestForm(props) {
     return (           
         <Container maxWidth="lg">
             <Box marginY={4}>
+                { console.log(screenSize() > 768 ? console.log('768 den büyük') : console.log('768 den küçük'))}
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
@@ -264,8 +279,8 @@ export default function LeaveRequestForm(props) {
                             </Grid>
                         </MuiPickersUtilsProvider>
                     </Box>
-                    <TextField name='b' className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
-                    onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
+                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
+                    onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                     onChange={handleChange('description')} value={state.description} />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" 
