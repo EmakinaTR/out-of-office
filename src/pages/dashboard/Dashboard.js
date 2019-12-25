@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useContext} from "react";
 import InfoCard from "../../components/UIElements/InfoCard/InfoCard";
 import {
   Container,
@@ -17,7 +17,8 @@ import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
 import IncomingRequestCard from "../../components/UIElements/incomingRequestCard";
 import { incomingRequestData } from "../../constants/dummyData";
 import RequestedLeaveItem from "../../components/UIElements/RequestedLeaveItem/RequestedLeaveItem";
-
+import { FirebaseContext } from "../../components/firebase";
+import app from "firebase";
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
@@ -25,6 +26,8 @@ const REMAINING_CASUAL_LEAVE_REQUEST = "Kalan Mazeret İzni";
 const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
 const MY_LEAVE_REQUEST = "My Leaves";
 const REQUESTED_LEAVES = "Incoming Requests";
+
+
 
 // CUSTOM STATIC DATA
 const leaves = [
@@ -78,6 +81,16 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = React.useState(true);
   const classes = useStyles();
   const incomingRequests = incomingRequestData.slice(0, 5);
+
+  const firebaseContext = useContext(FirebaseContext);
+  var getTeamLeavesByUserID = app.functions().httpsCallable('getTeamLeavesByUserID');
+  getTeamLeavesByUserID({user: "Cnwr7gKFgaemJni6yZFvb6Uf0cm2"}).then(function(result) {
+    console.log("Firebase fun ref: ", result);
+  }).catch(error => {
+    console.log("Cloud Func Error: ", error);
+  });
+  
+
   return (
     <Container maxWidth="xl">
       <Box marginY={4}>

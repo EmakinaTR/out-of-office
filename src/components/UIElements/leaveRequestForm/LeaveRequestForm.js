@@ -40,12 +40,14 @@ export default function LeaveRequestForm(props) {
         protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
-    const [selectedStartDate, setSelectedStartDate] = useState(moment());
-    const [selectedEndDate, setSelectedEndDate] = useState(moment());
-    const [duration, setDuration] = useState('');
+    const [selectedStartDate, setSelectedStartDate] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'));
+    const [selectedEndDate, setSelectedEndDate] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'));
+    const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
+    const [dateTimeLocalStart, setDateTimeLocalStart] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'))
+    const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'))
     
     // Handle Methods
     const handleChange = name => event => {
@@ -56,24 +58,33 @@ export default function LeaveRequestForm(props) {
         console.log(event.target.value);
     };
 
+    // Desktop DateTimePickers
     const handleStartDateChange = date => {
-        // console.log(date.format("MMMM Do, YYYY [at] h:mm:ss a [UTC+3]"));
         setSelectedStartDate(date);
-        console.log('START DATE: -> ', date);
     }
 
     const handleEndDateChange = date => {
         setSelectedEndDate(date);
-        console.log('END DATE: -> ', date);
     }
 
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
         // I used parseInt to prevent duration to be stringified in firebase
-        let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
+        // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
+        const duration = await moment(selectedEndDate).diff(selectedStartDate, 'days')
         setDuration(duration);
-        console.log('Duration -> ', duration);
     }
 
+    // Mobile DateTimePickers
+    const handleDateTimeLocalStart = date => {
+        setDateTimeLocalStart(date.target.value);
+        console.log('LOCALTIMESTART', dateTimeLocalStart)
+    }
+
+    const handleDateTimeLocalEnd = date => {
+        setDateTimeLocalEnd(date.target.value);
+        console.log("LOCALTIMEEND", dateTimeLocalEnd);
+    }
+    
 
     const handleCheck = event => {
         setChecked(event.target.checked);
@@ -91,26 +102,31 @@ export default function LeaveRequestForm(props) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        console.log('submit')
         const uid = props.auth().uid;
-        const processedBy = " ";
-        const createdBy = props.firebase.convertUidToFirebaseRef(uid);
+        const processedBy = "";
+        const createdBy = uid;
         const requesterName = props.auth().displayName;
-        const isCancelled = false;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
         const {leaveType, description, protocolNumber}  = state;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
-        const startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedStartDate._d);
-        const endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(selectedEndDate._d);
+        let startDate = moment()._d;
+        let endDate = moment()._d;
+        if ((screenSize() > 768)) {
+            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
+            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
+            
+        }
+        else {
+            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
+            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+        }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
+            description, protocolNumber, isPrivacyPolicyApproved, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj);
-        
     }
 
     //Firebase
@@ -130,10 +146,19 @@ export default function LeaveRequestForm(props) {
         }
     }
 
+    let screenSize = () => {
+       return window.innerWidth;
+    }
+
+    const addResizeEvent = async () => {
+        await window.addEventListener('resize', screenSize);
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
+        addResizeEvent();
     }, []);
       
     
@@ -150,6 +175,7 @@ export default function LeaveRequestForm(props) {
     return (           
         <Container maxWidth="lg">
             <Box marginY={4}>
+                { console.log(screenSize() > 768 ? console.log('768 den büyük') : console.log('768 den küçük'))}
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
@@ -174,18 +200,18 @@ export default function LeaveRequestForm(props) {
                         label="Start Date and Time"
                         type="datetime-local"
                         className={classes.inputWidth}
-                        value={selectedStartDate}
-                        onChange={handleStartDateChange}
+                        defaultValue={dateTimeLocalStart}
+                        onChange={handleDateTimeLocalStart}
                         InputLabelProps={{
                         shrink: true,
                         }}
                         />
                         <TextField
                         margin="normal"
-                        id="datetime-local"
-                        label="Next appointment"
+                        label="End Date and Time"
                         type="datetime-local"
-                        defaultValue="2017-05-24T10:30"
+                        defaultValue={dateTimeLocalEnd}
+                        onChange={handleDateTimeLocalEnd}
                         className={classes.inputWidth}
                         InputLabelProps={{
                         shrink: true,
@@ -254,7 +280,7 @@ export default function LeaveRequestForm(props) {
                         </MuiPickersUtilsProvider>
                     </Box>
                     <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
-                    onChange={handleDuration(selectedEndDate, selectedStartDate)} value={duration}/>
+                    onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                     onChange={handleChange('description')} value={state.description} />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
@@ -263,12 +289,10 @@ export default function LeaveRequestForm(props) {
                     
                         <Typography variant="caption" component="div">Approver</Typography>
 
-                           {approvers.map((item) => {
-                                return  <Box component="span">
+                           {approvers.map((item, index) => {
+                                return  <Box key={index} component="span">
                                             <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
                                         </Box>; 
-                                        
-                                        
                             })}
                                                  
                     </Box>
@@ -288,12 +312,7 @@ export default function LeaveRequestForm(props) {
                                 <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
                                 <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
                                     </Grid> 
-                                 </Grid> 
-                            
-                                
-                              
-                                
-                                
+                                 </Grid>                            
                                 <Dialog
                                 fullScreen={fullScreen}
                                 open={open}

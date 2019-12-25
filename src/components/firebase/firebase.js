@@ -75,7 +75,6 @@ export default class Firebase {
               providerData: authUser.providerData,
               ...dbUser
             };
-
             next(authUser);
           });
       } else {
@@ -86,10 +85,36 @@ export default class Firebase {
   getAllLeaveTypes = () => {
     return this.db.collection("leaveType").get();
   };
-  getLeaveRequestsWaitingToApprove = () => {
+  getSpecificLeaveType = (docReference) => {
+    return this.db.doc(docReference).get();
+  };
+
+  getReferenceDocument (docRef){
+    return this.db.doc(docRef);
+  }
+  getAllLeaveRequests = () => {
     return this.db.collection("leaveRequests").get();
   };
 
+  getIncomingRequests = (user) => {
+    return new Promise((resolve,reject) => {
+      const getTeamLeaves = app.functions().httpsCallable('getTeamLeaves');
+      getTeamLeaves({user:user}).then(result => {
+        resolve(result.data);
+        console.log(result)
+      }).catch(error => {
+        reject(error);
+      })
+    });   
+  }
+
+  getLeaveRequestsWaitingToApprove = () => {
+    return this.db.collection("leaveRequests").where("status", "==" ,"0").get();
+  };
+
+  setLeaveStatus = (documentID, newStatus) => {
+    return this.db.collection("leaveRequests").doc(documentID).update({'status': newStatus});
+  }
   sendNewLeaveRequest = leaveRequestObj => {
     this.db.collection("leaveRequests").add(leaveRequestObj);
   };

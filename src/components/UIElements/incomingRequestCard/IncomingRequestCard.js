@@ -1,13 +1,14 @@
-import React from 'react';
-import { Paper, Avatar, Grid, Typography,Fab, Hidden } from '@material-ui/core'
+import React,{useContext} from 'react';
+import { Paper, Avatar, Grid, Typography} from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import CustomBadge from '../customBadge/CustomBadge';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
 import moment from 'moment';
 import 'moment/locale/tr';
+import MoreDialog from '../moreDialog';
+import { FirebaseContext } from "../../firebase";
+import { render } from '@testing-library/react';
 moment().locale('tr')
-
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
@@ -99,21 +100,20 @@ const useStyles = makeStyles(theme => ({
     },
   
 }));
-const getduration = (endDate,startDate) =>{
-    let oneDay = 1000 * 60 * 60 * 24;
-    let duration = (new Date(endDate) - new Date(startDate))/oneDay;
-    return Math.round(duration);
-}
+
 export const IncomingRequestCard = (props) =>{
     const classes = useStyles();
-
+    const firebaseContext = useContext(FirebaseContext);
+    const detailHandler = (e) => {
+        console.log(e.target.value);
+    }
     return (
         <Paper className={classes.paper}>
             <Grid container>
                 <Grid item xs={12} md={2} className={classes.leftContent} >
                     <Grid container className={classes.userInfoInner}>
                         <Grid item className={classes.userInfo}>
-                            <Avatar className={classes.avatarImage}>{props.userName.charAt(0)}</Avatar>
+                            <Avatar className={classes.avatarImage}>{props.userName?.charAt(0)}</Avatar>
                             <Typography className={classes.userName}>{props.userName}</Typography>
                         </Grid>
                     </Grid>
@@ -133,7 +133,7 @@ export const IncomingRequestCard = (props) =>{
                             <CustomBadge badgecolor={props.statusTypeColor}> {props.statusTypeContent}</CustomBadge>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={3} sm={4} md={2} md={2}>
-                            <CustomBadge badgecolor="tomato" >{getduration(props.endDate,props.startDate) +" day"}</CustomBadge>
+                            <CustomBadge badgecolor="tomato">{props.duration +" day"}</CustomBadge>
                         </Grid>
                         <Grid item align className={classes.badgeContainer} xs={4} sm={4} md={2}>
                             <CustomBadge badgecolor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>
@@ -144,9 +144,10 @@ export const IncomingRequestCard = (props) =>{
                     </Grid>
                     </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
-                    <Fab className={classes.moreButton} size="small" >
-                        <MoreVertIcon></MoreVertIcon>
-                    </Fab>
+                   <MoreDialog 
+                   changeFormStatusHandler={props.changeFormStatusHandler} 
+                   detailHandler={detailHandler}
+                   document={props.documentID}></MoreDialog>
                 </Grid>
             </Grid>
             

@@ -9,28 +9,17 @@ import OrderByFilter from '../../components/UIElements/orderByFilter';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import { FirebaseContext } from "../../components/firebase";
+import  AuthContext from "../../components/session";
+import LaunchScreen from '../../components/UIElements/launchScreen'
 
 
 
 const useStyles = makeStyles(theme => ({
     contentContainer: {
-        // padding:0
+        padding: "0",
     },
     headerContainer: {
-        //margin: theme.spacing(2)
-    },
-    listControls: {
-        '& :first-child': {
-            flexGrow: 1,
-            [theme.breakpoints.up('lg')]: {
-                flexGrow: 0
-            },
-         },
-        justifyContent: "flex-start",
-        [theme.breakpoints.up('lg')]: {
-            justifyContent: "flex-end",
-        },
-        
+        margin: theme.spacing(2)
     }
 }));
  
@@ -56,17 +45,18 @@ const orderByFilterOptions = {
 
 export default function IncomingRequests(props) {
     const classes = useStyles();
-    const [dataList, setDataList] = useState(incomingRequestData);
+    const [dataList, setDataList] = useState();
     const [searchQuery, setsearchQuery] = useState('');
     const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
     const [filterBoxState, setFilterBoxState] =useState();
     const firebaseContext = useContext(FirebaseContext);
+    const Auth = useContext(AuthContext);
 
     const onSearchQueryChange = (value) => {
         let filteredDataList = incomingRequestData;
         filteredDataList = filteredDataList.filter((data) => {
-            return data.userName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
+            return data.requesterName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
         })
         setDataList(filteredDataList);
     }
@@ -80,21 +70,24 @@ export default function IncomingRequests(props) {
     const onSelectedFilterTypeChanged = (e) => {
         setSelectedFilterType(e.target.value);
     }
-    
-    // let getAllLeaveTypes = async () => {
-    //     let firebasePromise = firebaseContext.getLeaveRequestsWaitingToApprove();
-    //     // console.log(firebaseContext)
-    //     let leaveRequestArray = [];
-    //     if (firebasePromise !== null) {
-    //         await firebasePromise.then(snapshot => {
-    //             for (let doc of snapshot.docs) {
-    //                 leaveRequestArray.push(doc.data())
-    //             }
-    //             // setDataList(leaveRequestArray);
-    //         });
-    //     }
-    //     console.log(leaveRequestArray)
-    // }
+    const changeFormStatusHandler = async (documentID,type) => {
+        await firebaseContext.setLeaveStatus(documentID, type)
+            .then(
+            setDataList(dataList.filter(function (obj) {
+                return obj.id !== documentID;
+            }))
+            )
+            .catch(err => console.log(err));
+    }
+    let getAllLeaveRequests = async () => {
+        let leaveRequestPromise = firebaseContext.getAllLeaveRequests();
+        let leaveRequestArray = [];
+        await firebaseContext.getIncomingRequests(window.currentUser.uid)
+         .then( result => {
+             console.log(result);
+             setDataList([...result]);
+         });
+    }
 
     const filterData = (data, filterBoxState) => {
         if (filterBoxState != undefined && filterBoxState.length != 0) {
@@ -116,7 +109,6 @@ export default function IncomingRequests(props) {
                     console.log("end")
                     return item.endDate <= filterBoxState.endDate;
                 });
-                console.log(data)
             }
         }
         setDataList([...data]);
@@ -133,68 +125,66 @@ export default function IncomingRequests(props) {
         setDataList([...data]);
     }
     useEffect(() => {
-        // getAllLeaveTypes()
-        sortDataByTypeAscDesc(isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
-        filterData(incomingRequestData, filterBoxState)
+        getAllLeaveRequests()
+        // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+        // filterData(dataList, filterBoxState)
     }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
-        <Container maxWidth="xl">
-            <Box marginY={3}>
-            <Box marginBottom={2}>
-                <Grid container className={classes.headerContainer} alignItems="center">
+        <Container className={classes.contentContainer}  >
+            <Box >
+                <Grid container className={classes.headerContainer}>
                     <Grid item xs={12} lg={4}>
-                    <Typography variant="h5" component="h2">Incoming Requests</Typography>
+                        <Typography variant="h4" >Incoming Requests</Typography>
                     </Grid>
-                    <Grid item xs={12} lg={8}>
-                    
-                    <Grid container alignItems="center" spacing={2} className={classes.listControls} wrap="nowrap">
-                        <Grid item>
+                    <Grid item xs={12} md={6} lg={3} >
                         <SearchFilter 
                             onChange={onSearchQueryChange}
-                          />
-                        </Grid>
-                        <Grid item>
-                            <OrderByFilter
-                                options={orderByFilterOptions}
-                                onFilterDirectionChanged={onFilterDirectionChanged}
-                                currentDirection={isDescending}
-                                selectedFilterType={selectedFilterType}
-                                onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
-                                >
-                                
-                            </OrderByFilter>
-                        </Grid>
-                        <Grid item>
-                                <FilterBox
-                                onFilterBoxClick={onFilterBoxClick}
-                                filterBoxState={filterBoxState}
-                                >
-                                </FilterBox>
-                        </Grid>
+                          >
+                        </SearchFilter>
+                    </Grid>
+                    <Grid item xs={9} md={4} lg={3}>
+                        <OrderByFilter
+                            options={orderByFilterOptions}
+                            onFilterDirectionChanged={onFilterDirectionChanged}
+                            currentDirection={isDescending}
+                            selectedFilterType={selectedFilterType}
+                            onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
+                            >
+                            
+                        </OrderByFilter>
+                    </Grid>
+                    <Grid item xs={3} md={2} lg={2}>
+                            <FilterBox
+                            onFilterBoxClick={onFilterBoxClick}
+                            filterBoxState={filterBoxState}
+                            >
+                            </FilterBox>
                     </Grid>
                 </Grid>
-                </Grid>
-                </Box>
-                {dataList.map((data, index) => {
+                {dataList ? dataList.map((data, index) => {
                     if(data.status == 0)
                     return (
                         // <p>{data}</p>
                         <IncomingRequestCard
                             key={index}
-                            userName={data.userName}
-                            leaveTypeContent={leaveBadges[parseInt(data.leaveType)].badgeContent}
-                            leaveTypeColor={leaveBadges[parseInt(data.leaveType)].color}
+                            userName={data.requesterName}
+                            leaveTypeContent={data.leaveType?.name}
+                            leaveTypeColor={data.leaveType?.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data.startDate}
-                            endDate={data.endDate}
+                            startDate={data.startDate?.seconds}
+                            endDate={data.endDate.seconds}
                             duration={data.duration}
                             description={data.description}
+                            documentID = {data.id}
+                            changeFormStatusHandler={changeFormStatusHandler}
                         ></IncomingRequestCard>
                     )
-                })}
-                </Box>
+                }) 
+            :
+            <LaunchScreen></LaunchScreen>}
+            </Box>
         </Container>
     )
 }
