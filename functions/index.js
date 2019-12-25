@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 
-exports.onCreateUser = functions.auth.user().onCreate(async (userRecord, context) => {
+exports.createUser = functions.auth.user().onCreate(async (userRecord, context) => {
     displayName = userRecord.displayName.split(' ')
     userDoc = {
         email : userRecord.email,
@@ -27,7 +27,7 @@ exports.onCreateUser = functions.auth.user().onCreate(async (userRecord, context
     });
 });
 
-exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
+exports.sendEmail = functions.firestore.document('teams/{leadUser}')
     .onUpdate( async (change, context) => {
         console.log(change);
         
@@ -56,6 +56,8 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => { // isC
             querySnapshot.docs.map(doc => {
                 const docObject = doc.data();
                 docObject.id = doc.id;
+                docObject.startDate = doc.data().startDate._seconds
+                docObject.endDate = doc.data().endDate._seconds
                 leaveRequestArray.push(docObject);
             })
         }).catch(err => console.log(err));
@@ -94,6 +96,8 @@ exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // is
                     querySnapshot.docs.map(doc => {
                         const docObject = doc.data();
                         docObject.id = doc.id;
+                        docObject.startDate = doc.data().startDate._seconds
+                        docObject.endDate = doc.data().endDate._seconds
                         leaveRequestArray.push(docObject);                      
                     })
                 }).catch(err=>console.log(err));
