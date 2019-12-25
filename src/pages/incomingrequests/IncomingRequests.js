@@ -9,6 +9,7 @@ import OrderByFilter from '../../components/UIElements/orderByFilter';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import { FirebaseContext } from "../../components/firebase";
+import  AuthContext from "../../components/session";
 import LaunchScreen from '../../components/UIElements/launchScreen'
 
 
@@ -50,6 +51,7 @@ export default function IncomingRequests(props) {
     const [selectedFilterType, setSelectedFilterType] = useState(0);
     const [filterBoxState, setFilterBoxState] =useState();
     const firebaseContext = useContext(FirebaseContext);
+    const Auth = useContext(AuthContext);
 
     const onSearchQueryChange = (value) => {
         let filteredDataList = incomingRequestData;
@@ -69,38 +71,22 @@ export default function IncomingRequests(props) {
         setSelectedFilterType(e.target.value);
     }
     const changeFormStatusHandler = async (documentID,type) => {
-        console.log(documentID,type)
-        let newArray
         await firebaseContext.setLeaveStatus(documentID, type)
             .then(
             setDataList(dataList.filter(function (obj) {
-                console.log(obj.id)
-                return obj.documentID !== documentID;
+                return obj.id !== documentID;
             }))
             )
             .catch(err => console.log(err));
     }
-    
     let getAllLeaveRequests = async () => {
         let leaveRequestPromise = firebaseContext.getAllLeaveRequests();
         let leaveRequestArray = [];
-        if (leaveRequestPromise !== null) {
-            await leaveRequestPromise.then(snapshot => {
-                snapshot.docs.map((doc,index) => {
-                    leaveRequestArray.push(doc.data())
-                    leaveRequestArray[index].documentID = doc.id;
-                })
-            });
-        }
-        await Promise.all(leaveRequestArray.map(async(item)=>{
-            const leaveTypeReference = item.leaveTypeRef;
-            await firebaseContext.getReferenceDocument(leaveTypeReference.path).get().then(documentSnapshot =>  {
-                item.leaveType = documentSnapshot.data();
-            });
-
-        }))
-      
-         setDataList([...leaveRequestArray])
+        await firebaseContext.getIncomingRequests(window.currentUser.uid)
+         .then( result => {
+             console.log(result);
+             setDataList([...result]);
+         });
     }
 
     const filterData = (data, filterBoxState) => {
@@ -191,7 +177,7 @@ export default function IncomingRequests(props) {
                             endDate={data.endDate.seconds}
                             duration={data.duration}
                             description={data.description}
-                            documentID = {data.documentID}
+                            documentID = {data.id}
                             changeFormStatusHandler={changeFormStatusHandler}
                         ></IncomingRequestCard>
                     )
