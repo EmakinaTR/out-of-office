@@ -63,7 +63,6 @@ export default function IncomingRequests(props) {
     const onFilterDirectionChanged = (e) => {
         setIsDescending(isDescending => !isDescending)
     }
-    
     const onFilterBoxClick =(filterBoxState)=>{
         setFilterBoxState({ ...filterBoxState });
     }
@@ -80,9 +79,8 @@ export default function IncomingRequests(props) {
             .catch(err => console.log(err));
     }
     let getAllLeaveRequests = async () => {
-        let leaveRequestPromise = firebaseContext.getAllLeaveRequests();
         let leaveRequestArray = [];
-        await firebaseContext.getIncomingRequests(window.currentUser.uid)
+        await firebaseContext.getIncomingRequests()
          .then( result => {
              console.log(result);
              setDataList([...result]);
