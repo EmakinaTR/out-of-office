@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 
-exports.createUser = functions.auth.user().onCreate(async (userRecord, context) => {
+exports.onCreateUser = functions.auth.user().onCreate(async (userRecord, context) => {
     displayName = userRecord.displayName.split(' ')
     userDoc = {
         email : userRecord.email,
@@ -27,7 +27,7 @@ exports.createUser = functions.auth.user().onCreate(async (userRecord, context) 
     });
 });
 
-exports.sendEmail = functions.firestore.document('teams/{leadUser}')
+exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
     .onUpdate( async (change, context) => {
         console.log(change);
         
@@ -54,9 +54,22 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => {
         then(querySnapshot => {
             console.log("izin snapshot", querySnapshot);
             querySnapshot.docs.map(doc => {
-                const docObject = doc.data();
-                docObject.id = doc.id;
-                leaveRequestArray.push(docObject);
+                leaveRequest = {
+                    requestedDate: doc.requestedDate,
+                    processedBy: doc.processedBy,
+                    createdBy: doc.createdBy,
+                    requesterName: doc.requesterName,
+                    leaveTypeRef: doc.leaveTypeRef,
+                    startDate: doc.startDate.toDate(),
+                    endDate: doc.endDate.toDate(),
+                    duration: doc.duration,
+                    description: doc.description,
+                    protocolNumber: doc.protocolNumber,
+                    isPrivacyPolicyApproved: doc.isPrivacyPolicyApproved,
+                    status: doc.status,
+                    documentID: doc.id
+                }
+                leaveRequestArray.push(leaveRequest);
             })
         }).catch(err => console.log(err));
 
@@ -71,44 +84,57 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => {
 
 
 
-exports.getTeamLeaves = functions.https.onCall( async (data, context) => { 
+exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
     let teamMemmbers = [];
     let leaveRequestArray = [];
-    
+
     await admin.firestore().collection('teams').where('leadUser', "==", context.auth.uid).get()
         .then(snapshot => {
-           if(!snapshot.empty){ // If he/she is, get members of the team
-               teamMemmbers = snapshot.docs[0].data().members;
-           } else {
-               return ("No data to display")
-           }
-          
+            if (!snapshot.empty) { // If he/she is, get members of the team
+                teamMemmbers = snapshot.docs[0].data().members;
+            } else {
+                return ("No data to display")
+            }
+
         }).catch(err => console.log(err))
-        if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
-            await Promise.all(teamMemmbers.map(async (member) => {
-                console.log("member " +member)
-                await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
-                then(querySnapshot  => {
-                    console.log("izin snapshot", querySnapshot );
+    if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
+        await Promise.all(teamMemmbers.map(async (member) => {
+            console.log("member " + member)
+            await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
+                then(querySnapshot => {
+                    console.log("izin snapshot", querySnapshot);
                     querySnapshot.docs.map(doc => {
-                        const docObject = doc.data();
-                        docObject.id = doc.id;
-                        leaveRequestArray.push(docObject);                      
+                        leaveRequest = {
+                            requestedDate: doc.requestedDate,
+                            processedBy: doc.processedBy,
+                            createdBy: doc.createdBy,
+                            requesterName: doc.requesterName,
+                            leaveTypeRef: doc.leaveTypeRef,
+                            startDate: doc.startDate.toDate(),
+                            endDate: doc.endDate.toDate(),
+                            duration: doc.duration,
+                            description: doc.description,
+                            protocolNumber: doc.protocolNumber,
+                            isPrivacyPolicyApproved: doc.isPrivacyPolicyApproved,
+                            status: doc.status,
+                            documentID: doc.id
+                        }
+                        leaveRequestArray.push(leaveRequest);
                     })
-                }).catch(err=>console.log(err));
+                }).catch(err => console.log(err));
         }))
-        if(leaveRequestArray.length>0){
-                await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
-                    await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
-                        item.leaveType = documentSnapshot.data();
-                    });
+        if (leaveRequestArray.length > 0) {
+            await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+                await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+                    item.leaveType = documentSnapshot.data();
+                });
             }))
         }
-        
-        } else {
-            return ("Your team has no members")
-        }
-    
+
+    } else {
+        return ("Your team has no members")
+    }
+
     return leaveRequestArray;
 });
 
