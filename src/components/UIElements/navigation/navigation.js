@@ -74,8 +74,8 @@ const Navigation = props => {
     content: {
       flexGrow: 1,
       // padding: theme.spacing(3),
-      backgroundColor: "#e8e8e8",
-      minHeight: "94.8vh"
+      // backgroundColor: "#e8e8e8",
+      // minHeight: "94.8vh"
     },
     toolbar: theme.mixins.toolbar
   }));

@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center'
     },
     formControl: {
-        margin: theme.spacing(1, 0),
+        // margin: theme.spacing(1, 0),
         minWidth: 120,
         width: '100%'
     },
@@ -140,7 +140,8 @@ export default function LeaveRequestEditForm(props) {
             <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>Leave Request Edit</h2>
+                <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Edit</Typography>
+                <Box marginTop={2}>
                     <FormControl variant="outlined" className={classes.formControl}>
                         <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                         <Select
@@ -165,9 +166,8 @@ export default function LeaveRequestEditForm(props) {
                             <option value={'other'}>Other</option>
                         </Select>
                     </FormControl>
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
+                </Box>
+                    
                     <Box display={{xs: 'block', md: 'none'}}>
                         <TextField
                         id="datetime-local"
@@ -194,7 +194,7 @@ export default function LeaveRequestEditForm(props) {
                     </Box>
                     <Box display={{xs: 'none', md: 'block'}}>
                         <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <Grid container spacing={3}>
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
                                     <KeyboardDatePicker
                                     disableToolbar
@@ -224,7 +224,7 @@ export default function LeaveRequestEditForm(props) {
                                     />
                                 </Grid>
                             </Grid>
-                            <Grid container spacing={3}>
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} md={6}>
                                     <KeyboardDatePicker
                                     disableToolbar
@@ -257,39 +257,36 @@ export default function LeaveRequestEditForm(props) {
                         </MuiPickersUtilsProvider>
                     </Box>
                     <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} />
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
+                    
                     <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" />
                     <Box my={3}>
-                    <Grid container>
-                            <Grid item xs={12} md={2}>
-                                <Typography>Approver</Typography>
-                            </Grid>
-                           <Grid item xs={12} md={5}>
-                                <Box component="span" marginRight={1}>
-                                    <Chip avatar={<Avatar>{approvers[0].name.charAt(0)}</Avatar>} label={approvers[0].name} />
-                                </Box>
-                                <Box component="span" marginRight={1}>
-                                    <Chip avatar={<Avatar>{approvers[1].name.charAt(0)}</Avatar>} label={approvers[1].name} />
-                                </Box>
-                           </Grid>
-                           {/* Offset */}
-                           <Grid item md={7} implementation="css" smDown component="hidden" />
-                        </Grid>
+                    <Typography variant="caption" component="div">Approver</Typography>
+                    {approvers.map((item) => {
+                                return  <Box component="span">
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
+                                        </Box>; 
+                                        
+                                        
+                            })}                          
                     </Box>
                     <Box my={2}>
-                        <Grid item xs={12} md={6}>
+                         <Grid container direction="row" alignItems="center">
+                                <Grid item>
                             <Checkbox
+                            id="kvkk"
                             uncontrolled
                             onChange={handleCheck}
                             value="KVKK_valid"
                             color="primary"
                             inputProps={{ 'aria-label': 'primary checkbox' }}
                             />
-                            <Box component="span" marginRight={1}>Agree with Terms and Conditions</Box>
-                            <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                            </Grid> 
+                                <Grid item xs>
+                                <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                    </Grid> 
+                         </Grid>
                             <Dialog
                             fullScreen={fullScreen}
                             open={open}
@@ -312,12 +309,11 @@ export default function LeaveRequestEditForm(props) {
                                     </Button>
                                 </DialogActions>
                             </Dialog>
-                        </Grid>
-                    </Box>
-                    <Grid container spacing={3}>
+                        </Box>
+                    <Grid container spacing={2}>
                         <Box clone order={{xs: 2, md: 1}}>
                             <Grid item xs={12} md={6}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary">CANCEL</Button>
+                                <Button className={classes.inputWidth} variant="contained" size="large">CANCEL</Button>
                             </Grid>
                         </Box>
                         <Box clone order={{xs: 1, md: 2}}>
@@ -326,6 +322,7 @@ export default function LeaveRequestEditForm(props) {
                             </Grid>
                         </Box>
                     </Grid>
+
                 </form>
             </Paper>
             </Box>

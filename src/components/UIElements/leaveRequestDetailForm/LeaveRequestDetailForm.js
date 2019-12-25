@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center'
     },
     formControl: {
-        margin: theme.spacing(1, 0),
+        // margin: theme.spacing(1, 0),
         minWidth: 120,
         width: '100%'
     },
@@ -103,57 +103,63 @@ export default function LeaveRequestForm(props) {
             <Box marginY={4}>
             <Paper className={classes.root}>
                 <form className={classes.form} onSubmit={handleSubmit}>
-                    <h2 style={{textAlign: 'center'}}>Leave Request Detail</h2>
+                <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Detail</Typography>
+                <Box marginTop={2}>
                     <TextField className={classes.inputWidth} label="Leave Type" variant="outlined" margin="normal" value="Excuse Leave" InputProps={{readOnly: true,}} />
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
-                    <Box my={2}>
-                        <Grid container spacing={1}>
-                            <Grid item xs={12} md={6}>
-                                <TextField className={classes.inputWidth} label="Leave Start" margin="normal" value="11.11.2019 - 9:00" InputProps={{readOnly: true,}} />
+                </Box>
+                   
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} lg={4}>
+                                <TextField className={classes.inputWidth} label="Leave Start" variant="outlined" margin="normal" value="11.11.2019 - 9:00" InputProps={{readOnly: true,}} />
                             </Grid>
-                            <Grid item xs={12} md={6}>
-                                <TextField className={classes.inputWidth} label="Leave End" margin="normal" value="12.11.2019 - 9:00" InputProps={{readOnly: true,}} />
+                            <Grid item xs={12} lg={4}>
+                                <TextField className={classes.inputWidth} label="Leave End" variant="outlined" margin="normal" value="12.11.2019 - 9:00" InputProps={{readOnly: true,}} />
+                            </Grid>
+                            <Grid item xs={12} lg={4}>
+                            <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value="2" InputProps={{readOnly: true,}} />
                             </Grid>
                         </Grid>
-                    </Box>
-                    <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value="2" InputProps={{readOnly: true,}} />
-                    <Box my={2}>
-                        <Divider />
-                    </Box>
+                    
+                    
+                    
                     <TextField className={classes.inputWidth}  multiline rows="4" label="Description" variant="outlined" margin="normal" value="İşim vardı" 
                     InputProps={{readOnly: true,}}
                     />
-                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" value="UA234XCWQ" InputProps={{readOnly: true,}} />
-                    <Box my={3}>
-                        <Grid container>
-                            <Grid item xs={12} md={2}>
-                                <Typography>Approver</Typography>
-                            </Grid>
-                           <Grid item xs={12} md={5}>
-                                <Box component="span" marginRight={1}>
-                                    <Chip avatar={<Avatar>{approvers[0].name.charAt(0)}</Avatar>} label={approvers[0].name} />
-                                </Box>
-                                <Box component="span" marginRight={1}>
-                                    <Chip avatar={<Avatar>{approvers[1].name.charAt(0)}</Avatar>} label={approvers[1].name} />
-                                </Box>
-                           </Grid>
-                           {/* Offset */}
-                           <Grid item md={7} implementation="css" smDown component="hidden" />
-                        </Grid>
+                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" variant="outlined" value="UA234XCWQ" InputProps={{readOnly: true,}} />
+                    <Box marginY={1}>
+                    
+                        <Typography variant="caption" component="div">Approver</Typography>
+                        {approvers.map((item) => {
+                                return  <Box component="span">
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
+                                        </Box>; 
+         
+                            })}
                     </Box>
-                    <TextField className={classes.inputWidth} label="Date of Record" margin="normal" value="10.11.2019 - 9:00" InputProps={{readOnly: true,}} />
+                    <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value="10.11.2019 - 9:00" InputProps={{readOnly: true,}} />
                     <Box my={3}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={4}>
                                 <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">EDIT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary" onClick={printLeaveRequest}>PRINT</Button>
+                                <Button className={classes.inputWidth} variant="outlined" size="large" color="primary" onClick={printLeaveRequest}>PRINT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" color="secondary">CANCEL</Button>
+                                <Button className={classes.inputWidth} variant="outlined" size="large">Cancel Request</Button>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                    <Box my={3}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={4}>
+                                <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">Approve</Button>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button className={classes.inputWidth} variant="outlined" size="large" color="primary" onClick={printLeaveRequest}>PRINT</Button>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button className={classes.inputWidth} variant="outlined" size="large">Reject</Button>
                             </Grid>
                         </Grid>
                     </Box>
