@@ -152,6 +152,11 @@ export default function IncomingRequests(props) {
         sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
         filterData(dataList, filterBoxState)
     }, [selectedFilterType, isDescending, filterBoxState])
+
+    // useEffect(() => {
+    //     sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+    //     filterData(dataList, filterBoxState)
+    // }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
         <Container className={classes.contentContainer}  >
