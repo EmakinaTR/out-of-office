@@ -135,6 +135,7 @@ const Dashboard = () => {
                     <Button href="#text-buttons" size="small">All</Button>
                   </Box>
                 </Box>
+                <Box margin={2}>
                 {incomingRequests.map((data, index) => {
                   return (
                     <RequestedLeaveItem
@@ -153,6 +154,7 @@ const Dashboard = () => {
                     ></RequestedLeaveItem>
                   );
                 })}
+                </Box>
               </Paper>
             </Grid>
           )}
@@ -176,6 +178,7 @@ const Dashboard = () => {
                       <Button href="#text-buttons" size="small">All</Button>
                   </Box>
                 </Box>
+                <Box margin={2}>
               {leaves.map((leave, index) => {
                 return (
                   <LeaveSummaryItem
@@ -185,6 +188,7 @@ const Dashboard = () => {
                   ></LeaveSummaryItem>
                 );
               })}
+              </Box>
             </Paper>
           </Grid>
         </Grid>
