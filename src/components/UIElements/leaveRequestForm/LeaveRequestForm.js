@@ -106,7 +106,6 @@ export default function LeaveRequestForm(props) {
         const processedBy = "";
         const createdBy = uid;
         const requesterName = props.auth().displayName;
-        const isCancelled = false;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
         const {leaveType, description, protocolNumber}  = state;
@@ -117,6 +116,7 @@ export default function LeaveRequestForm(props) {
         if ((screenSize() > 768)) {
             startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
             endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
+            
         }
         else {
             startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
@@ -124,7 +124,7 @@ export default function LeaveRequestForm(props) {
         }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, isCancelled, status }
+            description, protocolNumber, isPrivacyPolicyApproved, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj);
     }
