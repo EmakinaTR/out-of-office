@@ -44,11 +44,11 @@ exports.sendEmail = functions.firestore.document('teams/{leadUser}')
 });
 
 
-exports.getMyRequests = functions.https.onCall(async (data, context) => { // isCancelled + recruitmentDate + authUser 
+exports.getMyRequests = functions.https.onCall(async (data, context) => { 
     const userID = context.auth.uid;
     let leaveRequestArray = [];
 
-    console.log("userId form context "+userID)
+    console.log("userId form context "+ userID)
     
     await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
         then(querySnapshot => {
@@ -60,7 +60,7 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => { // isC
             })
         }).catch(err => console.log(err));
 
-    await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+    await Promise.all(leaveRequestArray.map(async (item) => {
         await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
             item.leaveType = documentSnapshot.data();
         });
@@ -71,19 +71,18 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => { // isC
 
 
 
-exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // isCancelled + recruitmentDate + authUser 
-    const userID = context.auth.uid;
+exports.getTeamLeaves = functions.https.onCall( async (data, context) => { 
     let teamMemmbers = [];
     let leaveRequestArray = [];
     
-    await admin.firestore().collection('teams').where('leadUser', "==", userID).get() // Check if user is team lead
+    await admin.firestore().collection('teams').where('leadUser', "==", context.auth.uid).get()
         .then(snapshot => {
            if(!snapshot.empty){ // If he/she is, get members of the team
                teamMemmbers = snapshot.docs[0].data().members;
+           } else {
+               return ("No data to display")
            }
-           else{
-                res("No data to display")
-           }
+          
         }).catch(err => console.log(err))
         if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
             await Promise.all(teamMemmbers.map(async (member) => {
@@ -106,7 +105,10 @@ exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // is
             }))
         }
         
-    }
+        } else {
+            return ("Your team has no members")
+        }
+    
     return leaveRequestArray;
 });
 
