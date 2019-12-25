@@ -179,8 +179,8 @@ export default function MyRequests(props) {
                             leaveTypeColor={data.leaveType?.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data.startDate.seconds}
-                            endDate={data.endDate.seconds}
+                            startDate={data.startDate}
+                            endDate={data.endDate}
                             duration={data.duration}
                             description={data.description}
                         ></MyRequestsCard>

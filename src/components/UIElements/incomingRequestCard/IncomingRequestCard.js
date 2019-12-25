@@ -129,10 +129,11 @@ export const IncomingRequestCard = (props) =>{
                         <Grid item xs={12} md={6} >
                             <Grid container className={classes.leavePeriod}  >
                                 <DateFull className={classes.dateFull}
-                                    startDate={props.startDate}
-                                    endDate={props.endDate}
+                                    startDate={props?.startDate}
+                                    endDate={props?.endDate}
                                 >
                                 </DateFull>
+
                             </Grid>
                         </Grid>
                         <Grid item className={classes.badgeContainer} xs={5} sm={4} md={2} md={2}>
@@ -141,15 +142,15 @@ export const IncomingRequestCard = (props) =>{
                         <Grid item className={classes.badgeContainer} xs={3} sm={4} md={2} md={2}>
                             <CustomBadge badgecolor="tomato">{props.duration +" day"}</CustomBadge>
                         </Grid>
-                        <Grid item align className={classes.badgeContainer} xs={4} sm={4} md={2}>
+                        <Grid item  className={classes.badgeContainer} xs={4} sm={4} md={2}>
                             <CustomBadge badgecolor={props.leaveTypeColor}>{props.leaveTypeContent}</CustomBadge>
                         </Grid>
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <Typography noWrap className={classes.description}>{props.description}</Typography>
                         </Grid>
                     </Grid>
                     </Grid>
-                <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
+                <Grid item  xs={2} md={1} justifyContent="center" className={classes.rightContent} >
                    <MoreDialog 
                    changeFormStatusHandler={props.changeFormStatusHandler} 
                    detailHandler={detailHandler}
