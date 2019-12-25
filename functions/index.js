@@ -43,30 +43,30 @@ exports.sendEmail = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
 });
 
-exports.getMyRequests = functions.https.onCall( async (req, res) => { // isCancelled + recruitmentDate + authUser 
-    const userID = req.query.user;
+
+exports.getMyRequests = functions.https.onCall(async (data, context) => { // isCancelled + recruitmentDate + authUser 
+    const userID = context.auth.uid;
     let leaveRequestArray = [];
 
-    await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
-        then(querySnapshot  => {
-            querySnapshot.docs.map((doc,index) => {
-                leaveRequestArray.push(doc.data());
-                leaveRequestArray[index].documentID = doc.id;
-            })
-        }).catch(err=>console.log(err));
-
-    await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
-        await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
-            item.leaveType = documentSnapshot.data();
-        });
+    await Promise.all(teamMemmbers.map(async (member) => {
+       
+        await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
+            then(querySnapshot => {
+                console.log("izin snapshot", querySnapshot);
+                querySnapshot.docs.map(doc => {
+                    const docObject = doc.data();
+                    docObject.id = doc.id;
+                    leaveRequestArray.push(docObject);
+                })
+            }).catch(err => console.log(err));
     }))
-    
-    res.send(leaveRequestArray)
+    return leaveRequestArray;
 });
 
+
+
 exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // isCancelled + recruitmentDate + authUser 
-    const userID = data.user;
-    console.log("REQ:: ", data);
+    const userID = context.auth.uid;
     let teamMemmbers = [];
     let leaveRequestArray = [];
     
