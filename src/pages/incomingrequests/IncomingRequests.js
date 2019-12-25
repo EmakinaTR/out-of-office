@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext}from 'react'
+import React,{useState,useEffect,useContext,useMemo}from 'react'
 import { Container, Box, Typography, Grid, Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
@@ -6,7 +6,6 @@ import IncomingRequestCard from '../../components/UIElements/incomingRequestCard
 import { incomingRequestData } from '../../constants/dummyData';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
 import OrderByFilter from '../../components/UIElements/orderByFilter';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import { FirebaseContext } from "../../components/firebase";
 import  AuthContext from "../../components/session";
@@ -50,15 +49,21 @@ export default function IncomingRequests(props) {
     const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
     const [filterBoxState, setFilterBoxState] =useState();
+    const [isProcessing,setIsProcessing] = useState(true);
     const firebaseContext = useContext(FirebaseContext);
     const Auth = useContext(AuthContext);
 
     const onSearchQueryChange = (value) => {
-        let filteredDataList = incomingRequestData;
-        filteredDataList = filteredDataList.filter((data) => {
-            return data.requesterName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
-        })
-        setDataList(filteredDataList);
+        if(!isProcessing){
+            setIsProcessing(true);
+            let filteredDataList = dataList;
+            filteredDataList = filteredDataList.filter((data) => {
+                return data.requesterName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
+            })
+            setDataList(filteredDataList);
+            setIsProcessing(false);
+        }
+       
     }
     const onFilterDirectionChanged = (e) => {
         setIsDescending(isDescending => !isDescending)
@@ -79,59 +84,74 @@ export default function IncomingRequests(props) {
             .catch(err => console.log(err));
     }
     let getAllLeaveRequests = async () => {
+        setIsProcessing(true);
         let leaveRequestArray = [];
         await firebaseContext.getIncomingRequests()
          .then( result => {
-             console.log(result);
-             setDataList([...result]);
+             setDataList([...result])
+             setIsProcessing(false);
          });
     }
 
     const filterData = (data, filterBoxState) => {
-        if (filterBoxState != undefined && filterBoxState.length != 0) {
-            if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
-                data = data.filter((item) => {
-                    console.log("leavetype")
-                    return filterBoxState.leaveType == item.leaveType;
-                })
-            }
-            if (filterBoxState.startDate != undefined ) {
-                data = data.filter((item) => {
-                    console.log("start")
-                    return item.startDate >= filterBoxState.startDate;
-                });
+        if(!isProcessing){
+            if (data != undefined && data.length > 0 && filterBoxState != undefined && filterBoxState.length != 0) {
+                setIsProcessing(true);
+                if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
+                    data = data.filter((item) => {
+                        console.log("leavetype")
+                        return filterBoxState.leaveType == item.leaveType;
+                    })
+                }
+                if (filterBoxState.startDate != undefined) {
+                    data = data.filter((item) => {
+                        console.log("start")
+                        return item.startDate >= filterBoxState.startDate;
+                    });
+
+                }
+                if (filterBoxState.endDate != undefined) {
+                    data = data.filter((item) => {
+                        console.log("end")
+                        return item.endDate <= filterBoxState.endDate;
+                    });
+                }
+                setDataList([...data]);
 
             }
-            if (filterBoxState.endDate != undefined) {
-                data = data.filter((item) => {
-                    console.log("end")
-                    return item.endDate <= filterBoxState.endDate;
+            setIsProcessing(false);
+        }
+       
+    }
+
+    const sortDataByTypeAscDesc = (isDescending,data,filterType) =>{
+        if(!isProcessing){
+            console.log("sort")
+            if (data != undefined && data.length > 0) {
+                setIsProcessing(true);
+                console.log(data);
+                console.log(filterType);
+                data.sort(function (a, b) {
+                    if (isDescending) {
+                        return (b[filterType] > a[filterType]) ? 1 : ((b[filterType] < a[filterType]) ? -1 : 0);
+                    } else {
+                        return (a[filterType] > b[filterType]) ? 1 : ((a[filterType] < b[filterType]) ? -1 : 0);
+                    }
                 });
+                setDataList([...data]);
+                setIsProcessing(false);
             }
         }
-        setDataList([...data]);
-    }
-    const sortDataByTypeAscDesc = (isDescending,data,filterType) =>{
-        
-        data.sort(function (a, b) {
-            if (isDescending) {
-                return (b[filterType] > a[filterType]) ? 1 : ((b[filterType] < a[filterType]) ? -1 : 0);
-            } else {
-                return (a[filterType] > b[filterType]) ? 1 : ((a[filterType] < b[filterType]) ? -1 : 0);
-            }
-        });
-        setDataList([...data]);
     }
     useEffect(() => {
-        getAllLeaveRequests()
-        // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
-        // filterData(dataList, filterBoxState)
-    }, [selectedFilterType, isDescending, filterBoxState])
+        getAllLeaveRequests();
+    }, [])
 
-    // useEffect(() => {
-    //     sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
-    //     filterData(dataList, filterBoxState)
-    // }, [selectedFilterType, isDescending, filterBoxState])
+    useEffect(() => {
+        // getAllLeaveRequests();
+        sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+        filterData(dataList, filterBoxState)
+    }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
         <Container className={classes.contentContainer}  >
@@ -171,15 +191,15 @@ export default function IncomingRequests(props) {
                         // <p>{data}</p>
                         <IncomingRequestCard
                             key={index}
-                            userName={data.requesterName}
-                            leaveTypeContent={data.leaveType?.name}
-                            leaveTypeColor={data.leaveType?.color}
+                            userName={data?.requesterName}
+                            leaveTypeContent={data?.leaveType.name}
+                            leaveTypeColor={data?.leaveType.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data.startDate?.seconds}
-                            endDate={data.endDate.seconds}
-                            duration={data.duration}
-                            description={data.description}
+                            startDate={data?.startDate}
+                            endDate={data?.endDate}
+                            duration={data?.duration}
+                            description={data?.description}
                             documentID = {data.id}
                             changeFormStatusHandler={changeFormStatusHandler}
                         ></IncomingRequestCard>
