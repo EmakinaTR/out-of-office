@@ -85,10 +85,10 @@ exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // is
                 res("No data to display")
            }
         }).catch(err => console.log(err))
-    if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
-        await Promise.all(teamMemmbers.map(async (member) => {
-            console.log("member " +member)
-            await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
+        if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
+            await Promise.all(teamMemmbers.map(async (member) => {
+                console.log("member " +member)
+                await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
                 then(querySnapshot  => {
                     console.log("izin snapshot", querySnapshot );
                     querySnapshot.docs.map(doc => {
@@ -99,10 +99,10 @@ exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // is
                 }).catch(err=>console.log(err));
         }))
         if(leaveRequestArray.length>0){
-            await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
-                await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
-                    item.leaveType = documentSnapshot.data();
-                });
+                await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+                    await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+                        item.leaveType = documentSnapshot.data();
+                    });
             }))
         }
         
