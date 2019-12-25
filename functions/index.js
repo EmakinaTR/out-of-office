@@ -13,6 +13,7 @@ exports.createUser = functions.auth.user().onCreate(async (userRecord, context) 
         createdDate: admin.firestore.Timestamp.fromDate(new Date()),
         isAdmin : false,
         isApprover: false,
+        quitDate : ''
     }
     return admin.firestore().collection('users').doc(userRecord.uid)
         .set(userDoc)
@@ -42,36 +43,23 @@ exports.sendEmail = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
 });
 
-exports.getTeamLeavesByUserID = functions.https.onRequest( async (req, res) => { // isCancelled + recruitmentDate + authUser 
+exports.getMyRequests = functions.https.onCall( async (req, res) => { // isCancelled + recruitmentDate + authUser 
     const userID = req.query.user;
-    let teamMemmbers = [];
     let leaveRequestArray = [];
+
+    await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
+        then(querySnapshot  => {
+            querySnapshot.docs.map((doc,index) => {
+                leaveRequestArray.push(doc.data());
+                leaveRequestArray[index].documentID = doc.id;
+            })
+        }).catch(err=>console.log(err));
+
+    await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+        await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+            item.leaveType = documentSnapshot.data();
+        });
+    }))
     
-    await admin.firestore().collection('teams').where('leadUser', "==", userID).get() // Check if user is team lead
-        .then(snapshot => {
-           if(!snapshot.empty){ // If he/she is, get members of the team
-               teamMemmbers = snapshot.docs[0].data().members;
-           }
-           else{
-                res("No data to display")
-           }
-        }).catch(err => console.log(err))
-    if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
-        await Promise.all(teamMemmbers.map(async (member) => {
-            console.log("member " +member)
-            await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
-                then(querySnapshot  => {
-                    console.log("izin snapshot", querySnapshot );
-                    querySnapshot.docs.map(doc => {
-                        leaveRequestArray.push(doc.data());
-                    })
-                }).catch(err=>console.log(err));
-        }))
-        await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
-            await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
-                item.leaveType = documentSnapshot.data();
-            });
-        }))
-    }
-    res.status(200).send(leaveRequestArray)
+    res.send(leaveRequestArray)
 });

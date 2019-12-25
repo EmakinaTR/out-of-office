@@ -95,7 +95,19 @@ export default class Firebase {
   getAllLeaveRequests = () => {
     return this.db.collection("leaveRequests").get();
   };
-  
+
+  getIncomingRequests = (user) => {
+    return new Promise((resolve,reject) => {
+      const getTeamLeaves = app.functions().httpsCallable('getTeamLeaves');
+      getTeamLeaves({user:user}).then(result => {
+        resolve(result.data);
+        console.log(result)
+      }).catch(error => {
+        reject(error);
+      })
+    });   
+  }
+
   getLeaveRequestsWaitingToApprove = () => {
     return this.db.collection("leaveRequests").where("status", "==" ,"0").get();
   };
