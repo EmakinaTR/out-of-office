@@ -48,18 +48,24 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => { // isC
     const userID = context.auth.uid;
     let leaveRequestArray = [];
 
-    await Promise.all(teamMemmbers.map(async (member) => {
-       
-        await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
-            then(querySnapshot => {
-                console.log("izin snapshot", querySnapshot);
-                querySnapshot.docs.map(doc => {
-                    const docObject = doc.data();
-                    docObject.id = doc.id;
-                    leaveRequestArray.push(docObject);
-                })
-            }).catch(err => console.log(err));
+    console.log("userId form context "+userID)
+    
+    await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
+        then(querySnapshot => {
+            console.log("izin snapshot", querySnapshot);
+            querySnapshot.docs.map(doc => {
+                const docObject = doc.data();
+                docObject.id = doc.id;
+                leaveRequestArray.push(docObject);
+            })
+        }).catch(err => console.log(err));
+
+    await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+        await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+            item.leaveType = documentSnapshot.data();
+        });
     }))
+    
     return leaveRequestArray;
 });
 
@@ -92,11 +98,14 @@ exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // is
                     })
                 }).catch(err=>console.log(err));
         }))
-        await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
-            await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
-                item.leaveType = documentSnapshot.data();
-            });
-        }))
+        if(leaveRequestArray.length>0){
+            await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+                await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+                    item.leaveType = documentSnapshot.data();
+                });
+            }))
+        }
+        
     }
     return leaveRequestArray;
 });
