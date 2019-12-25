@@ -1,6 +1,5 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const firebase = require('firebase');
 admin.initializeApp();
 
 
@@ -103,6 +102,6 @@ exports.getTeamLeaves = functions.https.onCall( async (data, context) => { // is
 });
 
 exports.Test = functions.https.onCall(async (data,context) => {
-    const id = firebase.auth().currentUser.getIdToken();
+    const id = context.auth.uid
     return id;
 })
