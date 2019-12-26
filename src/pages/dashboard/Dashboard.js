@@ -83,8 +83,8 @@ const Dashboard = () => {
   const incomingRequests = incomingRequestData.slice(0, 5);
 
   const firebaseContext = useContext(FirebaseContext);
-  var getTeamLeavesByUserID = app.functions().httpsCallable('getTeamLeavesByUserID');
-  getTeamLeavesByUserID({user: "Cnwr7gKFgaemJni6yZFvb6Uf0cm2"}).then(function(result) {
+  const Test = app.functions().httpsCallable('Test');
+  Test().then(function(result) {
     console.log("Firebase fun ref: ", result);
   }).catch(error => {
     console.log("Cloud Func Error: ", error);
