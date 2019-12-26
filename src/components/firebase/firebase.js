@@ -106,6 +106,16 @@ export default class Firebase {
       })
     });   
   }
+  getLeaveRequestDetail = (documentID) => {
+    return new Promise((resolve,reject) => {
+      const requestDetail = app.functions().httpsCallable('getLeaveRequestDetail');
+      requestDetail({documentID :documentID}).then(result => {
+        resolve(result.data);
+      }).catch(error => {
+        reject(error);
+      })
+    })
+  }
 
   getMyRequests = () => {
     return new Promise((resolve, reject) => {
