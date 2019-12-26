@@ -119,6 +119,10 @@ export default class Firebase {
     this.db.collection("leaveRequests").add(leaveRequestObj);
   };
 
+  getSpecificLeaveRequestWithId = (documentId) => {
+    return this.db.collection("leaveRequests").doc(documentId).get();
+  }
+
   convertMomentObjectToFirebaseTimestamp = (momentObj) => {
      return app.firestore.Timestamp.fromDate(momentObj);
   }
