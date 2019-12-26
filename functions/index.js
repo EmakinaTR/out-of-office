@@ -38,7 +38,12 @@ exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
 });
 
+<<<<<<< HEAD
 exports.getMyRequests = functions.https.onCall( async (req, res) => { // isCancelled + recruitmentDate + authUser 
+=======
+exports.getMyRequests = functions.https.onCall(async (data, context) => { 
+    const userID = context.auth.uid;
+>>>>>>> 4f3c29bd684ea328bce7865b983eeff32751064d
     let leaveRequestArray = [];
     await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
         then(querySnapshot => {
