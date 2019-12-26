@@ -6,22 +6,29 @@ import Navigation from "./components/UIElements/navigation";
 import AuthContext from "./components/session";
 import { FirebaseContext } from "../src/components/firebase";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-function App(props) {
+import { getUserRole } from "./constants/roles";
+let isSignedIn = false;
+function App(props) { 
   const [isLoggedIn, setLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(false);
   const firebaseContext = useContext(FirebaseContext);
   const signIn = () => {
-    firebaseContext.doSignInWithGoogle().then(result => {
+    firebaseContext.doSignInWithGoogle().then(user => {      
       setLoggedIn(true);
     });
   };
 
   firebaseContext.auth.onAuthStateChanged(user => {
-    window.currentUser = user;
+    window.currentUser = user;     
     if (user) {
       setLoggedIn(true);
     } else {
       signIn();
     }
+    if(!isSignedIn) {
+      setUser(user.uid); 
+    }
+ 
   });
 
   const breakpointValues = {
@@ -52,16 +59,29 @@ function App(props) {
   };
   function readSession() {
     const user = window.currentUser;
-    if (user) {
+    if (user) {      
       return user;
     }
   }
+  function setUser(userId) {  
+    if(userId && !isSignedIn) {
+      firebaseContext.getCurrentUser(userId).then(async response => {
+        const user = response.data();
+        if(user) {
+          user.role = getUserRole(user); 
+          await setCurrentUser(user);
+        }
+        isSignedIn = true;
+       });
+    }    
+   
+  }
   useEffect(() => {
-    readSession();
+    readSession();     
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession }}>
+    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession, currentUser }}>
       <MuiThemeProvider theme={theme}>
         <Router>
           <Navigation title="OOO" isLoggedIn={isLoggedIn}></Navigation>

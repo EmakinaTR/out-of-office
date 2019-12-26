@@ -28,8 +28,9 @@ export default class Firebase {
             .auth()
             .signInWithRedirect(app.googleProvider)
             .then(results => {
-              window.currentUser = app.auth().currentUser;
-              resolve(results);
+              const currentUser = app.auth().currentUser;
+              window.currentUser = currentUser;             
+              resolve(currentUser);
             })
             .catch(error => {
               reject(error);
@@ -52,6 +53,8 @@ export default class Firebase {
 
   // user = uid => this.db.doc(`users/${uid}`);
   users = () => this.db.collection("users");
+
+  getCurrentUser = uid => this.db.doc(`users/${uid}`).get();
 
   // *** Merge Auth and DB User API *** //
   onAuthUserListener = (next, fallback) =>
