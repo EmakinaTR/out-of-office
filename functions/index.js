@@ -60,7 +60,7 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => {
 });
 
 exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => {
-    const documentId = data.text; 
+    const documentId = data; 
     await admin.firestore().doc('/leaveRequests/{documentId}').get()
     .then( async querySnapshot => {
             const leaveRequest = querySnapshot.data();
