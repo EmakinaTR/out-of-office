@@ -24,7 +24,7 @@ export function OrderByFilter(props) {
         setOpen(false);
     };
     return (
-        <Grid container direction="column" alignItems="right">
+        <Grid container direction="column" >
             <Grid item xs={12}>
                 <ButtonGroup variant="outlined" size="small" ref={anchorRef} aria-label="split button">
                     <Button onClick={props.onFilterDirectionChanged}>
