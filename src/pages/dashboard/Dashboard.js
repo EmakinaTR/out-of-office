@@ -7,16 +7,17 @@ import {
   Typography,
   Icon,
   Button,
+  IconButton,
   Box,
-  Paper
+  Paper,
+  Divider
 } from "@material-ui/core";
-
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
 import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
 import IncomingRequestCard from "../../components/UIElements/incomingRequestCard";
 import { incomingRequestData } from "../../constants/dummyData";
-import RequestedLeaveItem from "../../components/UIElements/RequestedLeaveItem/RequestedLeaveItem";
+import RequestedLeaveBasicItem from "../../components/UIElements/RequestedLiveBasicItem/RequestedLeaveBasicItem";
 import { FirebaseContext } from "../../components/firebase";
 import app from "firebase";
 // String sources
@@ -73,6 +74,8 @@ const useStyles = makeStyles(theme => ({
   listCard: {
     // padding: theme.spacing(3),
     // textAlign: "center"
+  },
+  divider: {
   }
 }));
 
@@ -128,11 +131,10 @@ const Dashboard = () => {
 
           {/* Incoming Requests - Visible Only For Admin Users */}
           {isAdmin && (
-            <Grid item xs={12} lg={6}>
+            <Grid item xs={12} xl={6}>
               <Paper className={classes.listCard}>
                 <Box
-                  paddingY={1}
-                  paddingX={2}
+                  padding={2}
                   style={{ borderBottom: "solid 1px #ddd" }}
                 >
                   <Box
@@ -144,15 +146,17 @@ const Dashboard = () => {
                     <Box fontWeight={500} fontSize="large">
                       {REQUESTED_LEAVES}
                     </Box>
-
-                    <Button href="#text-buttons" size="small">All</Button>
-                  </Box>
+                    {/* <IconButton color="primary" size="small" aria-label="Approve" component="span">
+        <ChevronRightIcon />
+        </IconButton> */}
+                    
+                    </Box>
                 </Box>
-                <Box margin={2}>
+                <Box>
                 {incomingRequests.map((data, index) => {
                   return (
-                    <RequestedLeaveItem
-                      key={index}
+                    <div key={index}>
+                    <RequestedLeaveBasicItem
                       userName={data.userName}
                       leaveTypeContent={
                         leaveBadges[data.leaveType].badgeContent
@@ -164,19 +168,20 @@ const Dashboard = () => {
                       endDate={data.endDate}
                       duration={data.duration}
                       description={data.description}
-                    ></RequestedLeaveItem>
+                    ></RequestedLeaveBasicItem>
+                    <Divider />                    
+                    </div>
                   );
                 })}
                 </Box>
               </Paper>
-            </Grid>
+              </Grid>
           )}
           {/* Last 5 Request */}
-          <Grid item xs={12} lg={isAdmin ? 6 : 12}>
+          <Grid item xs={12} xl={isAdmin ? 6 : 12}>
           <Paper className={classes.listCard}>
                 <Box
-                  paddingY={1}
-                  paddingX={2}
+                  padding={2}
                   style={{ borderBottom: "solid 1px #ddd" }}
                 >
                   <Box
@@ -188,17 +193,19 @@ const Dashboard = () => {
                       <Box fontWeight={500} fontSize="large">
                         {MY_LEAVE_REQUEST}
                       </Box>
-                      <Button href="#text-buttons" size="small">All</Button>
+                      {/* <Button href="#text-buttons" size="small">All</Button> */}
                   </Box>
                 </Box>
-                <Box margin={2}>
+                <Box>
               {leaves.map((leave, index) => {
                 return (
+                  <div key={index}>
                   <LeaveSummaryItem
-                    key={index}
                     leaveType={leave.leaveType}
                     leaveCount={leave.leaveCount}
                   ></LeaveSummaryItem>
+                  <Divider />
+                  </div>
                 );
               })}
               </Box>
