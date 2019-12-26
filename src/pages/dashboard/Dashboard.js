@@ -19,7 +19,7 @@ import RequestedLeaveItem from "../../components/UIElements/RequestedLeaveItem/R
 import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
-
+import app from "firebase";
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
@@ -83,6 +83,15 @@ const Dashboard = () => {
   const firebaseContext = useContext(FirebaseContext);  
   const { currentUser } = useContext(AuthContext);
   const isAdmin = currentUser.role >= ROLE.APPROVER;
+
+  const Test = app.functions().httpsCallable('Test');
+  Test().then(function(result) {
+    console.log("Firebase fun ref: ", result);
+  }).catch(error => {
+    console.log("Cloud Func Error: ", error);
+  });
+
+
   return (
     <Container maxWidth="xl">
       <Box marginY={4}>

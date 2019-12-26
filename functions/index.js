@@ -118,7 +118,32 @@ exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
     return leaveRequestArray;
 });
 
+const _getUser = (userid) => {
+    return new Promise((resolve, reject) => {
+        admin.firestore().doc(`users/${userid}`).get().then(response => {           
+            resolve(response.data());       
+        }).catch(error => {
+            reject(error);
+        });   
+    });     
+}
+
+const _isAdmin = (user) => {
+    return user.isAdmin === true;
+} 
+
+const _isApprover = (user) => {
+    return user.isApprover === true;
+}
+
 exports.Test = functions.https.onCall(async (data,context) => {
-    const id = context.auth.uid
-    return id;
+    let user;
+    const id = context.auth.uid;
+    await _getUser(id).then(async response => {
+        console.log("User:: ", response);
+        user = response;
+    }).catch(error => {
+        console.log("Error: ", error);
+    })
+    return user;
 })
