@@ -107,6 +107,16 @@ export default class Firebase {
       })
     });   
   }
+  getLeaveRequestDetail = (documentID) => {
+    return new Promise((resolve,reject) => {
+      const requestDetail = app.functions().httpsCallable('getLeaveRequestDetail');
+      requestDetail({documentID :documentID}).then(result => {
+        resolve(result.data);
+      }).catch(error => {
+        reject(error);
+      })
+    })
+  }
 
   getLeaveRequestsWaitingToApprove = () => {
     return this.db.collection("leaveRequests").where("status", "==" ,"0").get();

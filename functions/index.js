@@ -60,6 +60,22 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => {
     return leaveRequestArray;
 });
 
+exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => {
+    const documentId = data.text; 
+    await admin.firestore().doc('/leaveRequests/{documentId}').get()
+    .then( async querySnapshot => {
+            const leaveRequest = querySnapshot.data();
+            await admin.firestore().doc(leaveRequest.leaveTypeRef.path).get()
+            .then(documentSnapshot => {
+                leaveRequest.leaveType = documentSnapshot.data();
+                
+            });
+            
+        })
+        .catch(err => { console.log(err);return ("Document not found") }
+    )
+    return leaveRequest;
+});
 
 
 exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
