@@ -49,8 +49,6 @@ const protectedRoutes = [
     icon: "insert_chart_outlined"
   },
   {
-    // Name property will be removed, it is needed for test
-    name: "Request Detail",
     path: "/request-detail",
     exact: true,
     main: props => <LeaveRequestDetail {...props} />

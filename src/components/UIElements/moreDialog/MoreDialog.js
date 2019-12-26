@@ -100,7 +100,7 @@ export const MoreDialog = (props)=>{
                                             <MenuItem key="2" value="2" onClick={handleApproveReject}>
                                                 <Close htmlColor="red" style={{ marginRight: '12px' }}></Close>Reject
                                             </MenuItem>
-                                            <MenuItem key="3" value="3" onClick={props.detailHandler}>
+                                            <MenuItem key="3" value="3" onClick={() => props.detailHandler(props.document)}>
                                                 <Visibility htmlColor="primary" style={{ marginRight: '12px' }}></Visibility>Details
                                             </MenuItem>
                                         </MenuList>

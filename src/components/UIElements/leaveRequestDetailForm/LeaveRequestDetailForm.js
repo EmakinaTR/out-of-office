@@ -1,13 +1,14 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
-
 import NativeSelect from '@material-ui/core/NativeSelect';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -27,6 +28,7 @@ const useStyles = makeStyles(theme => ({
   }));
 
 export default function LeaveRequestForm(props) {
+    const location = useLocation();
     // Styles
     const classes = useStyles();
     // Refs
@@ -43,13 +45,11 @@ export default function LeaveRequestForm(props) {
     });
     const [labelWidth, setLabelWidth] = useState(0);
     const [selectedDate, setSelectedDate] = useState(moment());
-    const [checked, setChecked] = React.useState(true);
-    const [open, setOpen] = React.useState(false);
+    const [checked, setChecked] = useState(true);
+    const [open, setOpen] = useState(false);
+    const [fields, setFields] = useState({});
     
-    // // Lifecycle Methods
-    // useEffect(() => {
-    //     setLabelWidth(inputLabel.current.offsetWidth);
-    //   }, []);
+   
       
     // Handle Methods
     const handleChange = name => event => {
@@ -88,6 +88,27 @@ export default function LeaveRequestForm(props) {
         console.log("print");
     }
 
+    // Firebase Functions
+    let getFormFields = async () => {
+        let uid = queryString.parse(location.search).formId;
+        let firebasePromise = props.firebase.getSpecificLeaveRequestWithId(uid);
+        let formFields = {};
+        if (firebasePromise !== null) {
+            await firebasePromise.then(snapshot => {
+                formFields = snapshot.data();
+                setFields(formFields);
+            })
+        }
+    }
+
+    // Lifecycle Methods
+    useEffect(() => {
+        // console.log(queryString.parse(location.search))
+        // console.log(props.firebase.getSpecificLeaveRequestWithId(queryString.parse(location.search).formId))
+        getFormFields();
+    }, []);
+    
+
     // Approver obj, it can be changed into props
     const approvers = [
         {
@@ -122,15 +143,15 @@ export default function LeaveRequestForm(props) {
                     
                     
                     
-                    <TextField className={classes.inputWidth}  multiline rows="4" label="Description" variant="outlined" margin="normal" value="İşim vardı" 
-                    InputProps={{readOnly: true,}}
+                    <TextField className={classes.inputWidth} disableAnimation multiline rows="4" label="Description" variant="outlined" margin="normal" value={fields.description || ''}
+                    InputProps={{readOnly: true}}
                     />
                     <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" variant="outlined" value="UA234XCWQ" InputProps={{readOnly: true,}} />
                     <Box marginY={1}>
                     
                         <Typography variant="caption" component="div">Approver</Typography>
-                        {approvers.map((item) => {
-                                return  <Box component="span">
+                        {approvers.map((item, index) => {
+                                return  <Box key={index} component="span">
                                             <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
                                         </Box>; 
          
