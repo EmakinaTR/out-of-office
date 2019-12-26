@@ -38,7 +38,6 @@ exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
 });
 
-
 exports.getMyRequests = functions.https.onCall(async (data, context) => { 
     const userID = context.auth.uid;
     let leaveRequestArray = [];

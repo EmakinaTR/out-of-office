@@ -3,12 +3,12 @@ import { Container, Box, Typography, Grid,Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
 import MyRequestsCard from '../../components/UIElements/myRequestCard';
-import { incomingRequestData } from '../../constants/dummyData';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
 import OrderByFilter from '../../components/UIElements/orderByFilter';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
-
+import LaunchScreen from '../../components/UIElements/launchScreen'
+import { FirebaseContext } from "../../components/firebase";
 const useStyles = makeStyles(theme => ({
     contentContainer: {
         // padding:0
@@ -48,7 +48,8 @@ function isValidDate(date) {
     return date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date);
 }
 export default function MyRequests(props) {
-    const [dataList, setDataList] = useState(incomingRequestData);
+    const firebaseContext = useContext(FirebaseContext);
+    const [dataList, setDataList] = useState();
     const [searchQuery, setsearchQuery] = useState('');
     const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
@@ -58,7 +59,7 @@ export default function MyRequests(props) {
         setFilterBoxState({ ...filterBoxState });
     }
     const onSearchQueryChange = (value) => {
-        let filteredDataList = incomingRequestData;
+        let filteredDataList = dataList;
         filteredDataList = filteredDataList.filter((data) => {
             return data.userName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
         })
@@ -66,6 +67,17 @@ export default function MyRequests(props) {
     }
     const onFilterDirectionChanged = (e) => {
         setIsDescending(isDescending => !isDescending)
+    }
+
+    let getMyRequests = async () => {
+        let leaveRequestArray = [];
+        await firebaseContext.getMyRequests()
+            .then(result => {
+                console.log(result);
+                setDataList([...result]);
+                console.log(result)
+
+            });
     }
 
     const onSelectedFilterTypeChanged = (e) => {
@@ -87,8 +99,36 @@ export default function MyRequests(props) {
         });
         setDataList([...data]);
     }
+
+    const filterData = (data, filterBoxState) => {
+        if (filterBoxState != undefined && filterBoxState.length != 0) {
+            if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
+                data = data.filter((item) => {
+                    console.log("leavetype")
+                    return filterBoxState.leaveType == item.leaveType;
+                })
+            }
+            if (filterBoxState.startDate != undefined) {
+                data = data.filter((item) => {
+                    console.log("start")
+                    return item.startDate >= filterBoxState.startDate;
+                });
+
+            }
+            if (filterBoxState.endDate != undefined) {
+                data = data.filter((item) => {
+                    console.log("end")
+                    return item.endDate <= filterBoxState.endDate;
+                });
+            }
+        }
+        setDataList([...data]);
+    }
+
     useEffect(() => {
-        sortDataByTypeAscDesc(filterBoxState, isDescending, incomingRequestData, orderByFilterOptions[selectedFilterType].key);
+        getMyRequests()
+        // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+        // filterData(dataList, filterBoxState)
     }, [selectedFilterType, isDescending, filterBoxState])
     return (
         <Container maxWidth="xl">
@@ -128,24 +168,26 @@ export default function MyRequests(props) {
                     </Grid>
                 </Grid>
                 </Box>
-                {dataList.map((data, index) => {
+                {dataList ? dataList.map((data, index) => {
                     // var statusType = statusBadges.find(type => type.id == data.status)
                     // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
                     return (
                         <MyRequestsCard
                             key={index}
                             userName={data.userName}
-                            leaveTypeContent={leaveBadges[data.leaveType].badgeContent}
-                            leaveTypeColor={leaveBadges[data.leaveType].color}
-                            statusTypeContent={statusBadges[data.status].badgeContent}
-                            statusTypeColor={statusBadges[data.status].color}
+                            leaveTypeContent={data.leaveType?.name}
+                            leaveTypeColor={data.leaveType?.color}
+                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
+                            statusTypeColor={statusBadges[parseInt(data.status)].color}
                             startDate={data.startDate}
                             endDate={data.endDate}
                             duration={data.duration}
                             description={data.description}
                         ></MyRequestsCard>
                     )
-                })}
+                })
+            :
+                    <LaunchScreen></LaunchScreen>}
             </Box>
         </Container>
     )
