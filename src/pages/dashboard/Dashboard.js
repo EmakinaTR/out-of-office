@@ -15,10 +15,11 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
 import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
-import IncomingRequestCard from "../../components/UIElements/incomingRequestCard";
 import { incomingRequestData } from "../../constants/dummyData";
 import IncomingRequestBasicCard from "../../components/UIElements/IncomingRequestBasicCard/IncomingRequestBasicCard";
 import { FirebaseContext } from "../../components/firebase";
+import AuthContext from "../../components/session";
+import { ROLE } from "../../constants/roles";
 import app from "firebase";
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
@@ -79,20 +80,20 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Dashboard = () => {
-  // IsAdmin state will be set through firebase connection
-  const [isAdmin, setIsAdmin] = React.useState(true);
+const Dashboard = () => {  
   const classes = useStyles();
   const incomingRequests = incomingRequestData.slice(0, 5);
+  const firebaseContext = useContext(FirebaseContext);  
+  const { currentUser } = useContext(AuthContext);
+  const isAdmin = currentUser.role >= ROLE.APPROVER;
 
-  const firebaseContext = useContext(FirebaseContext);
   const Test = app.functions().httpsCallable('Test');
   Test().then(function(result) {
     console.log("Firebase fun ref: ", result);
   }).catch(error => {
     console.log("Cloud Func Error: ", error);
   });
-  
+
 
   return (
     <Container maxWidth="xl">

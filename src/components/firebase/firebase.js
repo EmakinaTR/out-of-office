@@ -28,8 +28,9 @@ export default class Firebase {
             .auth()
             .signInWithRedirect(app.googleProvider)
             .then(results => {
-              window.currentUser = app.auth().currentUser;
-              resolve(results);
+              const currentUser = app.auth().currentUser;
+              window.currentUser = currentUser;             
+              resolve(currentUser);
             })
             .catch(error => {
               reject(error);
@@ -52,6 +53,8 @@ export default class Firebase {
 
   // user = uid => this.db.doc(`users/${uid}`);
   users = () => this.db.collection("users");
+
+  getCurrentUser = uid => this.db.doc(`users/${uid}`).get();
 
   // *** Merge Auth and DB User API *** //
   onAuthUserListener = (next, fallback) =>
@@ -98,7 +101,7 @@ export default class Firebase {
 
   getIncomingRequests = () => {
     return new Promise((resolve,reject) => {
-      const getTeamLeaves = app.functions().httpsCallable('getTeamLeaves');
+      const getTeamLeaves = app.functions().httpsCallable('getTeamLeavesC');
       getTeamLeaves().then(result => {
         resolve(result.data);
       }).catch(error => {
@@ -131,7 +134,16 @@ export default class Firebase {
  
 
   setLeaveStatus = (documentID, newStatus) => {
-    return this.db.collection("leaveRequests").doc(documentID).update({'status': newStatus});
+    return new Promise((resolve, reject) => {
+      const changeLeaveStatus = app.functions().httpsCallable('changeLeaveStatus');
+      changeLeaveStatus({documentID : documentID, newStatus:newStatus}).then(result => {
+        resolve(result.data);
+      }).catch(error => {
+        reject(error);
+      })
+    });
+
+
   }
   sendNewLeaveRequest = leaveRequestObj => {
     this.db.collection("leaveRequests").add(leaveRequestObj);
@@ -141,8 +153,16 @@ export default class Firebase {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }
 
+  getLeaveTypeOfGivenReference = (ref) => {
+    return this.db.doc(ref).get();
+  }
+
   convertMomentObjectToFirebaseTimestamp = (momentObj) => {
-     return app.firestore.Timestamp.fromDate(momentObj);
+    return app.firestore.Timestamp.fromDate(momentObj);
+  }
+
+  convertFirebaseTimestampToMomentObject = (timeStamp) => {
+    return timeStamp.toDate(timeStamp);
   }
 
   convertUidToFirebaseRef = (uid) => {

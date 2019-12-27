@@ -22,11 +22,17 @@ import { FirebaseContext } from "../../firebase";
 import ProtectedRouteHoc from "../../protectedRouteHoc";
 import { withRouter, useHistory } from "react-router-dom";
 import LaunchScreen from "../launchScreen/LaunchScreen";
+import { getUserRole } from "../../../constants/roles";
 const drawerWidth = 240;
-const Navigation = props => {
+const Navigation = props => {  
+ 
   const { isLoggedIn } = useContext(AuthContext);
   const firebase = useContext(FirebaseContext);
   const history = useHistory();
+  const { currentUser } = useContext(AuthContext);    
+  const userRoutes = protectedRoutes.filter(route => {
+    return currentUser?.role >= route.level;
+  });
   const _getCurrentRouteIndex = location => {
     let activeIndex = protectedRoutes.findIndex(route => {
       return route.path === location;
@@ -136,7 +142,7 @@ const Navigation = props => {
             <div className={classes.toolbar} />
 
             <List>
-              {protectedRoutes.map((route, index) => {
+              {userRoutes.map((route, index) => {
                 // Render List ONLY IF the route has a name. It prevents default route to be printed.
                 if (route.name) {
                   return (
@@ -164,7 +170,7 @@ const Navigation = props => {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
-            {protectedRoutes.map(route => (
+            {userRoutes.map(route => (
               <ProtectedRouteHoc
                 key={route.path}
                 isLoggedIn={isLoggedIn}

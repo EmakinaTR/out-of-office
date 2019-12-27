@@ -6,6 +6,9 @@ import MyRequests from "../pages/myrequests";
 import IncomingRequests from "../pages/incomingrequests";
 import LeaveRequestDetail from "../pages/leaveRequestDetail";
 import LeaveRequestEdit from "../pages/leaveRequestEdit";
+import { ROLE } from "./roles";
+
+
 
 const protectedRoutes = [
   {
@@ -14,7 +17,8 @@ const protectedRoutes = [
     exact: true,
     main: () => <Dashboard />,
     public: false,
-    icon: "dashboard"
+    icon: "dashboard",
+    level: ROLE.USER       
   },
   {
     name: "New Leave Request",
@@ -22,7 +26,8 @@ const protectedRoutes = [
     exact: true,
     main: props => <LeaveRequest {...props} />,
     public: false,
-    icon: "post_add"
+    icon: "post_add",
+    level: ROLE.USER       
   },
   {
     name: "My Requests",
@@ -30,7 +35,8 @@ const protectedRoutes = [
     exact: false,
     main: props => <MyRequests {...props} />,
     public: false,
-    icon: "date_range"
+    icon: "date_range",
+    level: ROLE.USER       
   },
   {
     name: "Incoming Requests",
@@ -38,7 +44,8 @@ const protectedRoutes = [
     exact: true,
     main: props => <IncomingRequests {...props} />,
     public: false,
-    icon: "event_available"
+    icon: "event_available",
+    level: ROLE.APPROVER       
   },
   {
     name: "Reports",
@@ -46,27 +53,29 @@ const protectedRoutes = [
     exact: true,
     main: props => <Reports {...props} />,
     public: false,
-    icon: "insert_chart_outlined"
+    icon: "insert_chart_outlined",
+    level: ROLE.APPROVER
   },
   {
     path: "/request-detail",
     exact: true,
-    main: props => <LeaveRequestDetail {...props} />
+    main: props => <LeaveRequestDetail {...props} />,
+    level: ROLE.APPROVER
   },
   {
-    // Name property will be removed, it is needed for test
-    name: "Request Edit",
     path: "/request-edit",
     exact: true,
-    main: props => <LeaveRequestEdit {...props} />
+    main: props => <LeaveRequestEdit {...props} />,
+    level: ROLE.APPROVER
   },
   // Default Route; Sets unless none of the pathes are given
   {
     path: "**",
     exact: true,
     main: () => <Dashboard />,
-    public: false,
-    icon: "dashboard"
+    icon: "dashboard",
+    level: ROLE.USER
+    
   }
 ];
 
