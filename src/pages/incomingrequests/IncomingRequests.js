@@ -77,7 +77,7 @@ export default function IncomingRequests(props) {
     const changeFormStatusHandler = async (documentID,type) => {
         await firebaseContext.setLeaveStatus(documentID, type)
             .then(
-            setDataList(dataList.filter(function (obj) {
+                setDataList(dataList.filter(function (obj) {
                 return obj.id !== documentID;
             }))
             )
