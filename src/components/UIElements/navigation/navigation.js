@@ -34,7 +34,7 @@ const Navigation = props => {
     return currentUser?.role >= route.level;
   });
   const _getCurrentRouteIndex = location => {
-    let activeIndex = userRoutes.findIndex(route => {
+    let activeIndex = protectedRoutes.findIndex(route => {
       return route.path === location;
     });
     // If active index could not be found, it means default route path is used. Then, set active index to default value (0).

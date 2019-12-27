@@ -59,14 +59,14 @@ const protectedRoutes = [
   {
     path: "/request-detail",
     exact: true,
-    main: props => <LeaveRequestDetail {...props} />
+    main: props => <LeaveRequestDetail {...props} />,
+    level: ROLE.APPROVER
   },
   {
-    // Name property will be removed, it is needed for test
-    name: "Request Edit",
     path: "/request-edit",
     exact: true,
-    main: props => <LeaveRequestEdit {...props} />
+    main: props => <LeaveRequestEdit {...props} />,
+    level: ROLE.APPROVER
   },
   // Default Route; Sets unless none of the pathes are given
   {

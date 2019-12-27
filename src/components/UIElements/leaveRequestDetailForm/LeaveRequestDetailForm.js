@@ -1,13 +1,9 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
-Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
-DialogTitle, useMediaQuery } from '@material-ui/core';
-import NativeSelect from '@material-ui/core/NativeSelect';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import { Paper, Container, Grid, TextField, Box, Button, Typography, Chip, Avatar } from '@material-ui/core';
+import { ROLE } from "../../../constants/roles";
 const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
@@ -28,28 +24,50 @@ const useStyles = makeStyles(theme => ({
   }));
 
 export default function  LeaveRequestForm(props)  {
-    let isAdmin = false;
+    // Admin Check
+    const isAdmin = props.user.role >= ROLE.APPROVER;
+    // History
+    let history = useHistory();
+    // Location
     const location = useLocation();
     // Styles
     const classes = useStyles();
-    // Theme
-    const theme = useTheme();
     // States
     const [fields, setFields] = useState({});
     const [leaveType, setLeaveType] = useState('');
+    const [docUid, setDocUid] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('submit')
+    }
+
+    const editLeaveRequest = () => {
+        history.push({
+            pathname: '/request-edit',
+            search: '?formId='+ docUid,
+        })
     }
 
     const printLeaveRequest = () => {
-        console.log("print");
+        window.print();
+    }
+
+    const approveLeaveRequest = () => {
+        props.firebase.setLeaveStatus(docUid, 1);
+    }
+
+    const rejectLeaveRequest = () => {
+        props.firebase.setLeaveStatus(docUid, 2);
+    }
+
+    const cancelLeaveRequest = () => {
+        props.firebase.setLeaveStatus(docUid, 3);
     }
 
     // Firebase Functions
     const getFormFields = async () => {
-        let uid = queryString.parse(location.search).formId;
+        const uid = queryString.parse(location.search).formId;
+        setDocUid(uid);
         let firebasePromise = props.firebase.getSpecificLeaveRequestWithId(uid);
         let formFields = {};
         if (firebasePromise !== null) {
@@ -89,11 +107,6 @@ export default function  LeaveRequestForm(props)  {
             name: "Bekir Semih Turgut"
         }
     ]
-    // fields.leaveTypeRef?.get().then(function(doc) {
-    //     if (doc.exists) {
-    //        return doc.data().name
-    //     }
-    // })
 
     return (
         <Container maxWidth="lg">
@@ -129,30 +142,30 @@ export default function  LeaveRequestForm(props)  {
                             })}
                     </Box>
                     <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value={moment(fields.requestedDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
-                    {(isAdmin === false) ? 
+                    {(isAdmin === false || props.user.id == fields.createdBy) ? 
                     <Box my={3}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">EDIT</Button>
+                                <Button className={classes.inputWidth} onClick={editLeaveRequest} variant="contained" size="large" type="submit" color="primary">EDIT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="outlined" size="large" color="primary" onClick={printLeaveRequest}>PRINT</Button>
+                                <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary">PRINT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="outlined" size="large">Cancel Request</Button>
+                                <Button className={classes.inputWidth} onClick={cancelLeaveRequest} variant="outlined" size="large">Cancel Request</Button>
                             </Grid>
                         </Grid>
                     </Box>:
                     <Box my={3}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">Approve</Button>
+                                <Button className={classes.inputWidth} onClick={approveLeaveRequest}  variant="contained" size="large" type="submit" color="primary">Approve</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="outlined" size="large" color="primary" onClick={printLeaveRequest}>PRINT</Button>
+                                <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary" >PRINT</Button>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} variant="outlined" size="large">Reject</Button>
+                                <Button className={classes.inputWidth} onClick={rejectLeaveRequest} variant="outlined" size="large">Reject</Button>
                             </Grid>
                         </Grid>
                     </Box>}
