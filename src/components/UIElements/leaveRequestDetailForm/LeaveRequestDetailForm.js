@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
   }));
 
 export default function  LeaveRequestForm(props)  {
-   
+    let isAdmin = false;
     const location = useLocation();
     // Styles
     const classes = useStyles();
@@ -129,6 +129,7 @@ export default function  LeaveRequestForm(props)  {
                             })}
                     </Box>
                     <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value={moment(fields.requestedDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                    {(isAdmin === false) ? 
                     <Box my={3}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={4}>
@@ -141,7 +142,7 @@ export default function  LeaveRequestForm(props)  {
                                 <Button className={classes.inputWidth} variant="outlined" size="large">Cancel Request</Button>
                             </Grid>
                         </Grid>
-                    </Box>
+                    </Box>:
                     <Box my={3}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={4}>
@@ -154,7 +155,7 @@ export default function  LeaveRequestForm(props)  {
                                 <Button className={classes.inputWidth} variant="outlined" size="large">Reject</Button>
                             </Grid>
                         </Grid>
-                    </Box>
+                    </Box>}
                 </form>
             </Paper>
             </Box>
