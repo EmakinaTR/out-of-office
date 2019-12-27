@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Grid, Fab, Grow, Paper, Popper, MenuItem, MenuList, 
-    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,Slide,Button } from '@material-ui/core';
+    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,Slide,Button, IconButton } from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { MoreVert, Check, Close, Visibility } from '@material-ui/icons';
@@ -46,20 +46,14 @@ export const MoreDialog = (props)=>{
         closeDialog();
     }
         return (
-            <Grid container direction="column" alignItems="center">
-                <Grid item xs={12}>
-                            <Fab ref={anchorRef}
-                            className={classes.moreButton}
-                            color="primary"
-                            size="small"
-                            aria-controls={openMenu ? 'split-button-menu' : undefined}
+            <div>
+                <IconButton ref={anchorRef} aria-controls={openMenu ? 'split-button-menu' : undefined}
                         aria-expanded={openMenu ? 'true' : undefined}
                             aria-label="select merge strategy"
                             aria-haspopup="menu"
-                            onClick={handleToggle}
-                        >
-                        <MoreVert></MoreVert>
-                    </Fab>
+                            onClick={handleToggle} component="span">
+            <MoreVert />
+          </IconButton>
                     <Dialog
                         open={openDialog}
                         TransitionComponent={Transition}
@@ -109,9 +103,7 @@ export const MoreDialog = (props)=>{
                             </Grow>
                         )}
                     </Popper>
-                </Grid>
-                
-            </Grid>
+                </div>
         );
     }
 

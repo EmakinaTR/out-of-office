@@ -6,31 +6,56 @@ import {
   Typography,
   Grid,
   IconButton,
-  Divider
+  Divider,
+  Box,
+  Chip,
 } from "@material-ui/core";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import CustomBadge from "../customBadge/CustomBadge";
 
 const useStyles = makeStyles(theme => ({
-  requesterName: {
-    textAlign: "left"
-  },
-  requestCount: {
-    textAlign: "left"
-  },
-  leaveTypeContainer: {
-    textAlign: "center"
-  },
-  dividerContainer: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1)
+  request: {
+    "& > *": {
+      margin: theme.spacing(0.5),
+      marginLeft: 0
+    }
   }
 }));
 
 const LeaveSummaryItem = props => {
   const classes = useStyles();
-  return (
-    <Grid container alignItems="center">
+  return ( 
+    <Box padding={2}>
+      <Box display="flex" flexDirection="row" alignItems="center" style={{minHeight:"5rem"}}>
+        <Box flexGrow={1}>
+          <Grid container spacing={1} alignItems="center">
+            <Grid item xs={3}>
+                <DateCalendar
+              textFontSize="1rem"
+              textLineHeight="1.2rem"
+            ></DateCalendar>
+            </Grid>
+            <Grid item xs={9} className={classes.request}>
+            <Typography>{props.leaveCount}</Typography>
+              <Chip
+                color="primary"
+                size="small"
+                label={props.leaveType}
+              />
+              {/* <Chip variant="outlined" style={{borderColor: props.statusTypeColor,color:props.statusTypeColor}} size="small" label={props.statusTypeContent} /> */}
+            </Grid>
+          </Grid>
+        </Box>
+        <Box>
+          <IconButton color="primary" aria-label="Request Detail" component="span">
+            <ChevronRightIcon />
+          </IconButton>
+        </Box>
+      </Box>
+      
+    
+
+ {/* <Grid container alignItems="center">
       <Grid item xs={3}>
         <DateCalendar
           textFontSize="1rem"
@@ -51,7 +76,8 @@ const LeaveSummaryItem = props => {
       <Grid item xs={12}>
         <Divider className={classes.dividerContainer}></Divider>
       </Grid>
-    </Grid>
+    </Grid> */}
+    </Box>
   );
 };
 
