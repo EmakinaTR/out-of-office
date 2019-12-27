@@ -3,7 +3,6 @@ import { Container, Box, Typography, Grid, Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
 import IncomingRequestCard from '../../components/UIElements/incomingRequestCard';
-import { incomingRequestData } from '../../constants/dummyData';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
 import OrderByFilter from '../../components/UIElements/orderByFilter';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
@@ -11,7 +10,7 @@ import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import LaunchScreen from '../../components/UIElements/launchScreen'
 import SnackBar from '../../components/UIElements/snackBar/SnackBar';
-
+import {snackbars}  from '../../constants/snackbarContents'
 
 
 const useStyles = makeStyles(theme => ({
@@ -55,16 +54,7 @@ const orderByFilterOptions = {
     },
 
 };
-const snackbars = {
-    success: {
-        variant: "success",
-        message: "The request has been approved successfully."
-    },
-    error: {
-        variant: "error",
-        message: "Something went wrong"
-    },
-}
+
 export default function IncomingRequests(props) {
     const classes = useStyles();
     const [dataList, setDataList] = useState();
