@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
+import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
@@ -81,47 +81,6 @@ export default function LeaveRequestEditForm(props) {
         e.preventDefault();
         console.log('submit')
     }
-
-    // Leave Types obj
-    // const leaveTypes = [
-    //     {
-    //         name: '',
-    //         value: ''
-    //     },
-    //     {
-    //         name: 'Annual Leave',
-    //         value: 'annual_leave'
-    //     },
-    //     {
-    //         name: 'Excuse Leave',
-    //         value: 'excuse_leave'
-    //     },
-    //     {
-    //         name: '0-2 Hours',
-    //         value: '0-2_hours'
-    //     },
-    //     {
-    //         name: 'Remote Working',
-    //         value: 'remote_working'
-    //     },
-    //     {
-    //         name: 'Unpaid Vacation',
-    //         value: 'unpaid_vacation'
-    //     },
-    //     {
-    //         name: 'Marriage',
-    //         value: 'marriage'
-    //     },
-    //     {
-    //         name: 'Paternity Leave',
-    //         value: 'paternity'
-    //     },
-    //     {
-    //         name: 'Other',
-    //         value: 'other'
-    //     },
-
-    // ]
     
     
     // Approver obj, it can be changed into props
