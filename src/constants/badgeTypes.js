@@ -1,54 +1,54 @@
 export const statusBadges = {
   0: {
-    badgeContent: "Waiting Approve",
-    color: "#ffde7d"
+    badgeContent: "Pending",
+    color: "#F5E299"
   },
   1: {
     badgeContent: "Approved",
-    color: "#8cc63f"
+    color: "#d4ffb1"
   },
   2: {
     badgeContent: "Rejected",
-    color: "#ff7f41"
+    color: "#ffcbcd"
   },
   3: {
     badgeContent: "Cancelled",
-    color: "#969696"
+    color: "#eeeeee"
   }
 };
 
 export const leaveBadges = {
   0: {
     badgeContent: "Annual Leave",
-    color: "#f2d6eb"
+    color: "#008CCC"
   },
   1: {
     badgeContent: "Compansate Leave",
-    color: "#5c94bd"
+    color: "#02C802"
   },
   2: {
     badgeContent: "Excuse Leave",
-    color: "#1a3e59"
+    color: "#FF9C00"
   },
   3: {
     badgeContent: "Marriage",
-    color: "#470938"
+    color: "#FE1492"
   },
   4: {
     badgeContent: "Other Leave",
-    color: "#737373"
+    color: "#9C6137"
   },
    5: {
     badgeContent: "Parental",
-    color: "#737373"
+    color: "#7529E1"
   },
   6: {
     badgeContent: "Remote Working",
-    color: "#737373"
+    color: "#02C802"
   },
   7: {
     badgeContent: "Unpaid Vacation",
-    color: "#737373"
+    color: "#00CFD2"
   }
 };
 export const getBadgeColor = (theme, type) => {

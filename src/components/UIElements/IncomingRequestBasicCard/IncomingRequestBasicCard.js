@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
     }
   }
 }));
-const RequestedLeaveBasicItem = props => {
+const IncomingRequestBasicCard = props => {
   const classes = useStyles();
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
@@ -81,8 +81,8 @@ const RequestedLeaveBasicItem = props => {
   );
 };
 
-RequestedLeaveBasicItem.propTypes = {
+IncomingRequestBasicCard.propTypes = {
   userName: PropTypes.string
 };
 
-export default RequestedLeaveBasicItem;
+export default IncomingRequestBasicCard;

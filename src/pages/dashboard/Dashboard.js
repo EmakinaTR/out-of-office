@@ -17,7 +17,7 @@ import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/Leave
 import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
 import IncomingRequestCard from "../../components/UIElements/incomingRequestCard";
 import { incomingRequestData } from "../../constants/dummyData";
-import RequestedLeaveBasicItem from "../../components/UIElements/RequestedLiveBasicItem/RequestedLeaveBasicItem";
+import IncomingRequestBasicCard from "../../components/UIElements/IncomingRequestBasicCard/IncomingRequestBasicCard";
 import { FirebaseContext } from "../../components/firebase";
 import app from "firebase";
 // String sources
@@ -156,7 +156,7 @@ const Dashboard = () => {
                 {incomingRequests.map((data, index) => {
                   return (
                     <div key={index}>
-                    <RequestedLeaveBasicItem
+                    <IncomingRequestBasicCard
                       userName={data.userName}
                       leaveTypeContent={
                         leaveBadges[data.leaveType].badgeContent
@@ -168,7 +168,7 @@ const Dashboard = () => {
                       endDate={data.endDate}
                       duration={data.duration}
                       description={data.description}
-                    ></RequestedLeaveBasicItem>
+                    ></IncomingRequestBasicCard>
                     <Divider />                    
                     </div>
                   );

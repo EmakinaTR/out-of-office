@@ -15,10 +15,23 @@ import LaunchScreen from '../../components/UIElements/launchScreen'
 
 const useStyles = makeStyles(theme => ({
     contentContainer: {
-        padding: "0",
+        // padding:0
     },
     headerContainer: {
-        margin: theme.spacing(2)
+        //margin: theme.spacing(2)
+    },
+    listControls: {
+        '& :first-child': {
+            flexGrow: 1,
+            [theme.breakpoints.up('lg')]: {
+                flexGrow: 0
+            },
+         },
+        justifyContent: "flex-start",
+        [theme.breakpoints.up('lg')]: {
+            justifyContent: "flex-end",
+        },
+        
     }
 }));
  
@@ -154,6 +167,69 @@ export default function IncomingRequests(props) {
     }, [selectedFilterType, isDescending, filterBoxState])
     
     return (
+        <Container maxWidth="xl">
+        <Box marginY={3}>
+            <Box marginBottom={2}>
+                <Grid container className={classes.headerContainer}  alignItems="center">
+                    <Grid item xs={12} lg={4}>
+                    <Typography variant="h5" component="h2">Incoming Requests</Typography>
+                      
+                    </Grid>
+                    <Grid item xs={12} lg={8} >
+                    <Grid container alignItems="center" spacing={2} className={classes.listControls} wrap="nowrap">
+                        <Grid item>
+                        <SearchFilter
+                            onChange={onSearchQueryChange}
+                        >
+                        </SearchFilter>
+                        </Grid>
+                        <Grid item>
+                        <OrderByFilter
+                            options={orderByFilterOptions}
+                            onFilterDirectionChanged={onFilterDirectionChanged}
+                            currentDirection={isDescending}
+                            selectedFilterType={selectedFilterType}
+                            onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
+                        >
+
+                        </OrderByFilter>
+                        </Grid>
+                        <Grid item>
+                        <FilterBox
+                            onFilterBoxClick={onFilterBoxClick}
+                            filterBoxState={filterBoxState}
+                        >
+                        </FilterBox></Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                </Box>
+                {dataList ? dataList.map((data, index) => {
+                    if(data.status == 0)
+                    return (
+                        // <p>{data}</p>
+                        <IncomingRequestCard
+                            key={index}
+                            userName={data?.requesterName}
+                            leaveTypeContent={data?.leaveType.name}
+                            leaveTypeColor={data?.leaveType.color}
+                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
+                            statusTypeColor={statusBadges[parseInt(data.status)].color}
+                            startDate={data?.startDate}
+                            endDate={data?.endDate}
+                            duration={data?.duration}
+                            description={data?.description}
+                            documentID = {data.id}
+                            changeFormStatusHandler={changeFormStatusHandler}
+                        ></IncomingRequestCard>
+                    )
+                }) 
+            :
+            <LaunchScreen></LaunchScreen>}
+        </Box>
+        </Container>
+
+/* 
         <Container className={classes.contentContainer}  >
             <Box >
                 <Grid container className={classes.headerContainer}>
@@ -208,6 +284,6 @@ export default function IncomingRequests(props) {
             :
             <LaunchScreen></LaunchScreen>}
             </Box>
-        </Container>
+        </Container> */
     )
 }
