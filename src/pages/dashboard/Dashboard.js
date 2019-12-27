@@ -112,17 +112,17 @@ const Dashboard = () => {
           <Grid item xs={12} lg={6}>
             <InfoCard
               text={REMAINING_ANNUAL_LEAVE_REQUEST}
-              count={5}
+              count={currentUser.annualCredit}
             ></InfoCard>
           </Grid>
-          {/* Remaining Annual Leave */}
+          {/* Remaining Casual Leave */}
           <Grid item xs={12} lg={6}>
             <InfoCard
               text={REMAINING_CASUAL_LEAVE_REQUEST}
-              count={2}
+              count={currentUser.excuseCredit}
             ></InfoCard>
           </Grid>
-          {/* Remaining Annual Leave */}
+          {/* Remaining Pending Leave */}
           <Grid item xs={12} lg={6}>
             <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
           </Grid>
