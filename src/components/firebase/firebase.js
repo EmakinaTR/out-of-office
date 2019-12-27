@@ -153,8 +153,16 @@ export default class Firebase {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }
 
+  getLeaveTypeOfGivenReference = (ref) => {
+    return this.db.doc(ref).get();
+  }
+
   convertMomentObjectToFirebaseTimestamp = (momentObj) => {
-     return app.firestore.Timestamp.fromDate(momentObj);
+    return app.firestore.Timestamp.fromDate(momentObj);
+  }
+
+  convertFirebaseTimestampToMomentObject = (timeStamp) => {
+    return timeStamp.toDate(timeStamp);
   }
 
   convertUidToFirebaseRef = (uid) => {
