@@ -101,7 +101,7 @@ export default class Firebase {
 
   getIncomingRequests = () => {
     return new Promise((resolve,reject) => {
-      const getTeamLeaves = app.functions().httpsCallable('getTeamLeaves');
+      const getTeamLeaves = app.functions().httpsCallable('getTeamLeavesC');
       getTeamLeaves().then(result => {
         resolve(result.data);
       }).catch(error => {

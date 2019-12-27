@@ -8,7 +8,7 @@ import 'moment/locale/tr';
 import MoreDialog from '../moreDialog';
 import { FirebaseContext } from "../../firebase";
 import { render } from '@testing-library/react';
-import { Redirect, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 moment().locale('tr')
 
 const useStyles = makeStyles(theme => ({
