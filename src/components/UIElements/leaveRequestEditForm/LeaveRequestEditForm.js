@@ -1,11 +1,13 @@
 import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -27,6 +29,10 @@ const useStyles = makeStyles(theme => ({
 export default function LeaveRequestEditForm(props) {
     // Styles
     const classes = useStyles();
+    // History
+    let history = useHistory();
+    // Location
+    const location = useLocation();
     // Refs
     const inputLabel = useRef(null);
     // Theme
