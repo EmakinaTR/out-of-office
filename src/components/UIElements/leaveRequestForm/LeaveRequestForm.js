@@ -227,7 +227,7 @@ export default function LeaveRequestForm(props) {
                                     className={classes.inputWidth}
                                     label="Start Date"
                                     format='MM/DD/YYYY'
-                                    minDate={moment()}
+                                    minDate={moment().subtract(15,'d')}
                                     margin="normal"
                                     value={selectedStartDate}
                                     onChange={handleStartDateChange}

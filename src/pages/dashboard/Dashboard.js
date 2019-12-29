@@ -3,11 +3,9 @@ import InfoCard from "../../components/UIElements/InfoCard/InfoCard";
 import {
   Container,
   Grid,
-  Card,
   Typography,
   Icon,
   Button,
-  IconButton,
   Box,
   Paper,
   Divider
@@ -83,7 +81,6 @@ const useStyles = makeStyles(theme => ({
 const Dashboard = () => {  
   const classes = useStyles();
   const incomingRequests = incomingRequestData.slice(0, 5);
-  const firebaseContext = useContext(FirebaseContext);  
   const { currentUser } = useContext(AuthContext);
   const isAdmin = currentUser.role >= ROLE.APPROVER;
 

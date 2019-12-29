@@ -1,9 +1,12 @@
-import React from 'react';
-import { Paper, Avatar, Grid, Typography, Fab, Hidden } from '@material-ui/core'
+import React,{useContext} from 'react';
+import { Paper, Grid, Typography,  } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import CustomBadge from '../customBadge/CustomBadge';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
+import AuthContext from "../../session";
+import MoreDialog from "../moreDialog";
+import { useHistory } from "react-router-dom";
+
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
@@ -97,7 +100,14 @@ const useStyles = makeStyles(theme => ({
 }));
 export const MyRequestCard = (props) => {
     const classes = useStyles();
-
+    const { currentUser } = useContext(AuthContext);
+    let history = useHistory();
+    const detailHandler = document => {
+        history.push({
+            pathname: "/request-detail",
+            search: "?formId=" + document
+        });
+    };
     return (
         <Paper className={classes.paper}>
             <Grid container>
@@ -127,9 +137,16 @@ export const MyRequestCard = (props) => {
                     </Grid>
                 </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
-                    <Fab className={classes.moreButton} size="small" >
-                        <MoreVertIcon></MoreVertIcon>
-                    </Fab>
+                    <MoreDialog
+                        from="MyRequest"
+                        isFormOwner={props.createdBy === currentUser.uid}
+                        leaveHasntBegin={new Date(props.startDate) >= new Date()}
+                        currentUserRole={currentUser.ROLE}
+                        changeFormStatusHandler={props.changeFormStatusHandler}
+                        detailHandler={detailHandler}
+                        document={props.documentID}
+                        requestStatus={props.requestStatus}
+                    ></MoreDialog>
                 </Grid>
             </Grid>
 
