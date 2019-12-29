@@ -60,19 +60,19 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => {
 });
 
 exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => {
-    const documentId = data.text;
-    let leaveRequest;
-    let leaveTypeRef;
-    await _getLeaveRequestFromID(documentId).then(async response => {
-        console.log("LeaveRequest:: ", response);
-        leaveRequest = response;
-        leaveTypeRef = leaveRequest.leaveTypeRef;
-
-    }).catch(error => {console.log("Error: ", error);})
-    await _getLeaveTypeByRef(leaveRequest.leaveTypeRef.path).then(async response => {
-        console.log("leaveType:: ", response);
-        leaveRequest.leaveType = response;
-    }).catch(error => {console.log("Error: ", error);})
+    const documentId = data; 
+    await admin.firestore().doc('/leaveRequests/{documentId}').get()
+    .then( async querySnapshot => {
+            const leaveRequest = querySnapshot.data();
+            await admin.firestore().doc(leaveRequest.leaveTypeRef.path).get()
+            .then(documentSnapshot => {
+                leaveRequest.leaveType = documentSnapshot.data();
+                
+            });
+            
+        })
+        .catch(err => { console.log(err);return ("Document not found") }
+    )
     return leaveRequest;
 });
 
@@ -269,7 +269,7 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
         console.log("Error while form status changing: ", error);
     })
 
-    if(oldStatus === status.WAITING && newStatus == status.APPROVED){
+    if(oldStatus === status.WAITING && newStatus === status.APPROVED){
 
         if(leaveType.effectsTo =="Annual"){
             await _setDocumentField("users", leaveRequest.createdBy, "annualCredit", documentOwner.annualCredit - leaveRequest.duration).then(async response => {
@@ -296,7 +296,7 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
 
     }
 
-    else if (oldStatus === status.APPROVED && newStatus == status.CANCELLED) {
+    else if (oldStatus === status.APPROVED && newStatus === status.CANCELLED) {
         if (leaveType.effectsTo == "Annual") {
             await _setDocumentField("users", documentOwner.id, "annualCredit", documentOwner.annualCredit + leaveRequest.duration).then(async response => {
                 // console.log("Annual credit of user increased : " + documentOwner.annualCredit + leaveRequest.duration);
@@ -311,6 +311,9 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
                 console.log("Error: ", error);
             })
         }
+    }
+    if(oldStatus === status.WAITING && newStatus ===status.CANCELLED){
+        
     }
 
     sendMailtoUser();

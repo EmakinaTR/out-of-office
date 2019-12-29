@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     fontWeight: "normal",
     fontSize: ".9rem",
     [theme.breakpoints.up("sm")]: {
-      fontSize: "1.1rem"
+      fontSize: "1rem"
     }
   }
 }));
@@ -43,8 +43,8 @@ export default function DateFull(props) {
       <Box mr={1}>
         <Typography className={classes.dateText}>
         {isLargeScreen
-            ? moment(new Date(props.startDate._seconds * 1000)).format("lll")
-            : moment(new Date(props.startDate._seconds * 1000)).format(
+            ? moment(new Date(props.startDate)).format("lll")
+            : moment(new Date(props.startDate)).format(
               "MM/DD/YYYY, H:mm"
             )}                              
         </Typography>
@@ -52,12 +52,12 @@ export default function DateFull(props) {
       <ArrowForwardIosIcon className={classes.center} style={{ color: "#aaa" }} />
       <Box ml={1}>
         <Typography className={classes.dateText}>
-          {isLargeScreen
-            ? moment(new Date(props.endDate._seconds * 1000)).format("lll")
-            : moment(new Date(props.endDate._seconds * 1000)).format(
-                "MM/DD/YYYY, H:mm"
-              )}
-        </Typography>
+        {isLargeScreen
+            ? moment(new Date(props.endDate)).format("lll")
+            : moment(new Date(props.endDate)).format(
+              "MM/DD/YYYY, H:mm"
+            )}
+            </Typography>
       </Box>
     </Grid>
   );

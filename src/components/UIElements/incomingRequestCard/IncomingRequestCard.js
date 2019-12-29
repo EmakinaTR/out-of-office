@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext} from "react";
 import {
   Paper,
   Avatar,
@@ -7,18 +7,16 @@ import {
   Box,
   Hidden,
   Chip,
-  IconButton
+
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import CheckIcon from "@material-ui/icons/Check";
-import CustomBadge from "../customBadge/CustomBadge";
 import DateFull from "../date/DateFull";
 import moment from "moment";
 import "moment/locale/tr";
 import MoreDialog from "../moreDialog";
 import { FirebaseContext } from "../../firebase";
-import { render } from "@testing-library/react";
-import { Redirect, useHistory } from "react-router-dom";
+import AuthContext from "../../session";
+import { useHistory } from "react-router-dom";
 moment().locale("tr");
 
 const useStyles = makeStyles(theme => ({
@@ -120,6 +118,7 @@ export const IncomingRequestCard = props => {
   const classes = useStyles();
   let history = useHistory();
   const firebaseContext = useContext(FirebaseContext);
+  const { currentUser } = useContext(AuthContext);
   const detailHandler = document => {
     history.push({
       pathname: "/request-detail",
@@ -205,98 +204,21 @@ export const IncomingRequestCard = props => {
           </IconButton> */}
               <Box>
                 <MoreDialog
+                  from="IncomingRequest"
+                  isFormOwner={props.createdBy === currentUser.uid}
+                  leaveHasntBegin={new Date(props.startDate) >=new Date()}
+                  currentUserRole ={currentUser.ROLE}
                   changeFormStatusHandler={props.changeFormStatusHandler}
                   detailHandler={detailHandler}
                   document={props.documentID}
+                  requestStatus={props.requestStatus}
                 ></MoreDialog>
               </Box>
             </Grid>
           </Grid>
         </Box>
       </Paper>
-      {/* <Paper className={classes.paper}>
-        <Grid container>
-          <Grid item xs={12} md={2} className={classes.leftContent}>
-            <Grid container className={classes.userInfoInner}>
-              <Grid item className={classes.userInfo}>
-                <Avatar className={classes.avatarImage}>
-                  {props.userName?.charAt(0)}
-                </Avatar>
-                <Typography className={classes.userName}>
-                  {props.userName}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={10} md={9} className={classes.middleContent}>
-            <Grid container>
-              <Grid item xs={12} md={6}>
-                <Grid container className={classes.leavePeriod}>
-                  <DateFull
-                    className={classes.dateFull}
-                    startDate={props?.startDate}
-                    endDate={props?.endDate}
-                  ></DateFull>
-                </Grid>
-              </Grid>
-              <Grid
-                item
-                className={classes.badgeContainer}
-                xs={5}
-                sm={4}
-                md={2}
-                md={2}
-              >
-                <CustomBadge badgecolor={props.statusTypeColor}>
-                  {" "}
-                  {props.statusTypeContent}
-                </CustomBadge>
-              </Grid>
-              <Grid
-                item
-                className={classes.badgeContainer}
-                xs={3}
-                sm={4}
-                md={2}
-                md={2}
-              >
-                <CustomBadge badgecolor="tomato">
-                  {props.duration + " day"}
-                </CustomBadge>
-              </Grid>
-              <Grid
-                item
-                className={classes.badgeContainer}
-                xs={4}
-                sm={4}
-                md={2}
-              >
-                <CustomBadge badgecolor={props.leaveTypeColor}>
-                  {props.leaveTypeContent}
-                </CustomBadge>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography noWrap className={classes.description}>
-                  {props.description}
-                </Typography>
-              </Grid>
-            </Box>
-          </Grid>
-          <Grid
-            item
-            xs={2}
-            md={1}
-            justifyContent="center"
-            className={classes.rightContent}
-          >
-            <MoreDialog
-              changeFormStatusHandler={props.changeFormStatusHandler}
-              detailHandler={detailHandler}
-              document={props.documentID}
-            ></MoreDialog>
-          </Grid>
-        </Grid>
-      </Paper> */}
+      
     </Box>
   );
 };

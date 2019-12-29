@@ -5,18 +5,14 @@ import {
   Avatar,
   Typography,
   makeStyles,
-  Divider,
   useMediaQuery,
   useTheme,
   IconButton,
-  Fab,
   Box,
   Chip,
   Hidden
 } from "@material-ui/core";
-
 import DateFull from "../date/DateFull";
-import CustomBadge from "../customBadge/CustomBadge";
 import CheckIcon from "@material-ui/icons/Check";
 const useStyles = makeStyles(theme => ({
   request: {
