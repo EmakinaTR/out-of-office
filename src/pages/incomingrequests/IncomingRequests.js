@@ -55,6 +55,7 @@ const orderByFilterOptions = {
 
 };
 
+
 export default function IncomingRequests(props) {
     const classes = useStyles();
     const [dataList, setDataList] = useState();
@@ -186,6 +187,7 @@ export default function IncomingRequests(props) {
                     <Grid item xs={12} lg={8} >
                     <Grid container alignItems="center" spacing={2} className={classes.listControls} wrap="nowrap">
                         <Grid item>
+                            <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={() => { setSnackbarState(false) }}></SnackBar>
                         <SearchFilter
                             onChange={onSearchQueryChange}
                         >
@@ -213,9 +215,7 @@ export default function IncomingRequests(props) {
                 </Grid>
                 </Box>
                 {dataList ? dataList.map((data, index) => {
-                    if(data.status == 0)
                     return (
-                        // <p>{data}</p>
                         <IncomingRequestCard
                             key={index}
                             userName={data?.requesterName}
@@ -223,11 +223,13 @@ export default function IncomingRequests(props) {
                             leaveTypeColor={data?.leaveType.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data?.startDate}
-                            endDate={data?.endDate}
+                            startDate={data?.startDate._seconds * 1000}
+                            endDate={data?.endDate._seconds * 1000}
                             duration={data?.duration}
                             description={data?.description}
                             documentID = {data.id}
+                            requestStatus ={data.status}
+                            createdBy={data.createdBy}
                             changeFormStatusHandler={changeFormStatusHandler}
                         ></IncomingRequestCard>
                     )

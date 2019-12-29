@@ -269,7 +269,7 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
         console.log("Error while form status changing: ", error);
     })
 
-    if(oldStatus === status.WAITING && newStatus == status.APPROVED){
+    if(oldStatus === status.WAITING && newStatus === status.APPROVED){
 
         if(leaveType.effectsTo =="Annual"){
             await _setDocumentField("users", leaveRequest.createdBy, "annualCredit", documentOwner.annualCredit - leaveRequest.duration).then(async response => {
@@ -296,7 +296,7 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
 
     }
 
-    else if (oldStatus === status.APPROVED && newStatus == status.CANCELLED) {
+    else if (oldStatus === status.APPROVED && newStatus === status.CANCELLED) {
         if (leaveType.effectsTo == "Annual") {
             await _setDocumentField("users", documentOwner.id, "annualCredit", documentOwner.annualCredit + leaveRequest.duration).then(async response => {
                 // console.log("Annual credit of user increased : " + documentOwner.annualCredit + leaveRequest.duration);
@@ -311,6 +311,9 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
                 console.log("Error: ", error);
             })
         }
+    }
+    if(oldStatus === status.WAITING && newStatus ===status.CANCELLED){
+        
     }
 
     sendMailtoUser();
