@@ -61,10 +61,12 @@ const leaves = [
 const useStyles = makeStyles(theme => ({
   newRequestButton: {
     width: "100%",
-    padding: theme.spacing(3),
+    padding: theme.spacing(2),
     paddingRight: "0.5rem",
     alignItems: "center",
-    textTransform: "upperCase"
+    textTransform: "upperCase",
+    minHeight:75
+
   },
   newRequestButtonText: {
     flex: 1,
@@ -105,7 +107,7 @@ const Dashboard = () => {
               <Typography className={classes.newRequestButtonText}>
                 {NEW_LEAVE_REQUEST}
               </Typography>
-              <Icon style={{ fontSize: "2rem" }}>add</Icon>
+              <Icon fontSize="large">add</Icon>
             </Button>
           </Grid>
           {/* Remaining Annual Leave */}
@@ -113,6 +115,7 @@ const Dashboard = () => {
             <InfoCard
               text={REMAINING_ANNUAL_LEAVE_REQUEST}
               count={5}
+              color="#008fd4"
             ></InfoCard>
           </Grid>
           {/* Remaining Annual Leave */}
@@ -120,11 +123,12 @@ const Dashboard = () => {
             <InfoCard
               text={REMAINING_CASUAL_LEAVE_REQUEST}
               count={2}
+              color="#ff7f41"
             ></InfoCard>
           </Grid>
           {/* Remaining Annual Leave */}
           <Grid item xs={12} lg={6}>
-            <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
+            <InfoCard text={PENDING_LEAVE_REQUEST} count={1} color="#8cc63f"></InfoCard>
           </Grid>
 
           {/* Incoming Requests - Visible Only For Admin Users */}

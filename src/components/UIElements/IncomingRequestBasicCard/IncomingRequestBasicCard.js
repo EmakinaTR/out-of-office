@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
       textAlign: "center"
     }
   }
-}));
+})); 
 const IncomingRequestBasicCard = props => {
   const classes = useStyles();
   const theme = useTheme();
@@ -59,7 +59,9 @@ const IncomingRequestBasicCard = props => {
                 label={props.duration + " gün"}
               />
               <Chip
-                style={{ backgroundColor: props.leaveTypeColor, color: "#fff" }}
+              variant="outlined"
+                style={{ borderColor: props.leaveTypeColor,
+                  color: props.leaveTypeColor }}
                 size="small"
                 label={props.leaveTypeContent}
               />

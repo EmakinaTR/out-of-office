@@ -130,7 +130,7 @@ export const IncomingRequestCard = props => {
       <Paper>
         <Box padding={2}>
           <Grid container alignItems="center">
-            <Grid item xs={10} lg={11}>
+            <Grid item xs={11} lg={11}>
               <Grid container alignItems="center" spacing={1}>
                 <Grid item xs={12} lg={2}>
                   <Hidden mdDown>
@@ -158,7 +158,7 @@ export const IncomingRequestCard = props => {
                           <Chip
                             size="small"
                             variant="outlined"
-                            label={props.duration + " gün"}
+                            label={props.duration + " day"}
                             style={{ marginRight: ".5rem" }}
                           />
                           <Chip
@@ -198,7 +198,7 @@ export const IncomingRequestCard = props => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={2} lg={1} align="right">
+            <Grid item xs={1} lg={1} align="right">
               {/* <IconButton color="primary" aria-label="Approve" component="span">
             <CheckIcon></CheckIcon>
           </IconButton> */}

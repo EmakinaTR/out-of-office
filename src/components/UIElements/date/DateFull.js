@@ -1,6 +1,6 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
-import { Typography, Box } from "@material-ui/core";
+import { Typography, Box, useMediaQuery, useTheme } from "@material-ui/core";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import { makeStyles } from "@material-ui/styles";
 import PropTypes from "prop-types";
@@ -20,15 +20,18 @@ const useStyles = makeStyles(theme => ({
     }
   },
   dateText: {
-    fontSize: "14px",
+    fontWeight: "normal",
+    fontSize: ".9rem",
     [theme.breakpoints.up("sm")]: {
-      fontSize: "16px"
+      fontSize: "1rem"
     }
   }
 }));
 
 export default function DateFull(props) {
   const classes = useStyles(props);
+  const theme = useTheme();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
   moment.locale();   
   return (
     <Grid
@@ -38,11 +41,23 @@ export default function DateFull(props) {
       wrap="nowrap"
     >
       <Box mr={1}>
-        <Typography className={classes.dateText}>{moment(new Date(props.startDate)).format('lll')}</Typography>
+        <Typography className={classes.dateText}>
+        {isLargeScreen
+            ? moment(new Date(props.startDate)).format("lll")
+            : moment(new Date(props.startDate)).format(
+              "MM/DD/YYYY, H:mm"
+            )}                              
+        </Typography>
       </Box>
-      <ArrowForwardIosIcon className={classes.center} size="medium" />
+      <ArrowForwardIosIcon className={classes.center} style={{ color: "#aaa" }} />
       <Box ml={1}>
-        <Typography className={classes.dateText}>{moment(new Date(props.endDate)).format('lll')}</Typography>
+        <Typography className={classes.dateText}>
+        {isLargeScreen
+            ? moment(new Date(props.endDate)).format("lll")
+            : moment(new Date(props.endDate)).format(
+              "MM/DD/YYYY, H:mm"
+            )}
+            </Typography>
       </Box>
     </Grid>
   );
