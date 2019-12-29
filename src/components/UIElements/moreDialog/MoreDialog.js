@@ -47,7 +47,7 @@ export const MoreDialog = (props)=>{
     }
         return (
             <div>
-                <IconButton ref={anchorRef} aria-controls={openMenu ? 'split-button-menu' : undefined}
+                <IconButton size="small" ref={anchorRef} aria-controls={openMenu ? 'split-button-menu' : undefined}
                         aria-expanded={openMenu ? 'true' : undefined}
                             aria-label="select merge strategy"
                             aria-haspopup="menu"
