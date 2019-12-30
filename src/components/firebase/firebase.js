@@ -149,6 +149,10 @@ export default class Firebase {
     this.db.collection("leaveRequests").add(leaveRequestObj);
   };
 
+  updateLeaveRequest = (uid, leaveRequestObj) => {
+    this.db.collection("leaveRequests").doc(uid).update(leaveRequestObj);
+  }
+
   getSpecificLeaveRequestWithId = (documentId) => {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }

@@ -82,7 +82,6 @@ export default function  LeaveRequestForm(props)  {
 
     const getLeaveTypeName = async (ref) => {
         let firebasePromise = props.firebase.getLeaveTypeOfGivenReference(ref);
-        let a = {};
         if (firebasePromise !== null) {
             await firebasePromise.then(snapshot => {
                 setLeaveType(snapshot.data().name);        
@@ -111,66 +110,66 @@ export default function  LeaveRequestForm(props)  {
     return (
         <Container maxWidth="lg">
             <Box marginY={4}>
-            <Paper className={classes.root}>
-                <form className={classes.form} onSubmit={handleSubmit}>
-                <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Detail</Typography>
-                <Box marginTop={2}>
-                    <TextField className={classes.inputWidth} label="Leave Type" variant="outlined" margin="normal" value={leaveType || ''} InputProps={{readOnly: true,}} />
-                </Box>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} lg={4}>
-                            <TextField className={classes.inputWidth} label="Leave Start" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
-                        </Grid>
-                        <Grid item xs={12} lg={4}>
-                            <TextField className={classes.inputWidth} label="Leave End" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
-                        </Grid>
-                        <Grid item xs={12} lg={4}>
-                            <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value={fields.duration || ''} InputProps={{readOnly: true,}} />
-                        </Grid>
-                    </Grid>
-                    <TextField className={classes.inputWidth} multiline rows="4" label="Description" variant="outlined" margin="normal" value={fields.description || ''}
-                    InputProps={{readOnly: true}}
-                    />
-                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" variant="outlined" value={fields.protocolNumber || ''} InputProps={{readOnly: true,}} />
-                    <Box marginY={1}>
-                        <Typography variant="caption" component="div">Approver</Typography>
-                            {approvers.map((item, index) => {
-                                return  <Box key={index} component="span">
-                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
-                                        </Box>; 
-         
-                            })}
-                    </Box>
-                    <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value={moment(fields.requestedDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
-                    {(isAdmin === false || props.user.id == fields.createdBy) ? 
-                    <Box my={3}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} onClick={editLeaveRequest} variant="contained" size="large" type="submit" color="primary">EDIT</Button>
+                <Paper className={classes.root}>
+                    <form className={classes.form} onSubmit={handleSubmit}>
+                        <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Detail</Typography>
+                        <Box marginTop={2}>
+                            <TextField className={classes.inputWidth} label="Leave Type" variant="outlined" margin="normal" value={leaveType || ''} InputProps={{readOnly: true,}} />
+                        </Box>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} lg={4}>
+                                    <TextField className={classes.inputWidth} label="Leave Start" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                </Grid>
+                                <Grid item xs={12} lg={4}>
+                                    <TextField className={classes.inputWidth} label="Leave End" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                </Grid>
+                                <Grid item xs={12} lg={4}>
+                                    <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value={fields.duration || ''} InputProps={{readOnly: true,}} />
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary">PRINT</Button>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} onClick={cancelLeaveRequest} variant="outlined" size="large">Cancel Request</Button>
-                            </Grid>
-                        </Grid>
-                    </Box>:
-                    <Box my={3}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} onClick={approveLeaveRequest}  variant="contained" size="large" type="submit" color="primary">Approve</Button>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary" >PRINT</Button>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Button className={classes.inputWidth} onClick={rejectLeaveRequest} variant="outlined" size="large">Reject</Button>
-                            </Grid>
-                        </Grid>
-                    </Box>}
-                </form>
-            </Paper>
+                            <TextField className={classes.inputWidth} multiline rows="4" label="Description" variant="outlined" margin="normal" value={fields.description || ''}
+                            InputProps={{readOnly: true}}
+                            />
+                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" variant="outlined" value={fields.protocolNumber || ''} InputProps={{readOnly: true,}} />
+                            <Box marginY={1}>
+                                <Typography variant="caption" component="div">Approver</Typography>
+                                    {approvers.map((item, index) => {
+                                        return  <Box key={index} component="span">
+                                                    <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
+                                                </Box>; 
+                
+                                    })}
+                            </Box>
+                            <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value={moment(fields.requestedDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                            {(isAdmin === false || props.user.id == fields.createdBy) ? 
+                            <Box my={3}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={4}>
+                                        <Button className={classes.inputWidth} onClick={editLeaveRequest} variant="contained" size="large" type="submit" color="primary">EDIT</Button>
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary">PRINT</Button>
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <Button className={classes.inputWidth} onClick={cancelLeaveRequest} variant="outlined" size="large">Cancel Request</Button>
+                                    </Grid>
+                                </Grid>
+                            </Box>:
+                            <Box my={3}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={4}>
+                                        <Button className={classes.inputWidth} onClick={approveLeaveRequest}  variant="contained" size="large" type="submit" color="primary">Approve</Button>
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary" >PRINT</Button>
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <Button className={classes.inputWidth} onClick={rejectLeaveRequest} variant="outlined" size="large">Reject</Button>
+                                    </Grid>
+                                </Grid>
+                            </Box>}
+                    </form>
+                </Paper>
             </Box>
         </Container>
     )

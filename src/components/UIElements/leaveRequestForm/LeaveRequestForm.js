@@ -175,174 +175,172 @@ export default function LeaveRequestForm(props) {
     return (           
         <Container maxWidth="lg">
             <Box marginY={4}>
-                { console.log(screenSize() > 768 ? console.log('768 den büyük') : console.log('768 den küçük'))}
-            <Paper className={classes.root}>
-                <form className={classes.form} onSubmit={handleSubmit}>
-                    <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
-                    <Box marginTop={2}>
-                    <FormControl variant="outlined" className={classes.formControl}>
-                        <InputLabel ref={inputLabel}>Leave Type</InputLabel>
-                        <Select
-                        native
-                        value={state.leaveType}
-                        onChange={handleChange('leaveType')}
-                        labelWidth={labelWidth}
-                        >
-                        <option value="" />
-                        {leaveTypes.map((item, index) => {
-                            return <option key={index} value={index}>{item.name}</option>
-                        })}
-                        </Select>
-                    </FormControl></Box>
-                    <Box display={{xs: 'block', md: 'none'}}>
-                        <TextField
-                        margin="normal"
-                        label="Start Date and Time"
-                        type="datetime-local"
-                        className={classes.inputWidth}
-                        defaultValue={dateTimeLocalStart}
-                        onChange={handleDateTimeLocalStart}
-                        InputLabelProps={{
-                        shrink: true,
-                        }}
-                        />
-                        <TextField
-                        margin="normal"
-                        label="End Date and Time"
-                        type="datetime-local"
-                        defaultValue={dateTimeLocalEnd}
-                        onChange={handleDateTimeLocalEnd}
-                        className={classes.inputWidth}
-                        InputLabelProps={{
-                        shrink: true,
-                        }}
-                        />
-                    </Box>
-                    <Box display={{xs: 'none', md: 'block'}}>
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6}>
-                                    <KeyboardDatePicker
-                                    clearable
-                                    className={classes.inputWidth}
-                                    label="Start Date"
-                                    format='MM/DD/YYYY'
-                                    minDate={moment()}
-                                    margin="normal"
-                                    value={selectedStartDate}
-                                    onChange={handleStartDateChange}
-                                    KeyboardButtonProps={{
-                                        'aria-label': 'change date',
-                                    }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <KeyboardTimePicker
-                                    className={classes.inputWidth}
-                                    margin="normal"
-                                    label="Start Time"
-                                    value={selectedStartDate}
-                                    onChange={handleStartDateChange}
-                                    KeyboardButtonProps={{
-                                        'aria-label': 'change time',
-                                    }}
-                                    />
-                                </Grid>
-                            </Grid>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6}>
-                                    <KeyboardDatePicker
-                                    className={classes.inputWidth}
-                                    label="End Date"
-                                    format='MM/DD/YYYY'
-                                    minDate={moment()}
-                                    margin="normal"
-                                    value={selectedEndDate}
-                                    onChange={handleEndDateChange}
-                                    KeyboardButtonProps={{
-                                        'aria-label': 'change date',
-                                    }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <KeyboardTimePicker
-                                    className={classes.inputWidth}
-                                    margin="normal"
-                                    label="End Time"
-                                    value={selectedEndDate}
-                                    onChange={handleEndDateChange}
-                                    KeyboardButtonProps={{
-                                        'aria-label': 'change time',
-                                    }}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </MuiPickersUtilsProvider>
-                    </Box>
-                    <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
-                    onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
-                    <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                    onChange={handleChange('description')} value={state.description} />
-                    <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                    onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
-                    <Box my={3}>
-                    
-                        <Typography variant="caption" component="div">Approver</Typography>
-
-                           {approvers.map((item, index) => {
-                                return  <Box key={index} component="span">
-                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
-                                        </Box>; 
+                <Paper className={classes.root}>
+                    <form className={classes.form} onSubmit={handleSubmit}>
+                        <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
+                        <Box marginTop={2}>
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <InputLabel ref={inputLabel}>Leave Type</InputLabel>
+                            <Select
+                            native
+                            value={state.leaveType}
+                            onChange={handleChange('leaveType')}
+                            labelWidth={labelWidth}
+                            >
+                            <option value="" />
+                            {leaveTypes.map((item, index) => {
+                                return <option key={index} value={index}>{item.name}</option>
                             })}
-                                                 
-                    </Box>
-                    <Box my={2}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} lg={6}>
-                                <Grid container direction="row" alignItems="center">
-                                <Grid item><Checkbox
-                            id="kvkk"
-                                checked={checked}
-                                onChange={handleCheck}
-                                value={checked}
-                                color="primary"
-                                inputProps={{ 'aria-label': 'primary checkbox' }}
-                                /></Grid> 
-                                <Grid item xs>
-                                <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
-                                <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                    </Grid> 
-                                 </Grid>                            
-                                <Dialog
-                                fullScreen={fullScreen}
-                                open={open}
-                                onClose={handleDialogClose}
-                                aria-labelledby="responsive-dialog-title"
-                                >
-                                    <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Let Google help apps determine location. This means sending anonymous location data to
-                                            Google, even when no apps are running.
-                                        </DialogContentText>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button autoFocus onClick={handleDialogClose} color="primary">
-                                            Disagree
-                                        </Button>
-                                        <Button onClick={handleDialogClose} color="primary" autoFocus>
-                                            Agree
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                            </Select>
+                        </FormControl></Box>
+                        <Box display={{xs: 'block', md: 'none'}}>
+                            <TextField
+                            margin="normal"
+                            label="Start Date and Time"
+                            type="datetime-local"
+                            className={classes.inputWidth}
+                            defaultValue={dateTimeLocalStart}
+                            onChange={handleDateTimeLocalStart}
+                            InputLabelProps={{
+                            shrink: true,
+                            }}
+                            />
+                            <TextField
+                            margin="normal"
+                            label="End Date and Time"
+                            type="datetime-local"
+                            defaultValue={dateTimeLocalEnd}
+                            onChange={handleDateTimeLocalEnd}
+                            className={classes.inputWidth}
+                            InputLabelProps={{
+                            shrink: true,
+                            }}
+                            />
+                        </Box>
+                        <Box display={{xs: 'none', md: 'block'}}>
+                            <MuiPickersUtilsProvider utils={MomentUtils}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={6}>
+                                        <KeyboardDatePicker
+                                        clearable
+                                        className={classes.inputWidth}
+                                        label="Start Date"
+                                        format='MM/DD/YYYY'
+                                        margin="normal"
+                                        value={selectedStartDate}
+                                        onChange={handleStartDateChange}
+                                        KeyboardButtonProps={{
+                                            'aria-label': 'change date',
+                                        }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <KeyboardTimePicker
+                                        className={classes.inputWidth}
+                                        margin="normal"
+                                        label="Start Time"
+                                        value={selectedStartDate}
+                                        onChange={handleStartDateChange}
+                                        KeyboardButtonProps={{
+                                            'aria-label': 'change time',
+                                        }}
+                                        />
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={6}>
+                                        <KeyboardDatePicker
+                                        className={classes.inputWidth}
+                                        label="End Date"
+                                        format='MM/DD/YYYY'
+                                        minDate={selectedStartDate}
+                                        margin="normal"
+                                        value={selectedEndDate}
+                                        onChange={handleEndDateChange}
+                                        KeyboardButtonProps={{
+                                            'aria-label': 'change date',
+                                        }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <KeyboardTimePicker
+                                        className={classes.inputWidth}
+                                        margin="normal"
+                                        label="End Time"
+                                        value={selectedEndDate}
+                                        onChange={handleEndDateChange}
+                                        KeyboardButtonProps={{
+                                            'aria-label': 'change time',
+                                        }}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </MuiPickersUtilsProvider>
+                        </Box>
+                        <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
+                        onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
+                        <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
+                        onChange={handleChange('description')} value={state.description} />
+                        <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
+                        onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
+                        <Box my={3}>
+                        
+                            <Typography variant="caption" component="div">Approver</Typography>
+
+                            {approvers.map((item, index) => {
+                                    return  <Box key={index} component="span">
+                                                <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
+                                            </Box>; 
+                                })}
+                                                    
+                        </Box>
+                        <Box my={2}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} lg={6}>
+                                    <Grid container direction="row" alignItems="center">
+                                    <Grid item><Checkbox
+                                id="kvkk"
+                                    checked={checked}
+                                    onChange={handleCheck}
+                                    value={checked}
+                                    color="primary"
+                                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                                    /></Grid> 
+                                    <Grid item xs>
+                                    <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                    <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                        </Grid> 
+                                    </Grid>                            
+                                    <Dialog
+                                    fullScreen={fullScreen}
+                                    open={open}
+                                    onClose={handleDialogClose}
+                                    aria-labelledby="responsive-dialog-title"
+                                    >
+                                        <DialogTitle id="responsive-dialog-title">{"Use Google's location service?"}</DialogTitle>
+                                        <DialogContent>
+                                            <DialogContentText>
+                                                Let Google help apps determine location. This means sending anonymous location data to
+                                                Google, even when no apps are running.
+                                            </DialogContentText>
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Button autoFocus onClick={handleDialogClose} color="primary">
+                                                Disagree
+                                            </Button>
+                                            <Button onClick={handleDialogClose} color="primary" autoFocus>
+                                                Agree
+                                            </Button>
+                                        </DialogActions>
+                                    </Dialog>
+                                </Grid>
+                                <Grid item xs={12} lg={6}>
+                                    <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} lg={6}>
-                                <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </form>
-            </Paper>
+                        </Box>
+                    </form>
+                </Paper>
             </Box>
         </Container>
     )
