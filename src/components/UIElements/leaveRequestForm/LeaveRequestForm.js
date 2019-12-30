@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'moment-business-days';
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
@@ -70,7 +70,7 @@ export default function LeaveRequestForm(props) {
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
         // I used parseInt to prevent duration to be stringified in firebase
         // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
-        const duration = await moment(selectedEndDate).diff(selectedStartDate, 'days')
+        const duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
         setDuration(duration);
     }
 
