@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef,useContext } from 'react';
 import { Grid, Fab, Grow, Paper, Popper, MenuItem, MenuList, 
     Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,Slide,Button, IconButton } from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { MoreVert, Check, Close, Visibility } from '@material-ui/icons';
 
+import { MoreVert, Check, Close, Visibility, Block, Edit } from '@material-ui/icons';
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -15,6 +15,8 @@ const useStyles = makeStyles(theme => ({
 }));
 export const MoreDialog = (props)=>{
     const classes = useStyles();
+
+
     const [openMenu, setOpenMenu] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [statusType, setStatusType] = useState([]);
@@ -47,7 +49,7 @@ export const MoreDialog = (props)=>{
     }
         return (
             <div>
-                <IconButton ref={anchorRef} aria-controls={openMenu ? 'split-button-menu' : undefined}
+                <IconButton size="small" ref={anchorRef} aria-controls={openMenu ? 'split-button-menu' : undefined}
                         aria-expanded={openMenu ? 'true' : undefined}
                             aria-label="select merge strategy"
                             aria-haspopup="menu"
@@ -86,17 +88,34 @@ export const MoreDialog = (props)=>{
                                 }}
                             >
                                 <Paper>
+                                   
                                     <ClickAwayListener onClickAway={handleCloseMenu}>
                                         <MenuList id="split-button-menu">
-                                            <MenuItem key="1" value="1" onClick={handleApproveReject}>
-                                                <Check htmlColor="green" style={{marginRight:'12px'}}></Check>Approve
-                                            </MenuItem>
-                                            <MenuItem key="2" value="2" onClick={handleApproveReject}>
+                                        {(props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0 ) ?
+                                            (< MenuItem value="1" onClick={handleApproveReject}>
+                                                <Check htmlColor="green" style={{ marginRight: '12px' }}></Check>Approve
+                                            </MenuItem>)
+                                        : undefined}
+                                        {(props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0) ? (
+                                            <MenuItem value="2" onClick={handleApproveReject}>
                                                 <Close htmlColor="red" style={{ marginRight: '12px' }}></Close>Reject
                                             </MenuItem>
-                                            <MenuItem key="3" value="3" onClick={() => props.detailHandler(props.document)}>
+                                        )
+                                        : undefined}
+                                            <MenuItem value="3" onClick={() => props.detailHandler(props.document)}>
                                                 <Visibility htmlColor="primary" style={{ marginRight: '12px' }}></Visibility>Details
                                             </MenuItem>
+                                        {((props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 1)
+                                        ||
+                                            (props.from == "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (<MenuItem value="4" >
+                                            <Block htmlColor="red" style={{ marginRight: '12px' }}></Block>Cancel
+                                            </MenuItem>)
+                                        :undefined}
+                                        {(props.from == "MyRequest" && props.leaveHasntBegin && props.isFormOwner && props.requestStatus === 0) ? 
+                                        (<MenuItem value="4" >
+                                            <Edit htmlColor="primary" style={{ marginRight: '12px' }}></Edit>Edit
+                                        </MenuItem>) 
+                                        : undefined}
                                         </MenuList>
                                     </ClickAwayListener>
                                 </Paper>

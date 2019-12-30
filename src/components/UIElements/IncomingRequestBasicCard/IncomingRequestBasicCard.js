@@ -5,18 +5,14 @@ import {
   Avatar,
   Typography,
   makeStyles,
-  Divider,
   useMediaQuery,
   useTheme,
   IconButton,
-  Fab,
   Box,
   Chip,
   Hidden
 } from "@material-ui/core";
-
 import DateFull from "../date/DateFull";
-import CustomBadge from "../customBadge/CustomBadge";
 import CheckIcon from "@material-ui/icons/Check";
 const useStyles = makeStyles(theme => ({
   request: {
@@ -30,7 +26,7 @@ const useStyles = makeStyles(theme => ({
       textAlign: "center"
     }
   }
-}));
+})); 
 const IncomingRequestBasicCard = props => {
   const classes = useStyles();
   const theme = useTheme();
@@ -63,7 +59,9 @@ const IncomingRequestBasicCard = props => {
                 label={props.duration + " gün"}
               />
               <Chip
-                style={{ backgroundColor: props.leaveTypeColor, color: "#fff" }}
+              variant="outlined"
+                style={{ borderColor: props.leaveTypeColor,
+                  color: props.leaveTypeColor }}
                 size="small"
                 label={props.leaveTypeContent}
               />

@@ -6,12 +6,10 @@ import {
   Typography,
   Grid,
   IconButton,
-  Divider,
   Box,
   Chip,
 } from "@material-ui/core";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import CustomBadge from "../customBadge/CustomBadge";
 
 const useStyles = makeStyles(theme => ({
   request: {

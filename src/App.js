@@ -68,10 +68,11 @@ function App(props) {
       firebaseContext.getCurrentUser(userId).then(async response => {
         const user = response.data();
         if(user) {
-          user.role = getUserRole(user); 
+          user.role = getUserRole(user);
+          user.uid = userId;
           await setCurrentUser(user);
+          isSignedIn = true;
         }
-        isSignedIn = true;
        });
     }    
    
