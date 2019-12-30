@@ -87,14 +87,14 @@ const Dashboard = () => {
   const isAdmin = currentUser.role >= ROLE.APPROVER; 
 
   const _getMyRequests = async () => {   
-    console.log("ID =>", currentUser);
-    await firebaseContext.getMyRequestsC(currentUser.uid,2).then(result => {      
-      //setMyRequests([...result]); 
-      console.log("Res:", result);   
-      firebaseContext.getMyRequestsC(currentUser.uid,2,result.lastDocument).then(result => {
-        console.log("Next Page: ",result )
-      }
-    )});
+    // console.log("ID =>", currentUser);
+    // await firebaseContext.getMyRequestsC(currentUser.uid,2).then(result => {      
+    //   //setMyRequests([...result]); 
+    //   console.log("Res:", result);   
+    //   firebaseContext.getMyRequestsC(currentUser.uid,2,result.lastDocument).then(result => {
+    //     console.log("Next Page: ",result )
+    //   }
+    // )});
   };
   useEffect(() => {
     _getMyRequests();
