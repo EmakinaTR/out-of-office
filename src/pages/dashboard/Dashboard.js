@@ -3,19 +3,18 @@ import InfoCard from "../../components/UIElements/InfoCard/InfoCard";
 import {
   Container,
   Grid,
-  Card,
   Typography,
   Icon,
   Button,
   Box,
-  Paper
+  Paper,
+  Divider
 } from "@material-ui/core";
-
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
 import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
 import { incomingRequestData } from "../../constants/dummyData";
-import RequestedLeaveItem from "../../components/UIElements/RequestedLeaveItem/RequestedLeaveItem";
+import IncomingRequestBasicCard from "../../components/UIElements/IncomingRequestBasicCard/IncomingRequestBasicCard";
 import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
@@ -62,10 +61,12 @@ const leaves = [
 const useStyles = makeStyles(theme => ({
   newRequestButton: {
     width: "100%",
-    padding: theme.spacing(3),
+    padding: theme.spacing(2),
     paddingRight: "0.5rem",
     alignItems: "center",
-    textTransform: "upperCase"
+    textTransform: "upperCase",
+    minHeight:75
+
   },
   newRequestButtonText: {
     flex: 1,
@@ -74,13 +75,14 @@ const useStyles = makeStyles(theme => ({
   listCard: {
     // padding: theme.spacing(3),
     // textAlign: "center"
+  },
+  divider: {
   }
 }));
 
 const Dashboard = () => {  
   const classes = useStyles();
   const incomingRequests = incomingRequestData.slice(0, 5);
-  const firebaseContext = useContext(FirebaseContext);  
   const { currentUser } = useContext(AuthContext);
   const isAdmin = currentUser.role >= ROLE.APPROVER;
 
@@ -105,14 +107,15 @@ const Dashboard = () => {
               <Typography className={classes.newRequestButtonText}>
                 {NEW_LEAVE_REQUEST}
               </Typography>
-              <Icon style={{ fontSize: "2rem" }}>add</Icon>
+              <Icon fontSize="large">add</Icon>
             </Button>
           </Grid>
           {/* Remaining Annual Leave */}
           <Grid item xs={12} lg={6}>
             <InfoCard
               text={REMAINING_ANNUAL_LEAVE_REQUEST}
-              count={currentUser.annualCredit}
+              count={currentUser.annualCredit}             
+              color="#008fd4"
             ></InfoCard>
           </Grid>
           {/* Remaining Casual Leave */}
@@ -120,20 +123,20 @@ const Dashboard = () => {
             <InfoCard
               text={REMAINING_CASUAL_LEAVE_REQUEST}
               count={currentUser.excuseCredit}
+              color="#ff7f41"
             ></InfoCard>
           </Grid>
           {/* Remaining Pending Leave */}
           <Grid item xs={12} lg={6}>
-            <InfoCard text={PENDING_LEAVE_REQUEST} count={1}></InfoCard>
+            <InfoCard text={PENDING_LEAVE_REQUEST} count={1} color="#8cc63f"></InfoCard>
           </Grid>
 
           {/* Incoming Requests - Visible Only For Admin Users */}
           {isAdmin && (
-            <Grid item xs={12} lg={6}>
+            <Grid item xs={12} xl={6}>
               <Paper className={classes.listCard}>
                 <Box
-                  paddingY={1}
-                  paddingX={2}
+                  padding={2}
                   style={{ borderBottom: "solid 1px #ddd" }}
                 >
                   <Box
@@ -145,15 +148,16 @@ const Dashboard = () => {
                     <Box fontWeight={500} fontSize="large">
                       {REQUESTED_LEAVES}
                     </Box>
-
-                    <Button href="#text-buttons" size="small">All</Button>
-                  </Box>
+                    {/* <IconButton color="primary" size="small" aria-label="Approve" component="span">
+        <ChevronRightIcon />
+        </IconButton> */}                    
+                    </Box>
                 </Box>
-                <Box margin={2}>
+                <Box>
                 {incomingRequests.map((data, index) => {
                   return (
-                    <RequestedLeaveItem
-                      key={index}
+                    <div key={index}>
+                    <IncomingRequestBasicCard
                       userName={data.userName}
                       leaveTypeContent={
                         leaveBadges[data.leaveType].badgeContent
@@ -165,19 +169,20 @@ const Dashboard = () => {
                       endDate={data.endDate}
                       duration={data.duration}
                       description={data.description}
-                    ></RequestedLeaveItem>
+                    ></IncomingRequestBasicCard>
+                    <Divider />                    
+                    </div>
                   );
                 })}
                 </Box>
               </Paper>
-            </Grid>
+              </Grid>
           )}
           {/* Last 5 Request */}
-          <Grid item xs={12} lg={isAdmin ? 6 : 12}>
+          <Grid item xs={12} xl={isAdmin ? 6 : 12}>
           <Paper className={classes.listCard}>
                 <Box
-                  paddingY={1}
-                  paddingX={2}
+                  padding={2}
                   style={{ borderBottom: "solid 1px #ddd" }}
                 >
                   <Box
@@ -189,17 +194,19 @@ const Dashboard = () => {
                       <Box fontWeight={500} fontSize="large">
                         {MY_LEAVE_REQUEST}
                       </Box>
-                      <Button href="#text-buttons" size="small">All</Button>
+                      {/* <Button href="#text-buttons" size="small">All</Button> */}
                   </Box>
                 </Box>
-                <Box margin={2}>
+                <Box>
               {leaves.map((leave, index) => {
                 return (
+                  <div key={index}>
                   <LeaveSummaryItem
-                    key={index}
                     leaveType={leave.leaveType}
                     leaveCount={leave.leaveCount}
                   ></LeaveSummaryItem>
+                  <Divider />
+                  </div>
                 );
               })}
               </Box>

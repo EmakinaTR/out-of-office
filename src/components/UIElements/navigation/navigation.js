@@ -58,14 +58,14 @@ const Navigation = props => {
     },
     menuButton: {
       marginRight: theme.spacing(2),
-      [theme.breakpoints.up("sm")]: {
+      [theme.breakpoints.up("md")]: {
         display: "none"
       }
     },
     title: {
       flex: 1,
       textAlign: "center",
-      [theme.breakpoints.up("sm")]: {
+      [theme.breakpoints.up("md")]: {
         textAlign: "left"
       }
     },
@@ -97,7 +97,7 @@ const Navigation = props => {
   const activeIndex = _getCurrentRouteIndex(props.location.pathname);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(activeIndex);
-  const matches = useMediaQuery(theme.breakpoints.up("sm"));
+  const matches = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

@@ -174,15 +174,18 @@ export default function MyRequests(props) {
                     return (
                         <MyRequestsCard
                             key={index}
-                            userName={data.userName}
-                            leaveTypeContent={data.leaveType?.name}
-                            leaveTypeColor={data.leaveType?.color}
+                            userName={data?.requesterName}
+                            leaveTypeContent={data?.leaveType.name}
+                            leaveTypeColor={data?.leaveType.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data.startDate}
-                            endDate={data.endDate}
-                            duration={data.duration}
-                            description={data.description}
+                            startDate={data?.startDate._seconds * 1000}
+                            endDate={data?.endDate._seconds * 1000}
+                            duration={data?.duration}
+                            description={data?.description}
+                            documentID={data.id}
+                            requestStatus={data.status}
+                            createdBy={data.createdBy}
                         ></MyRequestsCard>
                     )
                 })

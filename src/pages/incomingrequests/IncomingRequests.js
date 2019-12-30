@@ -3,7 +3,6 @@ import { Container, Box, Typography, Grid, Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
 import IncomingRequestCard from '../../components/UIElements/incomingRequestCard';
-import { incomingRequestData } from '../../constants/dummyData';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
 import OrderByFilter from '../../components/UIElements/orderByFilter';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
@@ -11,15 +10,28 @@ import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import LaunchScreen from '../../components/UIElements/launchScreen'
 import SnackBar from '../../components/UIElements/snackBar/SnackBar';
-
+import {snackbars}  from '../../constants/snackbarContents'
 
 
 const useStyles = makeStyles(theme => ({
     contentContainer: {
-        padding: "0",
+        // padding:0
     },
     headerContainer: {
-        margin: theme.spacing(2)
+        //margin: theme.spacing(2)
+    },
+    listControls: {
+        '& :first-child': {
+            flexGrow: 1,
+            [theme.breakpoints.up('lg')]: {
+                flexGrow: 0
+            },
+         },
+        justifyContent: "flex-start",
+        [theme.breakpoints.up('lg')]: {
+            justifyContent: "flex-end",
+        },
+        
     }
 }));
 
@@ -42,16 +54,7 @@ const orderByFilterOptions = {
     },
 
 };
-const snackbars = {
-    success: {
-        variant: "success",
-        message: "The request has been approved successfully."
-    },
-    error: {
-        variant: "error",
-        message: "Something went wrong"
-    },
-}
+
 export default function IncomingRequests(props) {
     const classes = useStyles();
     const [dataList, setDataList] = useState();
@@ -172,6 +175,70 @@ export default function IncomingRequests(props) {
 
 
     return (
+        <Container maxWidth="xl">
+        <Box marginY={3}>
+            <Box marginBottom={2}>
+                <Grid container className={classes.headerContainer}  alignItems="center">
+                    <Grid item xs={12} lg={4}>
+                    <Typography variant="h5" component="h2">Incoming Requests</Typography>
+                      
+                    </Grid>
+                    <Grid item xs={12} lg={8} >
+                    <Grid container alignItems="center" spacing={2} className={classes.listControls} wrap="nowrap">
+                        <Grid item>
+                            <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={() => { setSnackbarState(false) }}></SnackBar>
+                        <SearchFilter
+                            onChange={onSearchQueryChange}
+                        >
+                        </SearchFilter>
+                        </Grid>
+                        <Grid item>
+                        <OrderByFilter
+                            options={orderByFilterOptions}
+                            onFilterDirectionChanged={onFilterDirectionChanged}
+                            currentDirection={isDescending}
+                            selectedFilterType={selectedFilterType}
+                            onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
+                        >
+
+                        </OrderByFilter>
+                        </Grid>
+                        <Grid item>
+                        <FilterBox
+                            onFilterBoxClick={onFilterBoxClick}
+                            filterBoxState={filterBoxState}
+                        >
+                        </FilterBox></Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                </Box>
+                {dataList ? dataList.map((data, index) => {
+                    return (
+                        <IncomingRequestCard
+                            key={index}
+                            userName={data?.requesterName}
+                            leaveTypeContent={data?.leaveType.name}
+                            leaveTypeColor={data?.leaveType.color}
+                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
+                            statusTypeColor={statusBadges[parseInt(data.status)].color}
+                            startDate={data?.startDate._seconds * 1000}
+                            endDate={data?.endDate._seconds * 1000}
+                            duration={data?.duration}
+                            description={data?.description}
+                            documentID = {data.id}
+                            requestStatus ={data.status}
+                            createdBy={data.createdBy}
+                            changeFormStatusHandler={changeFormStatusHandler}
+                        ></IncomingRequestCard>
+                    )
+                }) 
+            :
+            <LaunchScreen></LaunchScreen>}
+        </Box>
+        </Container>
+
+/* 
         <Container className={classes.contentContainer}  >
             <Box >
                     <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={()=>{setSnackbarState(false)}}></SnackBar>
@@ -228,6 +295,6 @@ export default function IncomingRequests(props) {
             :
             <LaunchScreen></LaunchScreen>}
             </Box>
-        </Container>
+        </Container> */
     )
 }

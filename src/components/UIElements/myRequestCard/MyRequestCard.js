@@ -1,9 +1,10 @@
-import React from 'react';
-import { Paper, Avatar, Grid, Typography, Fab, Hidden } from '@material-ui/core'
+import React,{useContext} from 'react';
+import { Paper, Avatar, Grid, Typography, Fab, Hidden, Chip, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
-import CustomBadge from '../customBadge/CustomBadge';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DateFull from '../date/DateFull';
+import AuthContext from "../../session";
+import MoreDialog from "../moreDialog";
+import { useHistory } from "react-router-dom";
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
@@ -95,11 +96,90 @@ const useStyles = makeStyles(theme => ({
     },
 
 }));
-export const MyRequestCard = (props) => {
-    const classes = useStyles();
+export const MyRequestCard = props => {
+  const classes = useStyles();
+  const { currentUser } = useContext(AuthContext);
+  let history = useHistory();
+  const detailHandler = document => {
+      history.push({
+          pathname: "/request-detail",
+          search: "?formId=" + document
+      });
+  };
+  return (
+    <Box marginY={2}>
+      <Paper>
+        <Box padding={2}>
+          <Grid container alignItems="center">
+            <Grid item xs={11}>
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs={12} xl={6}>
+                  <DateFull
+                    className={classes.dateFull}
+                    startDate={props.startDate}
+                    endDate={props.endDate}
+                  ></DateFull>
+                </Grid>
+                <Grid item xl={6}>
+                  <Box display="flex" justify="space-between">
+                    <Box flexGrow={1}>
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        label={props.duration + " day"}
+                        style={{ marginRight: ".5rem" }}
+                      />
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        style={{
+                          borderColor: props.leaveTypeColor,
+                          color: props.leaveTypeColor,
+                          marginRight: ".5rem"
+                        }}
+                        label={props.leaveTypeContent}
+                      />
+                    </Box>
+                    <Box>
+                      <Chip
+                        size="small"
+                        style={{
+                          backgroundColor: props.statusTypeColor,
+                          color: "rgba(0,0,0,.7)"
+                        }}
+                        label={props.statusTypeContent}
+                      />
+                    </Box>
+                  </Box>
+                </Grid>
 
-    return (
-        <Paper className={classes.paper}>
+                {props.description ? (
+                  <Grid item xs={12}>
+                    <Typography className={classes.description} variant="body2">
+                      {props.description}
+                    </Typography>
+                  </Grid>
+                ) : null}
+              </Grid>
+            </Grid>
+            <Grid item xs={1} align="right">
+              <Box>
+              <MoreDialog
+                        from="MyRequest"
+                        isFormOwner={props.createdBy === currentUser.uid}
+                        leaveHasntBegin={new Date(props.startDate) >= new Date()}
+                        currentUserRole={currentUser.ROLE}
+                        changeFormStatusHandler={props.changeFormStatusHandler}
+                        detailHandler={detailHandler}
+                        document={props.documentID}
+                        requestStatus={props.requestStatus}
+                    ></MoreDialog>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Paper>
+      {/* <Paper className={classes.paper}>
             <Grid container>
                 <Grid item xs={10} md={11} className={classes.middleContent} >
                     <Grid container>
@@ -127,14 +207,22 @@ export const MyRequestCard = (props) => {
                     </Grid>
                 </Grid>
                 <Grid item item xs={2} md={1} justifyContent="center" className={classes.rightContent} >
-                    <Fab className={classes.moreButton} size="small" >
-                        <MoreVertIcon></MoreVertIcon>
-                    </Fab>
+                    <MoreDialog
+                        from="MyRequest"
+                        isFormOwner={props.createdBy === currentUser.uid}
+                        leaveHasntBegin={new Date(props.startDate) >= new Date()}
+                        currentUserRole={currentUser.ROLE}
+                        changeFormStatusHandler={props.changeFormStatusHandler}
+                        detailHandler={detailHandler}
+                        document={props.documentID}
+                        requestStatus={props.requestStatus}
+                    ></MoreDialog>
                 </Grid>
             </Grid>
 
-        </Paper>
-    );
-}
+        </Paper> */}
+    </Box>
+  );
+};
 
 

@@ -1,11 +1,30 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
+import {
+  Typography,
+  Box,
+  Paper
+} from "@material-ui/core";
+
+
 import PropTypes from "prop-types";
 const useStyles = makeStyles(theme => ({
+  dateCard:{
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center",
+    lineHeight:"1rem"
+  },
+  day: {
+    fontSize:"2rem",
+    lineHeight:"2rem",
+  },
+  month: {
+    textTransform: "uppercase"
+  },
+  hour: {
+    fontSize:".85rem",
+  },
   card: {
     maxWidth: "80px",
     border: "1px solid black",
@@ -16,8 +35,7 @@ const useStyles = makeStyles(theme => ({
     padding: 0
   },
   time: {
-    backgroundColor: "#b3b3b3",
-    borderTop: "1px solid black"
+    backgroundColor: "#b3b3b3"
   },
   lineHeightControl: {
     lineHeight: props => props.textLineHeight,
@@ -29,7 +47,12 @@ export default function DateCalendar(props) {
   const classes = useStyles(props);
 
   return (
-    <Card className={classes.card}>
+    <Box className={classes.dateCard}>
+    <Box className={classes.day}>22</Box>
+    <Box className={classes.month}>Ara</Box>
+    <Box className={classes.hour}>09:00</Box>
+   
+    {/* <Card className={classes.card}>
       <CardContent className={classes.cardContent}>
         <Typography variant="h6" className={classes.lineHeightControl}>
           15
@@ -44,7 +67,8 @@ export default function DateCalendar(props) {
       <Box className={classes.time}>
         <Typography>09:00</Typography>
       </Box>
-    </Card>
+    </Card> */}
+    </Box>
   );
 }
 

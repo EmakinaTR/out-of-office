@@ -14,19 +14,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const customStyles = {
-  infoCountCustomStyle: {
-    fontSize: "2rem"
-  }
-};
-
 const InfoCard = props => {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
       <Typography className={classes.infoText}>{props.text}</Typography>
       <Typography
-        style={customStyles.infoCountCustomStyle}
+        style={{color: props.color, fontSize:"2.6rem", fontWeight:300, lineHeight:"2.6rem"}}
         className={classes.infoCount}
       >
         {props.count}
