@@ -5,10 +5,10 @@ import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
 import MyRequestsCard from '../../components/UIElements/myRequestCard';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
 import OrderByFilter from '../../components/UIElements/orderByFilter';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import LaunchScreen from '../../components/UIElements/launchScreen'
-import { FirebaseContext } from "../../components/firebase";
+import { FirebaseContext } from "../../components/firebase"; 
+import AuthContext from "../../components/session";
 const useStyles = makeStyles(theme => ({
     contentContainer: {
         // padding:0
@@ -49,10 +49,11 @@ function isValidDate(date) {
 }
 export default function MyRequests(props) {
     const firebaseContext = useContext(FirebaseContext);
-    const [dataList, setDataList] = useState();
+    const [dataList, setDataList] = useState([]);
     const [searchQuery, setsearchQuery] = useState('');
     const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
+    const { currentUser } = useContext(AuthContext);
     const classes = useStyles();
     const [filterBoxState, setFilterBoxState] =useState();
     const onFilterBoxClick = (filterBoxState) => {
@@ -71,11 +72,20 @@ export default function MyRequests(props) {
 
     let getMyRequests = async () => {
         let leaveRequestArray = [];
-        await firebaseContext.getMyRequests(5)
+        let lastDocument;
+        const queryData = {
+            filterArray: [
+                { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
+                { fieldPath: "status", condition: "==", value: 0 }
+            ],
+            count: 10,
+            lastDocument: lastDocument
+        };
+        await firebaseContext.getMyRequestsC(queryData, 10)
             .then(result => {
-                console.log(result);
-                setDataList([...result]);
-                console.log(result)
+                console.log(result.data);
+                lastDocument = result.lastDocument;
+                setDataList([...result.data,...dataList]);
 
             });
     }
@@ -171,16 +181,17 @@ export default function MyRequests(props) {
                 {dataList ? dataList.map((data, index) => {
                     // var statusType = statusBadges.find(type => type.id == data.status)
                     // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+
                     return (
                         <MyRequestsCard
                             key={index}
                             userName={data?.requesterName}
-                            leaveTypeContent={data?.leaveType.name}
-                            leaveTypeColor={data?.leaveType.color}
+                            leaveTypeContent={data.leaveType?.name}
+                            leaveTypeColor={data.leaveType?.color}
                             statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
                             statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data?.startDate._seconds * 1000}
-                            endDate={data?.endDate._seconds * 1000}
+                            startDate={data?.startDate.seconds * 1000}
+                            endDate={data?.endDate.seconds * 1000}
                             duration={data?.duration}
                             description={data?.description}
                             documentID={data.id}
