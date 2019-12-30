@@ -1,4 +1,4 @@
-import React,{useContext} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import InfoCard from "../../components/UIElements/InfoCard/InfoCard";
 import {
   Container,
@@ -26,8 +26,7 @@ const REMAINING_CASUAL_LEAVE_REQUEST = "Kalan Mazeret İzni";
 const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
 const MY_LEAVE_REQUEST = "My Leaves";
 const REQUESTED_LEAVES = "Incoming Requests";
-
-
+const LIST_ITEM_COUNT = 5;
 
 // CUSTOM STATIC DATA
 const leaves = [
@@ -58,6 +57,7 @@ const leaves = [
   }
 ];
 
+
 const useStyles = makeStyles(theme => ({
   newRequestButton: {
     width: "100%",
@@ -65,8 +65,7 @@ const useStyles = makeStyles(theme => ({
     paddingRight: "0.5rem",
     alignItems: "center",
     textTransform: "upperCase",
-    minHeight:75
-
+    minHeight: 75
   },
   newRequestButtonText: {
     flex: 1,
@@ -76,23 +75,32 @@ const useStyles = makeStyles(theme => ({
     // padding: theme.spacing(3),
     // textAlign: "center"
   },
-  divider: {
-  }
+  divider: {}
 }));
 
-const Dashboard = () => {  
+const Dashboard = () => {
   const classes = useStyles();
   const incomingRequests = incomingRequestData.slice(0, 5);
   const { currentUser } = useContext(AuthContext);
-  const isAdmin = currentUser.role >= ROLE.APPROVER;
+  const firebaseContext = useContext(FirebaseContext);
+  const [myRequests,setMyRequests] = useState(false);
+  const isAdmin = currentUser.role >= ROLE.APPROVER; 
 
-  const Test = app.functions().httpsCallable('Test');
-  Test().then(function(result) {
-    console.log("Firebase fun ref: ", result);
-  }).catch(error => {
-    console.log("Cloud Func Error: ", error);
-  });
-
+  const _getMyRequests = async () => {   
+    console.log("ID =>", currentUser);
+    await firebaseContext.getMyRequestsC(currentUser.uid,2).then(result => {      
+      //setMyRequests([...result]); 
+      console.log("Res:", result);   
+      firebaseContext.getMyRequestsC(currentUser.uid,2,result.lastDocument).then(result => {
+        console.log("Next Page: ",result )
+      }
+    )});
+  };
+  useEffect(() => {
+    _getMyRequests();
+    // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+    // filterData(dataList, filterBoxState)
+  }, []);
 
   return (
     <Container maxWidth="xl">
@@ -114,7 +122,7 @@ const Dashboard = () => {
           <Grid item xs={12} lg={6}>
             <InfoCard
               text={REMAINING_ANNUAL_LEAVE_REQUEST}
-              count={currentUser.annualCredit}             
+              count={currentUser.annualCredit}
               color="#008fd4"
             ></InfoCard>
           </Grid>
@@ -128,17 +136,18 @@ const Dashboard = () => {
           </Grid>
           {/* Remaining Pending Leave */}
           <Grid item xs={12} lg={6}>
-            <InfoCard text={PENDING_LEAVE_REQUEST} count={1} color="#8cc63f"></InfoCard>
+            <InfoCard
+              text={PENDING_LEAVE_REQUEST}
+              count={1}
+              color="#8cc63f"
+            ></InfoCard>
           </Grid>
 
           {/* Incoming Requests - Visible Only For Admin Users */}
           {isAdmin && (
             <Grid item xs={12} xl={6}>
               <Paper className={classes.listCard}>
-                <Box
-                  padding={2}
-                  style={{ borderBottom: "solid 1px #ddd" }}
-                >
+                <Box padding={2} style={{ borderBottom: "solid 1px #ddd" }}>
                   <Box
                     display="flex"
                     flexDirection="row"
@@ -150,65 +159,64 @@ const Dashboard = () => {
                     </Box>
                     {/* <IconButton color="primary" size="small" aria-label="Approve" component="span">
         <ChevronRightIcon />
-        </IconButton> */}                    
-                    </Box>
-                </Box>
-                <Box>
-                {incomingRequests.map((data, index) => {
-                  return (
-                    <div key={index}>
-                    <IncomingRequestBasicCard
-                      userName={data.userName}
-                      leaveTypeContent={
-                        leaveBadges[data.leaveType].badgeContent
-                      }
-                      leaveTypeColor={leaveBadges[data.leaveType].color}
-                      statusTypeContent={statusBadges[data.status].badgeContent}
-                      statusTypeColor={statusBadges[data.status].color}
-                      startDate={data.startDate}
-                      endDate={data.endDate}
-                      duration={data.duration}
-                      description={data.description}
-                    ></IncomingRequestBasicCard>
-                    <Divider />                    
-                    </div>
-                  );
-                })}
-                </Box>
-              </Paper>
-              </Grid>
-          )}
-          {/* Last 5 Request */}
-          <Grid item xs={12} xl={isAdmin ? 6 : 12}>
-          <Paper className={classes.listCard}>
-                <Box
-                  padding={2}
-                  style={{ borderBottom: "solid 1px #ddd" }}
-                >
-                  <Box
-                    display="flex"
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    >
-                      <Box fontWeight={500} fontSize="large">
-                        {MY_LEAVE_REQUEST}
-                      </Box>
-                      {/* <Button href="#text-buttons" size="small">All</Button> */}
+        </IconButton> */}
                   </Box>
                 </Box>
                 <Box>
-              {leaves.map((leave, index) => {
-                return (
-                  <div key={index}>
-                  <LeaveSummaryItem
-                    leaveType={leave.leaveType}
-                    leaveCount={leave.leaveCount}
-                  ></LeaveSummaryItem>
-                  <Divider />
-                  </div>
-                );
-              })}
+                  {incomingRequests.map((data, index) => {
+                    return (
+                      <div key={index}>
+                        <IncomingRequestBasicCard
+                          userName={data.userName}
+                          leaveTypeContent={
+                            leaveBadges[data.leaveType].badgeContent
+                          }
+                          leaveTypeColor={leaveBadges[data.leaveType].color}
+                          statusTypeContent={
+                            statusBadges[data.status].badgeContent
+                          }
+                          statusTypeColor={statusBadges[data.status].color}
+                          startDate={data.startDate}
+                          endDate={data.endDate}
+                          duration={data.duration}
+                          description={data.description}
+                        ></IncomingRequestBasicCard>
+                        <Divider />
+                      </div>
+                    );
+                  })}
+                </Box>
+              </Paper>
+            </Grid>
+          )}
+          {/* Last 5 Request */}
+          <Grid item xs={12} xl={isAdmin ? 6 : 12}>
+            <Paper className={classes.listCard}>
+              <Box padding={2} style={{ borderBottom: "solid 1px #ddd" }}>
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Box fontWeight={500} fontSize="large">
+                    {MY_LEAVE_REQUEST}
+                  </Box>
+                  {/* <Button href="#text-buttons" size="small">All</Button> */}
+                </Box>
+              </Box>
+              <Box>
+                {leaves.map((leave, index) => {
+                  return (
+                    <div key={index}>
+                      <LeaveSummaryItem
+                        leaveType={leave.leaveType}
+                        leaveCount={leave.leaveCount}
+                      ></LeaveSummaryItem>
+                      <Divider />
+                    </div>
+                  );
+                })}
               </Box>
             </Paper>
           </Grid>
