@@ -71,7 +71,7 @@ export default function MyRequests(props) {
 
     let getMyRequests = async () => {
         let leaveRequestArray = [];
-        await firebaseContext.getMyRequests()
+        await firebaseContext.getMyRequests(5)
             .then(result => {
                 console.log(result);
                 setDataList([...result]);

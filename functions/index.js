@@ -38,10 +38,17 @@ exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
     });
 
-exports.getMyRequests = functions.https.onCall(async (data, context) => {
+exports.getMyRequestsC = functions.https.onCall(async (queryData, context) => {
     const userID = context.auth.uid;
     let leaveRequestArray = [];
-    await admin.firestore().collection('leaveRequests').where("createdBy", "==", userID).get().
+    const collection = admin.firestore().collection('leaveRequests').where("createdBy", "==", userID);
+    let query = _createQuery(collection,queryData)
+    const queryData = data.queryData;
+    if(data.count && data.count > 0) {
+        query = query.limit(data.count);
+    }
+    query = query.where(queryData.fieldPath,queryData.condition,userID)
+    await query.get().
         then(querySnapshot => {
             console.log("izin snapshot", querySnapshot);
             querySnapshot.docs.map(doc => {
@@ -58,6 +65,23 @@ exports.getMyRequests = functions.https.onCall(async (data, context) => {
     }))
     return leaveRequestArray;
 });
+
+const _createQuery = (collectionRef,queryData) => {   
+    let query;   
+    for(const filter of queryData.filterArray) {       
+        collectionRef = collectionRef.where(filter.fieldPath,filter.condition,filter.value);
+        totalCount = collectionRef
+    }
+    query = collectionRef;
+    if(queryData.orderBy && queryData.orderBy.type, queryData.orderBy.fieldPath) {
+        query = query.orderBy(queryData.orderBy.type,queryData.orderBy.fieldPath);
+    }
+    if(queryData.count && queryData.count > 0 && queryData.currentPage) {
+        query = query.startAfter(count * pageNumber - count).limit(count)
+    }      
+    return [collectionRef,query];                                   
+}
+
 
 exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => {
     const documentId = data; 
