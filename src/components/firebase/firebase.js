@@ -195,20 +195,22 @@ export default class Firebase {
 
   getMyRequestsC = (queryData,pageSize = 10) => {    
     const collectionRef = this.db.collection("leaveRequests");
-    return this._createQuery(collectionRef,queryData,10);
+    return this._createQuery(collectionRef,queryData,pageSize);
   };
 
   _createQuery = (collectionRef, queryData,pageSize) => {
     {     
       return new Promise((resolve, reject) => {
         let query;
-        for (const filter of queryData.filterArray) {
-          collectionRef = collectionRef.where(
-            filter.fieldPath,
-            filter.condition,
-            filter.value
-          );
-        }
+        if(queryData.filterArray && queryData.filterArray.length > 0) {
+          for (const filter of queryData.filterArray) {
+            collectionRef = collectionRef.where(
+              filter.fieldPath,
+              filter.condition,
+              filter.value
+            );
+          }
+        }       
         query = collectionRef;
         if (
           (queryData.orderBy && queryData.orderBy.type &&
