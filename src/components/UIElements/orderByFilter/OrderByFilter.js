@@ -27,7 +27,7 @@ export function OrderByFilter(props) {
             <Grid item xs={12}>
                 <ButtonGroup variant="outlined" size="small" ref={anchorRef} aria-label="split button">
                     <Button onClick={props.onFilterDirectionChanged}>
-                        {props.currentDirection ?
+                        {props.A_to_Z ?
                             <ArrowDownward fontSize="small" style={{ marginRight: '12px' }}></ArrowDownward> :
                             <ArrowUpward fontSize="small" style={{ marginRight: '12px' }}></ArrowUpward>
                         }
