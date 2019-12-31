@@ -181,9 +181,9 @@ export default class Firebase {
     return app.firestore.Timestamp.fromDate(momentObj);
   };
 
-  convertFirebaseTimestampToMomentObject = timeStamp => {
-    return timeStamp.toDate(timeStamp);
-  };
+  // convertFirebaseTimestampToMomentObject = timeStamp => {
+  //   return timeStamp.toDate(timeStamp);
+  // };
 
   convertUidToFirebaseRef = uid => {
     return this.db.collection("users").doc(uid);

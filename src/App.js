@@ -7,11 +7,21 @@ import AuthContext from "./components/session";
 import { FirebaseContext } from "../src/components/firebase";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { getUserRole } from "./constants/roles";
+import moment from 'moment-business-days';
+import { HOLIDAYS } from './constants/holidays';
 let isSignedIn = false;
 function App(props) { 
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(false);
   const firebaseContext = useContext(FirebaseContext);
+
+  // Moment week days initialization
+  moment.updateLocale('tr', {
+    holidays: HOLIDAYS,
+    holidayFormat: 'MM-DD',
+    workingWeekdays: [1, 2, 3, 4, 5]
+  });
+
   const signIn = () => {
     firebaseContext.doSignInWithGoogle().then(user => {      
       setLoggedIn(true);

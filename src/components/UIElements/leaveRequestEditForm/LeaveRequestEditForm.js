@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'moment-business-days';
 import React, {useRef, useState, useEffect} from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -77,7 +77,7 @@ export default function LeaveRequestEditForm(props) {
     }
 
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
-        const duration = await moment(selectedEndDate).diff(selectedStartDate, 'days')
+        const duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
         setDuration(duration);
     }
 
@@ -340,9 +340,11 @@ export default function LeaveRequestEditForm(props) {
                        
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                         onChange={handleChange('description')} defaultValue={state.description} value={state.description} InputLabelProps={{shrink: true}} />
-                        
+                        {(state.leaveType === '2') ? 
                         <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                        onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  />
+                        onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  /> : 
+                        ''
+                        }
                         <Box my={3}>
                         
                             <Typography variant="caption" component="div">Approver</Typography>
