@@ -10,6 +10,7 @@ import { getUserRole } from "./constants/roles";
 import moment from 'moment-business-days';
 import { HOLIDAYS } from './constants/holidays';
 let isSignedIn = false;
+
 function App(props) { 
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(false);

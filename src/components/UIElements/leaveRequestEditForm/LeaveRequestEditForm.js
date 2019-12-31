@@ -39,6 +39,8 @@ export default function LeaveRequestEditForm(props) {
     const theme = useTheme();
     // MediaQuery
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+    // Default Date
+    const defaultDate = moment().format('YYYY-MM-DDTHH:mm:ss');
     // States
     const [state, setState] = useState({
         leaveType: '',
@@ -46,14 +48,14 @@ export default function LeaveRequestEditForm(props) {
         protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
-    const [selectedStartDate, setSelectedStartDate] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'));
-    const [selectedEndDate, setSelectedEndDate] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'));
+    const [selectedStartDate, setSelectedStartDate] = useState(defaultDate);
+    const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
-    const [dateTimeLocalStart, setDateTimeLocalStart] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'))
-    const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(moment().format('YYYY-MM-DDTHH:mm:ss'))
+    const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
+    const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     // const [fields, setFields] = useState({});
     // const [leaveType, setLeaveType] = useState('');
     const [docUid, setDocUid] = useState('');
