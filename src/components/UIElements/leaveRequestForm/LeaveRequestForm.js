@@ -239,6 +239,7 @@ export default function LeaveRequestForm(props) {
                                         className={classes.inputWidth}
                                         margin="normal"
                                         label="Start Time"
+                                        // defaultValue={moment('09:00', 'HH:mm')}
                                         value={selectedStartDate}
                                         onChange={handleStartDateChange}
                                         KeyboardButtonProps={{
@@ -281,8 +282,12 @@ export default function LeaveRequestForm(props) {
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
                         onChange={handleChange('description')} value={state.description} />
+                        {(state.leaveType === '2') ? 
                         <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                        onChange={handleChange('protocolNumber')} value={state.protocolNumber} />
+                        onChange={handleChange('protocolNumber')} value={state.protocolNumber} /> : 
+                        ''
+                        }
+                        
                         <Box my={3}>
                         
                             <Typography variant="caption" component="div">Approver</Typography>

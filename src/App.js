@@ -8,6 +8,7 @@ import { FirebaseContext } from "../src/components/firebase";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { getUserRole } from "./constants/roles";
 import moment from 'moment-business-days';
+import { HOLIDAYS } from './constants/holidays';
 let isSignedIn = false;
 function App(props) { 
   const [isLoggedIn, setLoggedIn] = useState(false);
@@ -16,6 +17,8 @@ function App(props) {
 
   // Moment week days initialization
   moment.updateLocale('tr', {
+    holidays: HOLIDAYS,
+    holidayFormat: 'MM-DD',
     workingWeekdays: [1, 2, 3, 4, 5]
   });
 
