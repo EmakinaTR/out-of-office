@@ -173,6 +173,7 @@ export default class Firebase {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }
 
+
   getLeaveTypeOfGivenReference = ref => {
     return this.db.doc(ref).get();
   };
@@ -193,30 +194,24 @@ export default class Firebase {
     return this.db.collection("leaveType").doc(leaveType);
   };
 
-  getMyRequestsC = (userID,count = 20,lastDocument) => {    
+  getMyRequestsC = (queryData,pageSize = 10) => {    
     const collectionRef = this.db.collection("leaveRequests");
-    const queryData = {
-      filterArray: [
-        { fieldPath: "createdBy", condition: "==", value: userID },
-        { fieldPath: "status", condition: "==", value: 0 }
-      ],
-      count: count,
-      lastDocument: lastDocument      
-    };
-    return this._createQuery(collectionRef, queryData);
-  };
+    return this._createQuery(collectionRef,queryData,pageSize);
+  }
 
-  _createQuery = (collectionRef, queryData) => {
+  _createQuery = (collectionRef, queryData,pageSize) => {
     {     
       return new Promise((resolve, reject) => {
         let query;
-        for (const filter of queryData.filterArray) {
-          collectionRef = collectionRef.where(
-            filter.fieldPath,
-            filter.condition,
-            filter.value
-          );
-        }
+        if(queryData.filterArray && queryData.filterArray.length > 0) {
+          for (const filter of queryData.filterArray) {
+            collectionRef = collectionRef.where(
+              filter.fieldPath,
+              filter.condition,
+              filter.value
+            );
+          }
+        }       
         query = collectionRef;
         if (
           (queryData.orderBy && queryData.orderBy.type &&
@@ -228,15 +223,19 @@ export default class Firebase {
           );
         }
         if (queryData.lastDocument) {
-          query = query.startAt(2)
+          query = query.startAfter(queryData.lastDocument)
         }
-        if(queryData.count) {
-          query = query.limit(queryData.count);
+        if (queryData.pageSize) {
+          query = query.limit(queryData.pageSize);
         }
-        query.get().then(querySnapshot => {
+        query.get().then( async querySnapshot => {
           const dataArray = [];         
           for(const doc of querySnapshot.docs) {
-            dataArray.push(doc.data());
+            const leaveDoc = doc.data();
+            await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
+              leaveDoc.leaveType = documentSnapShot.data();
+            })
+            dataArray.push(leaveDoc);
           }
           resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
         });

@@ -19,6 +19,7 @@ import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
 import app from "firebase";
+import moment from "moment";
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
@@ -27,35 +28,6 @@ const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
 const MY_LEAVE_REQUEST = "My Leaves";
 const REQUESTED_LEAVES = "Incoming Requests";
 const LIST_ITEM_COUNT = 5;
-
-// CUSTOM STATIC DATA
-const leaves = [
-  {
-    requesterName: "Efe Uruk",
-    leaveType: "Yıllık İzin",
-    leaveCount: "1,5 gün"
-  },
-  {
-    requesterName: "Doğukan Uçak",
-    leaveType: "Mazeret İzni",
-    leaveCount: "1 gün"
-  },
-  {
-    requesterName: "İlker Ünal",
-    leaveType: "Yıllık İzin",
-    leaveCount: "3 gün"
-  },
-  {
-    requesterName: "Efe Uruk",
-    leaveType: "Yıllık İzin",
-    leaveCount: "1,5 gün"
-  },
-  {
-    requesterName: "Doğukan Uçak",
-    leaveType: "Mazeret İzni",
-    leaveCount: "1 gün"
-  }
-];
 
 
 const useStyles = makeStyles(theme => ({
@@ -83,19 +55,22 @@ const Dashboard = () => {
   const incomingRequests = incomingRequestData.slice(0, 5);
   const { currentUser } = useContext(AuthContext);
   const firebaseContext = useContext(FirebaseContext);
-  const [myRequests,setMyRequests] = useState(false);
+  const [myRequests,setMyRequests] = useState([]);
   const isAdmin = currentUser.role >= ROLE.APPROVER; 
 
-  const _getMyRequests = async () => {   
-    // console.log("ID =>", currentUser);
-    // await firebaseContext.getMyRequestsC(currentUser.uid,2).then(result => {      
-    //   //setMyRequests([...result]); 
-    //   console.log("Res:", result);   
-    //   firebaseContext.getMyRequestsC(currentUser.uid,2,result.lastDocument).then(result => {
-    //     console.log("Next Page: ",result )
-    //   }
-    // )});
-  };
+  const _getMyRequests = async () => {      
+    await firebaseContext.getMyRequestsC({
+      filterArray: [{
+        fieldPath: "createdBy",
+        condition: "==",
+        value: currentUser.uid
+      }],
+      pageSize:LIST_ITEM_COUNT
+    }).then(result => {          
+      setMyRequests([...result.data]);
+    });
+  }
+
   useEffect(() => {
     _getMyRequests();
     // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
@@ -206,12 +181,14 @@ const Dashboard = () => {
                 </Box>
               </Box>
               <Box>
-                {leaves.map((leave, index) => {
+                {myRequests.map((leave, index) => {
                   return (
                     <div key={index}>
                       <LeaveSummaryItem
-                        leaveType={leave.leaveType}
-                        leaveCount={leave.leaveCount}
+                        date={moment(leave.startDate.seconds*1000).toDate()}
+                        statusTypeContent={leave.leaveType.name}
+                        statusTypeColor={leave.leaveType.color}
+                        leaveCount={leave.duration}
                       ></LeaveSummaryItem>
                       <Divider />
                     </div>

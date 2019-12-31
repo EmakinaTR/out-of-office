@@ -10,6 +10,7 @@ import {
   Chip,
 } from "@material-ui/core";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { printDayCount } from "../../../utils/displayUtils";
 
 const useStyles = makeStyles(theme => ({
   request: {
@@ -29,18 +30,14 @@ const LeaveSummaryItem = props => {
           <Grid container spacing={1} alignItems="center">
             <Grid item xs={3}>
                 <DateCalendar
+              date={props.date}
               textFontSize="1rem"
               textLineHeight="1.2rem"
             ></DateCalendar>
             </Grid>
             <Grid item xs={9} className={classes.request}>
-            <Typography>{props.leaveCount}</Typography>
-              <Chip
-                color="primary"
-                size="small"
-                label={props.leaveType}
-              />
-              {/* <Chip variant="outlined" style={{borderColor: props.statusTypeColor,color:props.statusTypeColor}} size="small" label={props.statusTypeContent} /> */}
+  <Typography>{printDayCount(props.leaveCount)}</Typography>              
+              <Chip variant="outlined" style={{borderColor: props.statusTypeColor,color:props.statusTypeColor}} size="small" label={props.statusTypeContent} />
             </Grid>
           </Grid>
         </Box>
@@ -81,7 +78,8 @@ const LeaveSummaryItem = props => {
 
 LeaveSummaryItem.propTypes = {
   leaveType: PropTypes.string,
-  leaveCount: PropTypes.string
+  leaveCount: PropTypes.number,
+  date: PropTypes.instanceOf(Date)
 };
 
 export default LeaveSummaryItem;

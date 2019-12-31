@@ -8,6 +8,7 @@ import {
 
 
 import PropTypes from "prop-types";
+import moment from "moment";
 const useStyles = makeStyles(theme => ({
   dateCard:{
     display:"flex",
@@ -45,12 +46,23 @@ const useStyles = makeStyles(theme => ({
 
 export default function DateCalendar(props) {
   const classes = useStyles(props);
+  const _parseDate = (date) => {   
+    try {
+      const _date = moment(date).format("DD/MMM/YYYY");    
+      return _date.split("/");
+    }
+    catch(error) {
+      console.log("Date Parse Error: ", error);
+      return null;
+    }    
+  }
+  const [day,month,year] = _parseDate(props.date);  
 
   return (
     <Box className={classes.dateCard}>
-    <Box className={classes.day}>22</Box>
-    <Box className={classes.month}>Ara</Box>
-    <Box className={classes.hour}>09:00</Box>
+    <Box className={classes.day}>{day}</Box>
+    <Box className={classes.month}>{month}</Box>
+    <Box className={classes.hour}>{year}</Box>
    
     {/* <Card className={classes.card}>
       <CardContent className={classes.cardContent}>
@@ -69,12 +81,15 @@ export default function DateCalendar(props) {
       </Box>
     </Card> */}
     </Box>
-  );
+  );  
 }
+
+
 
 DateCalendar.propTypes = {
   textFontSize: PropTypes.string,
-  textLineHeight: PropTypes.string
+  textLineHeight: PropTypes.string,
+  date: PropTypes.instanceOf(Date)
 };
 
 DateCalendar.defaultProps = {
