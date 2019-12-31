@@ -59,7 +59,7 @@ export default function IncomingRequests(props) {
     const classes = useStyles();
     const [dataList, setDataList] = useState();
     const [searchQuery, setsearchQuery] = useState('');
-    const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
+    const [A_to_Z, setA_to_Z] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
     const [filterBoxState, setFilterBoxState] = useState(); 
     const [snackbarState, setSnackbarState] = useState(false);
@@ -81,7 +81,7 @@ export default function IncomingRequests(props) {
 
     }
     const onFilterDirectionChanged = (e) => {
-        setIsDescending(isDescending => !isDescending)
+        setA_to_Z(A_to_Z => !A_to_Z)
     }
     const onFilterBoxClick = (filterBoxState) => {
         setFilterBoxState({ ...filterBoxState });
@@ -144,7 +144,7 @@ export default function IncomingRequests(props) {
 
     }
 
-    const sortDataByTypeAscDesc = (isDescending, data, filterType) => {
+    const sortDataByTypeAscDesc = (A_to_Z, data, filterType) => {
         if (!isProcessing) {
             console.log("sort")
             if (data != undefined && data.length > 0) {
@@ -152,7 +152,7 @@ export default function IncomingRequests(props) {
                 console.log(data);
                 console.log(filterType);
                 data.sort(function (a, b) {
-                    if (isDescending) {
+                    if (A_to_Z) {
                         return (b[filterType] > a[filterType]) ? 1 : ((b[filterType] < a[filterType]) ? -1 : 0);
                     } else {
                         return (a[filterType] > b[filterType]) ? 1 : ((a[filterType] < b[filterType]) ? -1 : 0);
@@ -169,9 +169,9 @@ export default function IncomingRequests(props) {
 
     useEffect(() => {
         // getAllLeaveRequests();
-        sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
+        sortDataByTypeAscDesc(A_to_Z, dataList, orderByFilterOptions[selectedFilterType].key);
         filterData(dataList, filterBoxState)
-    }, [selectedFilterType, isDescending, filterBoxState])
+    }, [selectedFilterType, A_to_Z, filterBoxState])
 
 
     return (
@@ -196,7 +196,7 @@ export default function IncomingRequests(props) {
                         <OrderByFilter
                             options={orderByFilterOptions}
                             onFilterDirectionChanged={onFilterDirectionChanged}
-                            currentDirection={isDescending}
+                            A_to_Z={A_to_Z}
                             selectedFilterType={selectedFilterType}
                             onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
                         >

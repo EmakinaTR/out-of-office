@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext} from 'react'
+import React,{useState,useEffect,useContext,useRef} from 'react'
 import { Container, Box, Typography, Grid,Button } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
@@ -9,6 +9,8 @@ import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import LaunchScreen from '../../components/UIElements/launchScreen'
 import { FirebaseContext } from "../../components/firebase"; 
 import AuthContext from "../../components/session";
+
+
 const useStyles = makeStyles(theme => ({
     contentContainer: {
         // padding:0
@@ -51,11 +53,22 @@ export default function MyRequests(props) {
     const firebaseContext = useContext(FirebaseContext);
     const [dataList, setDataList] = useState([]);
     const [searchQuery, setsearchQuery] = useState('');
-    const [isDescending, setIsDescending] = useState(true); // 0 is down direction - 1 is up direction
+    const [A_to_Z, setA_to_Z] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
     const { currentUser } = useContext(AuthContext);
     const classes = useStyles();
     const [filterBoxState, setFilterBoxState] =useState();
+    const [loadMore, setLoadMore] = useState(true);
+    const intitialQueryData = {
+        filterArray: [
+            { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
+            { fieldPath: "status", condition: "==", value: 0 }
+        ],
+        orderBy: { fieldPath: "requestedDate", type: A_to_Z ? "desc": "asc" },
+        pageSize: 10,
+        // lastDocument : lastDocument
+    }
+    const [queryData, setQueryData] = useState(intitialQueryData)
     const onFilterBoxClick = (filterBoxState) => {
         setFilterBoxState({ ...filterBoxState });
     }
@@ -67,84 +80,94 @@ export default function MyRequests(props) {
         setDataList(filteredDataList);
     }
     const onFilterDirectionChanged = (e) => {
-        setIsDescending(isDescending => !isDescending)
+        setA_to_Z(A_to_Z => !A_to_Z)
+        console.log(A_to_Z)
     }
-
-    let getMyRequests = async () => {
-        let leaveRequestArray = [];
-        let lastDocument;
-        const queryData = {
-            filterArray: [
-                { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
-                { fieldPath: "status", condition: "==", value: 0 }
-            ],
-            count: 10,
-            lastDocument: lastDocument
-        };
-        await firebaseContext.getMyRequestsC(queryData, 10)
-            .then(result => {
-                console.log(result.data);
-                lastDocument = result.lastDocument;
-                setDataList([...result.data,...dataList]);
-
+    
+    let getMyRequests = async (loadMore,queryData) => {
+        if(loadMore){
+            await firebaseContext.getMyRequestsC(queryData)
+                .then(result => {
+                    if(result.data.length>0){
+                        setDataList([...result.data, ...dataList]);
+                        setQueryData({ ...queryData, lastDocument: result.lastDocument })
+                        console.log(result.data)
+                    }
+                    else{
+                        setQueryData({lastDocument: "end"})
+                    }
             });
+        }
     }
 
     const onSelectedFilterTypeChanged = (e) => {
         setSelectedFilterType(e.target.value);
-    }
-    const sortDataByTypeAscDesc = (filterBoxState, isDescending, data, filterType) => {
-        if (filterBoxState != undefined && filterBoxState.length != 0) {
-            data = data.filter((item) => {
-                return item.startDate >= filterBoxState.startDate &&
-                    item.endDate <= filterBoxState.endDate;
-            });
-        }
-        data.sort(function (a, b) {
-            if (isDescending) {
-                return (b[filterType] > a[filterType]) ? 1 : ((b[filterType] < a[filterType]) ? -1 : 0);
-            } else {
-                return (a[filterType] > b[filterType]) ? 1 : ((a[filterType] < b[filterType]) ? -1 : 0);
-            }
-        });
-        setDataList([...data]);
+        console.log(selectedFilterType)
     }
 
-    const filterData = (data, filterBoxState) => {
-        if (filterBoxState != undefined && filterBoxState.length != 0) {
-            if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
-                data = data.filter((item) => {
-                    console.log("leavetype")
-                    return filterBoxState.leaveType == item.leaveType;
-                })
-            }
-            if (filterBoxState.startDate != undefined) {
-                data = data.filter((item) => {
-                    console.log("start")
-                    return item.startDate >= filterBoxState.startDate;
-                });
+    
+    // const filterData = (data, filterBoxState) => {
+    //     if (filterBoxState != undefined && filterBoxState.length != 0) {
+    //         if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
+    //             data = data.filter((item) => {
+    //                 console.log("leavetype")
+    //                 return filterBoxState.leaveType == item.leaveType;
+    //             })
+    //         }
+    //         if (filterBoxState.startDate != undefined) {
+    //             data = data.filter((item) => {
+    //                 console.log("start")
+    //                 return item.startDate >= filterBoxState.startDate;
+    //             });
 
-            }
-            if (filterBoxState.endDate != undefined) {
-                data = data.filter((item) => {
-                    console.log("end")
-                    return item.endDate <= filterBoxState.endDate;
-                });
-            }
-        }
-        setDataList([...data]);
-    }
-
+    //         }
+    //         if (filterBoxState.endDate != undefined) {
+    //             data = data.filter((item) => {
+    //                 console.log("end")
+    //                 return item.endDate <= filterBoxState.endDate;
+    //             });
+    //         }
+    //     }
+    //     setDataList([...data]);
+    // }
+   
     useEffect(() => {
-        getMyRequests()
-        // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
-        // filterData(dataList, filterBoxState)
-    }, [selectedFilterType, isDescending, filterBoxState])
+        getMyRequests(loadMore, queryData);
+        setLoadMore(false);
+        console.log("from get")
+    }, [loadMore,queryData]);
+    
+    // useEffect(() => {
+    //     setQueryData(
+    //         { ...queryData,
+    //             // filterArray: [
+    //             //     { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
+    //             //     { fieldPath: "status", condition: "==", value: 0 }
+    //             // ],
+    //             orderBy: { fieldPath: "requestedDate", type: A_to_Z ? "desc" : "asc" },
+    //             lastDocument: undefined
+               
+    //         }
+    //     )
+    //     setLoadMore(true);
+    //     console.log("from use")
+    // }, [ A_to_Z]);
+    
+    useEffect(() => {
+        const list = document.getElementById('list')
+            // list has auto height  
+            window.addEventListener('scroll', () => {
+                if (window.scrollY + window.innerHeight >= list.clientHeight + list.offsetTop) {
+                    setLoadMore(true);
+                }
+            });
+    }, []);
+
     return (
         <Container maxWidth="xl">
         <Box marginY={3}>
             <Box marginBottom={2}>
-                <Grid container className={classes.headerContainer}  alignItems="center">
+                    <Grid container className={classes.headerContainer} alignItems="center" >
                     <Grid item xs={12} lg={4}>
                     <Typography variant="h5" component="h2">My Requests</Typography>
                       
@@ -161,7 +184,7 @@ export default function MyRequests(props) {
                         <OrderByFilter
                             options={orderByFilterOptions}
                             onFilterDirectionChanged={onFilterDirectionChanged}
-                            currentDirection={isDescending}
+                            A_to_Z={A_to_Z}
                             selectedFilterType={selectedFilterType}
                             onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
                         >
@@ -178,30 +201,34 @@ export default function MyRequests(props) {
                     </Grid>
                 </Grid>
                 </Box>
-                {dataList ? dataList.map((data, index) => {
-                    // var statusType = statusBadges.find(type => type.id == data.status)
-                    // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+                    <div id= "list">
+                    {dataList ? dataList.map((data, index) => {
+                        // var statusType = statusBadges.find(type => type.id == data.status)
+                        // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+                        return (
+                            <MyRequestsCard
+                                id={index}
+                                key={index}
+                                userName={data?.requesterName}
+                                leaveTypeContent={data.leaveType?.name}
+                                leaveTypeColor={data.leaveType?.color}
+                                statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
+                                statusTypeColor={statusBadges[parseInt(data.status)].color}
+                                startDate={data?.startDate.seconds * 1000}
+                                endDate={data?.endDate.seconds * 1000}
+                                duration={data?.duration}
+                                description={data?.description}
+                                documentID={data.id}
+                                requestStatus={data.status}
+                                createdBy={data.createdBy}
+                            ></MyRequestsCard>
+                        )
+                    })
+                        :
+                        <LaunchScreen></LaunchScreen>}
+                    </div>
 
-                    return (
-                        <MyRequestsCard
-                            key={index}
-                            userName={data?.requesterName}
-                            leaveTypeContent={data.leaveType?.name}
-                            leaveTypeColor={data.leaveType?.color}
-                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
-                            statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data?.startDate.seconds * 1000}
-                            endDate={data?.endDate.seconds * 1000}
-                            duration={data?.duration}
-                            description={data?.description}
-                            documentID={data.id}
-                            requestStatus={data.status}
-                            createdBy={data.createdBy}
-                        ></MyRequestsCard>
-                    )
-                })
-            :
-                    <LaunchScreen></LaunchScreen>}
+                
             </Box>
         </Container>
     )

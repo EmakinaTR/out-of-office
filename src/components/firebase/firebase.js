@@ -194,14 +194,19 @@ export default class Firebase {
     return this.db.collection("leaveType").doc(leaveType);
   };
 
-  getMyRequestsC = (queryData,pageSize = 10) => {    
+  getMyRequestsC = (queryData) => {  
+    
     const collectionRef = this.db.collection("leaveRequests");
-    return this._createQuery(collectionRef,queryData,pageSize);
-  }
+    return this._createQuery(collectionRef, queryData);
+  };
 
-  _createQuery = (collectionRef, queryData,pageSize) => {
+  _createQuery = (collectionRef, queryData) => {
     {     
+      console.log("hiii",queryData)
       return new Promise((resolve, reject) => {
+        if(queryData.lastDocument != "end"){
+
+       
         let query;
         if(queryData.filterArray && queryData.filterArray.length > 0) {
           for (const filter of queryData.filterArray) {
@@ -239,7 +244,8 @@ export default class Firebase {
           }
           resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
         });
-      });
+      }
+    });
     }
   };
 }
