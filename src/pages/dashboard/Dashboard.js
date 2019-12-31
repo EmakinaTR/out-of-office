@@ -66,8 +66,7 @@ const Dashboard = () => {
         value: currentUser.uid
       }],
       pageSize:LIST_ITEM_COUNT
-    }).then(result => {     
-      console.log("Result::", result.data);
+    }).then(result => {          
       setMyRequests([...result.data]);
     });
   };
