@@ -69,7 +69,8 @@ const Dashboard = () => {
     }).then(result => {          
       setMyRequests([...result.data]);
     });
-  };
+  }
+
   useEffect(() => {
     _getMyRequests();
     // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);

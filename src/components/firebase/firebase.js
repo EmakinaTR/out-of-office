@@ -173,6 +173,7 @@ export default class Firebase {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }
 
+
   getLeaveTypeOfGivenReference = ref => {
     return this.db.doc(ref).get();
   };
@@ -196,7 +197,7 @@ export default class Firebase {
   getMyRequestsC = (queryData,pageSize = 10) => {    
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef,queryData,pageSize);
-  };
+  }
 
   _createQuery = (collectionRef, queryData,pageSize) => {
     {     
