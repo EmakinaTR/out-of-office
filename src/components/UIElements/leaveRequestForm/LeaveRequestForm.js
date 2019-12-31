@@ -72,8 +72,12 @@ export default function LeaveRequestForm(props) {
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
         // I used parseInt to prevent duration to be stringified in firebase
         // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
-        const duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
+        let duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
+        if (await moment(selectedEndDate).diff(moment(selectedStartDate))>7200000 && await moment(selectedEndDate).diff(moment(selectedStartDate))<21600000) {
+            duration += 0.5;
+        }
         setDuration(duration);
+        console.log(moment(selectedEndDate).diff(moment(selectedStartDate)))
     }
 
     // Mobile DateTimePickers
