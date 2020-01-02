@@ -1,5 +1,5 @@
 import React, { useState, useRef,useContext } from 'react';
-import { Grid, Fab, Grow, Paper, Popper, MenuItem, MenuList, 
+import {TextField, Grow, Paper, Popper, MenuItem, MenuList, 
     Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,Slide,Button, IconButton } from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -14,12 +14,16 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 export const MoreDialog = (props)=>{
+
+    const initialState ={
+        approverDescription : '',
+        statusType : undefined,
+    }
     const classes = useStyles();
-
-
     const [openMenu, setOpenMenu] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const [statusType, setStatusType] = useState([]);
+    // const [statusType, setStatusType] = useState([]);
+    const [state, setState] = useState(initialState)
     const anchorRef = useRef(null);
     const handleToggle = () => {
         setOpenMenu(prevOpen => !prevOpen);
@@ -32,19 +36,25 @@ export const MoreDialog = (props)=>{
     };
     const showDialog = () => {
         setOpenDialog(true);
-        setStatusType([]);
+        setState({...state,statusType : undefined});
     };
 
     const closeDialog = () => {
         setOpenDialog(false);
     };
-    const handleApproveReject =(e) => {
+    const handleStatusChange =(e) => {
         setOpenMenu(false);
         showDialog();
-        setStatusType(e.target.value)
+        setState({ ...state, statusType: e.target.value });
     }
+
+    const handleDescriptionChange = (e)=> {
+        setState({ ...state, approverDescription: e.target.value });
+        console.log(state);
+    }
+
     const handleYesClick = ()=> {
-        props.changeFormStatusHandler(props.document,statusType);
+        props.changeFormStatusHandler(props.document, state.statusType, state.approverDescription);
         closeDialog();
     }
         return (
@@ -69,13 +79,24 @@ export const MoreDialog = (props)=>{
                             <DialogContentText id="alert-dialog-slide-description">
                                 Form üzerinde yapmış olduğunuz değişiklikler kalıcı olacaktır. Devam etmek istiyor musunuz ? 
                             </DialogContentText>
+                            <DialogContent>
+                            <TextField
+                                onChange={handleDescriptionChange}
+                                fullWidth
+                                id="outlined-multiline-static"
+                                label="Description"
+                                multiline
+                                rows="4"
+                                variant="outlined"
+                            />
+                            </DialogContent>
                         </DialogContent>
                         <DialogActions>
                             <Button variant="contained" onClick={handleYesClick} color="secondary">
-                                Evet
+                                Done
                             </Button>
                             <Button variant="contained" onClick={closeDialog} color="primary">
-                                Vazgeçtim
+                                Cancel
                             </Button>
                         </DialogActions>
                         </Dialog>
@@ -92,27 +113,28 @@ export const MoreDialog = (props)=>{
                                     <ClickAwayListener onClickAway={handleCloseMenu}>
                                         <MenuList id="split-button-menu">
                                         {(props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0 ) ?
-                                            (< MenuItem value="1" onClick={handleApproveReject}>
+                                            (< MenuItem value="1" onClick={handleStatusChange}>
                                                 <Check htmlColor="green" style={{ marginRight: '12px' }}></Check>Approve
                                             </MenuItem>)
                                         : undefined}
                                         {(props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0) ? (
-                                            <MenuItem value="2" onClick={handleApproveReject}>
+                                            <MenuItem value="2" onClick={handleStatusChange}>
                                                 <Close htmlColor="red" style={{ marginRight: '12px' }}></Close>Reject
                                             </MenuItem>
                                         )
                                         : undefined}
-                                            <MenuItem value="3" onClick={() => props.detailHandler(props.document)}>
+                                            <MenuItem value="4" onClick={() => props.detailHandler(props.document)}>
                                                 <Visibility htmlColor="primary" style={{ marginRight: '12px' }}></Visibility>Details
                                             </MenuItem>
                                         {((props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 1)
                                         ||
-                                            (props.from == "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (<MenuItem value="4" >
+                                            (props.from == "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (
+                                                <MenuItem value="3" onClick={handleStatusChange} >
                                             <Block htmlColor="red" style={{ marginRight: '12px' }}></Block>Cancel
                                             </MenuItem>)
                                         :undefined}
                                         {(props.from == "MyRequest" && props.leaveHasntBegin && props.isFormOwner && props.requestStatus === 0) ? 
-                                        (<MenuItem value="4" >
+                                        (<MenuItem value="5" >
                                             <Edit htmlColor="primary" style={{ marginRight: '12px' }}></Edit>Edit
                                         </MenuItem>) 
                                         : undefined}

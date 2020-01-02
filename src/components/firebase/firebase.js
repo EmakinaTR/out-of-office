@@ -139,12 +139,12 @@ export default class Firebase {
     });
   };
 
-  setLeaveStatus = (documentID, newStatus) => {
+  setLeaveStatus = (documentID, newStatus, description) => {
     return new Promise((resolve, reject) => {
       const changeLeaveStatus = app
         .functions()
         .httpsCallable("changeLeaveStatus");
-      changeLeaveStatus({ documentID: documentID, newStatus: newStatus })
+      changeLeaveStatus({ documentID: documentID, newStatus: newStatus, approverDescription : description })
         .then(result => {
           resolve(result.data);
         })
@@ -195,7 +195,7 @@ export default class Firebase {
   };
 
   getMyRequestsC = (queryData) => {  
-    
+    console.log("getMyRequests Call",queryData)
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef, queryData);
   };

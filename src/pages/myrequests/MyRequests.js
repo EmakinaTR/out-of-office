@@ -34,8 +34,8 @@ const useStyles = makeStyles(theme => ({
 }));
 const orderByFilterOptions = {
     0: {
-        key: 'startDate',
-        name: 'Start Date'
+        key: 'requestedDate',
+        name: 'Requested Date'
     },
     1: {
         key: 'endDate',
@@ -62,7 +62,7 @@ export default function MyRequests(props) {
     const intitialQueryData = {
         filterArray: [
             { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
-            { fieldPath: "status", condition: "==", value: 0 }
+            // // { fieldPath: "status", condition: "==", value: 0 }
         ],
         orderBy: { fieldPath: "requestedDate", type: A_to_Z ? "desc": "asc" },
         pageSize: 10,
@@ -81,29 +81,49 @@ export default function MyRequests(props) {
     }
     const onFilterDirectionChanged = (e) => {
         setA_to_Z(A_to_Z => !A_to_Z)
-        console.log(A_to_Z)
+        setQueryData(
+            {
+                ...queryData,
+                orderBy: { fieldPath: orderByFilterOptions[selectedFilterType].key, type: A_to_Z? "desc": "asc"},
+                lastDocument: undefined,
+
+            }
+        )
+        setDataList([]);
+        setLoadMore(loadMore => !loadMore)
+        console.log("from direction: ",queryData)
     }
-    
-    let getMyRequests = async (loadMore,queryData) => {
+
+    const onSelectedFilterTypeChanged = (e) => {
+        setSelectedFilterType(e.target.value);
+        setQueryData(
+            {
+                ...queryData,
+                orderBy: { fieldPath: orderByFilterOptions[selectedFilterType].key, type: A_to_Z ? "desc" : "asc" },
+                lastDocument: undefined,
+                
+            }
+        )
+        setDataList([]);
+        setLoadMore(loadMore => !loadMore)
+        console.log("from filter type : ", queryData)
+    }
+
+    let getMyRequests = async (loadMore, queryData) => {
         if(loadMore){
-            await firebaseContext.getMyRequestsC(queryData)
+            await firebaseContext.getMyRequestsC(queryData, currentUser.uid)
                 .then(result => {
                     if(result.data.length>0){
                         setDataList([...result.data, ...dataList]);
                         setQueryData({ ...queryData, lastDocument: result.lastDocument })
-                        console.log(result.data)
                     }
                     else{
-                        setQueryData({lastDocument: "end"})
+                        setQueryData({ ...queryData,lastDocument: "end"})
                     }
             });
         }
     }
 
-    const onSelectedFilterTypeChanged = (e) => {
-        setSelectedFilterType(e.target.value);
-        console.log(selectedFilterType)
-    }
 
     
     // const filterData = (data, filterBoxState) => {
@@ -132,33 +152,19 @@ export default function MyRequests(props) {
     // }
    
     useEffect(() => {
+        console.log("from useEffect - 1")
         getMyRequests(loadMore, queryData);
         setLoadMore(false);
-        console.log("from get")
     }, [loadMore,queryData]);
-    
-    // useEffect(() => {
-    //     setQueryData(
-    //         { ...queryData,
-    //             // filterArray: [
-    //             //     { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
-    //             //     { fieldPath: "status", condition: "==", value: 0 }
-    //             // ],
-    //             orderBy: { fieldPath: "requestedDate", type: A_to_Z ? "desc" : "asc" },
-    //             lastDocument: undefined
-               
-    //         }
-    //     )
-    //     setLoadMore(true);
-    //     console.log("from use")
-    // }, [ A_to_Z]);
+   
     
     useEffect(() => {
         const list = document.getElementById('list')
             // list has auto height  
             window.addEventListener('scroll', () => {
                 if (window.scrollY + window.innerHeight >= list.clientHeight + list.offsetTop) {
-                    setLoadMore(true);
+                    setLoadMore(loadMore=> !loadMore);
+                    console.log(loadMore)
                 }
             });
     }, []);

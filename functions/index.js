@@ -253,6 +253,7 @@ const _insertUpdateLog = (documentId, processedBy, processedDate, processStatus)
 exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
     let documentId = data.documentID;
     let newStatus = data.newStatus;
+    let approverDescription = data.approverDescription;
     let documentOwner;
     let oldStatus;
     let leaveRequest;
@@ -292,7 +293,11 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
     }).catch(error => {
         console.log("Error while form status changing: ", error);
     })
-
+    await _setDocumentField("leaveRequests", documentId, "approverDescription", approverDescription).then(async response => {
+        // console.log("Form status has changed from" + oldStatus + " to " + newStatus);
+    }).catch(error => {
+        console.log("Error while description: ", error);
+    })
     if(oldStatus === status.WAITING && newStatus === status.APPROVED){
 
         if(leaveType.effectsTo =="Annual"){
