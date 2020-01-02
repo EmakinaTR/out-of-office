@@ -50,6 +50,8 @@ export default function LeaveRequestForm(props) {
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
+    // Required description check
+    const [isRequired, setIsRequired] = useState(false);
     
     // Handle Methods
     const handleChange = name => event => {
@@ -74,10 +76,12 @@ export default function LeaveRequestForm(props) {
         // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
         let duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
         if (await moment(selectedEndDate).diff(moment(selectedStartDate))>7200000 && await moment(selectedEndDate).diff(moment(selectedStartDate))<21600000) {
+            console.log('START->', selectedStartDate)
+            console.log('END->', selectedEndDate)
             duration += 0.5;
+            console.log("Ekledim");
         }
         setDuration(duration);
-        console.log(moment(selectedEndDate).diff(moment(selectedStartDate)))
     }
 
     // Mobile DateTimePickers
@@ -167,6 +171,10 @@ export default function LeaveRequestForm(props) {
         addResizeEvent();
     }, []);
       
+    const checkIfRequired = (leaveTypeIndex) => {
+        const leaveType = leaveTypes[leaveTypeIndex];
+        return leaveType?.isDescriptionMandatory;
+    }
     
     // Approver obj, it can be changed into props
     const approvers = [
@@ -180,25 +188,28 @@ export default function LeaveRequestForm(props) {
 
     return (           
         <Container maxWidth="lg">
+            {console.log(leaveTypes)}
             <Box marginY={4}>
                 <Paper className={classes.root}>
                     <form className={classes.form} onSubmit={handleSubmit}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
                         <Box marginTop={2}>
-                        <FormControl variant="outlined" className={classes.formControl}>
-                            <InputLabel ref={inputLabel}>Leave Type</InputLabel>
-                            <Select
-                            native
-                            value={state.leaveType}
-                            onChange={handleChange('leaveType')}
-                            labelWidth={labelWidth}
-                            >
-                            <option value="" />
-                            {leaveTypes.map((item, index) => {
-                                return <option key={index} value={index}>{item.name}</option>
-                            })}
-                            </Select>
-                        </FormControl></Box>
+                            <FormControl variant="outlined" className={classes.formControl}>
+                                <InputLabel ref={inputLabel}>Leave Type</InputLabel>
+                                <Select
+                                native
+                                value={state.leaveType}
+                                onChange={handleChange('leaveType')}
+                                labelWidth={labelWidth}
+                                required
+                                >
+                                <option value="" />
+                                {leaveTypes.map((item, index) => {
+                                    return <option key={index} value={index}>{item.name}</option>
+                                })}
+                                </Select>
+                            </FormControl>
+                        </Box>
                         <Box display={{xs: 'block', md: 'none'}}>
                             <TextField
                             margin="normal"
@@ -207,6 +218,7 @@ export default function LeaveRequestForm(props) {
                             className={classes.inputWidth}
                             defaultValue={dateTimeLocalStart}
                             onChange={handleDateTimeLocalStart}
+                            required
                             InputLabelProps={{
                             shrink: true,
                             }}
@@ -218,6 +230,7 @@ export default function LeaveRequestForm(props) {
                             defaultValue={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
+                            required
                             InputLabelProps={{
                             shrink: true,
                             }}
@@ -284,11 +297,14 @@ export default function LeaveRequestForm(props) {
                                 </Grid>
                             </MuiPickersUtilsProvider>
                         </Box>
+                        
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
+                       
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                        onChange={handleChange('description')} value={state.description} />
-                        {(state.leaveType === '2') ? 
+                        onChange={handleChange('description')} value={state.description} required={checkIfRequired(state.leaveType)} />
+
+                        {(state.leaveType == 2) ? 
                         <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
                         onChange={handleChange('protocolNumber')} value={state.protocolNumber} /> : 
                         ''
