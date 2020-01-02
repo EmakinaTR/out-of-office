@@ -20,6 +20,7 @@ import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
 import app from "firebase";
 import moment from "moment";
+import { useHistory } from "react-router-dom";
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
@@ -50,12 +51,21 @@ const useStyles = makeStyles(theme => ({
   divider: {}
 }));
 
+
 const Dashboard = () => {
   const classes = useStyles();
+  let history = useHistory();
+  const detailHandler = document => {
+    history.push({
+      pathname: "/request-detail",
+      search: "?formId=" + document
+    });
+  };
   const incomingRequests = incomingRequestData.slice(0, 5);
   const { currentUser } = useContext(AuthContext);
   const firebaseContext = useContext(FirebaseContext);
   const [myRequests,setMyRequests] = useState([]);
+  const [_incomingRequests,setIncomingRequests] = useState([]);
   const isAdmin = currentUser.role >= ROLE.APPROVER; 
 
   const _getMyRequests = async () => {      
@@ -66,13 +76,25 @@ const Dashboard = () => {
         value: currentUser.uid
       }],
       pageSize:LIST_ITEM_COUNT
-    }).then(result => {          
+    }).then(result => {     
+      console.log("Resu:", result);         
       setMyRequests([...result.data]);
     });
   }
 
+  const _getIncomingRequest = async () => {
+    if(isAdmin) {
+      await firebaseContext.getIncomingRequests(LIST_ITEM_COUNT)
+      .then(result => {                   
+          setIncomingRequests([...result]);     
+      });
+    }   
+  }
+
   useEffect(() => {
     _getMyRequests();
+    _getIncomingRequest();
+
     // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
     // filterData(dataList, filterBoxState)
   }, []);
@@ -138,21 +160,21 @@ const Dashboard = () => {
                   </Box>
                 </Box>
                 <Box>
-                  {incomingRequests.map((data, index) => {
+                  {_incomingRequests.map((data, index) => {
                     return (
                       <div key={index}>
                         <IncomingRequestBasicCard
-                          userName={data.userName}
+                          userName={data.requesterName}
                           leaveTypeContent={
-                            leaveBadges[data.leaveType].badgeContent
+                            data.leaveType.name
                           }
-                          leaveTypeColor={leaveBadges[data.leaveType].color}
+                          leaveTypeColor={data.leaveType.color}
                           statusTypeContent={
                             statusBadges[data.status].badgeContent
                           }
                           statusTypeColor={statusBadges[data.status].color}
-                          startDate={data.startDate}
-                          endDate={data.endDate}
+                          startDate={moment(data.startDate._seconds*1000).toDate()}
+                          endDate={moment(data.endDate._seconds*1000).toDate()}
                           duration={data.duration}
                           description={data.description}
                         ></IncomingRequestBasicCard>
@@ -189,6 +211,7 @@ const Dashboard = () => {
                         statusTypeContent={leave.leaveType.name}
                         statusTypeColor={leave.leaveType.color}
                         leaveCount={leave.duration}
+                        onItemClick={() => detailHandler(leave.id)}
                       ></LeaveSummaryItem>
                       <Divider />
                     </div>

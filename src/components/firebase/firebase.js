@@ -99,11 +99,11 @@ export default class Firebase {
     return this.db.collection("leaveRequests").get();
   };
 
-  getIncomingRequests = () => {
+  getIncomingRequests = (pageSize = 10) => {
     return new Promise((resolve, reject) => {
-      const getTeamLeaves = app.functions().httpsCallable("getTeamLeavesC");
-      getTeamLeaves()
-        .then(result => {
+      const getTeamLeaves = app.functions().httpsCallable("getTeamLeavesTT");
+      getTeamLeaves({pageSize: pageSize})
+        .then(result => {        
           resolve(result.data);
         })
         .catch(error => {
@@ -237,6 +237,7 @@ export default class Firebase {
           const dataArray = [];         
           for(const doc of querySnapshot.docs) {
             const leaveDoc = doc.data();
+            leaveDoc.id = doc.id;
             await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
               leaveDoc.leaveType = documentSnapShot.data();
             })
