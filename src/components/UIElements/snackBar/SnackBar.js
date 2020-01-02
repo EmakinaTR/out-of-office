@@ -113,7 +113,7 @@ export default function CustomizedSnackbars(props) {
             >
                 <MySnackbarContentWrapper
                     onClose={handleClose}
-                    variant={props.snackbarType.variant}
+                    variant={props.snackbarType.variant ? props.snackbarType.variant  : "success" }
                     message={props.snackbarType.message}
                 />
             </Snackbar>

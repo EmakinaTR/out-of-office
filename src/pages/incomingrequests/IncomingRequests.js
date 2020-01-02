@@ -89,13 +89,12 @@ export default function IncomingRequests(props) {
     const onSelectedFilterTypeChanged = (e) => {
         setSelectedFilterType(e.target.value);
     }
-    const changeFormStatusHandler = async (documentID, type) => {
-        await firebaseContext.setLeaveStatus(documentID, type)
+    const changeFormStatusHandler = async (documentID, type,description) => {
+        await firebaseContext.setLeaveStatus(documentID, type ,description)
             .then(()=>{
                 
                 setSnackbarState(true);
                 setSnackbarType(snackbars.success);
-                console.log("from then");
                 setDataList(dataList.filter(function (obj) {
                     return obj.id !== documentID;
                 }))
@@ -220,8 +219,8 @@ export default function IncomingRequests(props) {
                             userName={data?.requesterName}
                             leaveTypeContent={data?.leaveType.name}
                             leaveTypeColor={data?.leaveType.color}
-                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
-                            statusTypeColor={statusBadges[parseInt(data.status)].color}
+                            statusTypeContent={statusBadges[parseInt(data.status)]?.badgeContent}
+                            statusTypeColor={statusBadges[parseInt(data.status)]?.color}
                             startDate={data?.startDate._seconds * 1000}
                             endDate={data?.endDate._seconds * 1000}
                             duration={data?.duration}
