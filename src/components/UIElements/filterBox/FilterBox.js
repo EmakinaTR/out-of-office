@@ -1,12 +1,13 @@
-import React, { useState,useRef,useEffect} from 'react';
-import { Grid, Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem, Badge, IconButton, Box} from '@material-ui/core';
+import React, { useState,useRef,useContext} from 'react';
+import { Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem, Badge, IconButton, Box} from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { statusBadges, leaveBadges } from '../../../constants/badgeTypes';
+import { leaveBadges } from '../../../constants/badgeTypes';
 import { KeyboardDatePicker, MuiPickersUtilsProvider, KeyboardTimePicker } from '@material-ui/pickers';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import moment from 'moment';
 import MomentUtils from '@date-io/moment';
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -48,13 +49,12 @@ export function FilterBox(props) {
     }
     const handleStartDateChange = date => {
         setState({
-            ...state, startDate: date.toJSON()
+            ...state, startDate: date._d
         });
-      
     }
     const handleEndDateChange = date => {
         setState({
-            ...state, endDate: date.toJSON()
+            ...state, endDate: date._d
         });
     }
     const handleToggle = () => {

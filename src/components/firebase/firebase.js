@@ -195,7 +195,6 @@ export default class Firebase {
   };
 
   getMyRequestsC = (queryData) => {  
-    console.log("getMyRequests Call",queryData)
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef, queryData);
   };
@@ -205,8 +204,6 @@ export default class Firebase {
       console.log("hiii",queryData)
       return new Promise((resolve, reject) => {
         if(queryData.lastDocument != "end"){
-
-       
         let query;
         if(queryData.filterArray && queryData.filterArray.length > 0) {
           for (const filter of queryData.filterArray) {
@@ -233,10 +230,13 @@ export default class Firebase {
         if (queryData.pageSize) {
           query = query.limit(queryData.pageSize);
         }
+        console.log(query)
         query.get().then( async querySnapshot => {
-          const dataArray = [];         
+          const dataArray = [];
+          console.log(querySnapshot)     
           for(const doc of querySnapshot.docs) {
             const leaveDoc = doc.data();
+            console.log(doc.data())
             await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
               leaveDoc.leaveType = documentSnapShot.data();
             })

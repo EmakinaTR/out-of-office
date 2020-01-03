@@ -34,8 +34,8 @@ const useStyles = makeStyles(theme => ({
 }));
 const orderByFilterOptions = {
     0: {
-        key: 'requestedDate',
-        name: 'Requested Date'
+        key: 'startDate',
+        name: 'Start Date'
     },
     1: {
         key: 'endDate',
@@ -64,14 +64,32 @@ export default function MyRequests(props) {
             { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
             // // { fieldPath: "status", condition: "==", value: 0 }
         ],
-        orderBy: { fieldPath: "requestedDate", type: A_to_Z ? "desc": "asc" },
+        orderBy: { fieldPath: "startDate", type: A_to_Z ? "desc": "asc" },
         pageSize: 10,
         // lastDocument : lastDocument
     }
     const [queryData, setQueryData] = useState(intitialQueryData)
+
     const onFilterBoxClick = (filterBoxState) => {
-        setFilterBoxState({ ...filterBoxState });
+        // setFilterBoxState({ ...filterBoxState });
+        // console.log(filterBoxState)
+        var reference = firebaseContext.db.collection("leaveType");
+        // filterBoxState.leaveType ? (leaveTypeRef.0 ):undefined
+        setQueryData(
+            {
+                ...queryData,
+                filterArray: [
+                    { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
+                    filterBoxState.leaveType ? ({ fieldPath: "leaveTypeRef", condition: "==", value: reference.doc(filterBoxState.leaveType)}) : undefined,
+                    filterBoxState.startDate ? { fieldPath: "startDate", condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filterBoxState.startDate))} : undefined,
+                    // filterBoxState.endDate ? { fieldPath: "startDate", condition: "<=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filterBoxState.endDate))} : undefined
+                ],
+                lastDocument: undefined
+            }
+        )
+        setLoadMore(true)
     }
+
     const onSearchQueryChange = (value) => {
         let filteredDataList = dataList;
         filteredDataList = filteredDataList.filter((data) => {
@@ -91,7 +109,7 @@ export default function MyRequests(props) {
         )
         setDataList([]);
         setLoadMore(loadMore => !loadMore)
-        console.log("from direction: ",queryData)
+        // console.log("from direction: ",queryData)
     }
 
     const onSelectedFilterTypeChanged = (e) => {
@@ -106,14 +124,17 @@ export default function MyRequests(props) {
         )
         setDataList([]);
         setLoadMore(loadMore => !loadMore)
-        console.log("from filter type : ", queryData)
+        // console.log("from filter type : ", queryData)
     }
 
     let getMyRequests = async (loadMore, queryData) => {
+        console.log("getMyReq")
         if(loadMore){
+            console.log("inside")
             await firebaseContext.getMyRequestsC(queryData, currentUser.uid)
                 .then(result => {
                     if(result.data.length>0){
+                        console.log(result.data)
                         setDataList([...result.data, ...dataList]);
                         setQueryData({ ...queryData, lastDocument: result.lastDocument })
                     }
@@ -124,38 +145,12 @@ export default function MyRequests(props) {
         }
     }
 
-
-    
-    // const filterData = (data, filterBoxState) => {
-    //     if (filterBoxState != undefined && filterBoxState.length != 0) {
-    //         if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
-    //             data = data.filter((item) => {
-    //                 console.log("leavetype")
-    //                 return filterBoxState.leaveType == item.leaveType;
-    //             })
-    //         }
-    //         if (filterBoxState.startDate != undefined) {
-    //             data = data.filter((item) => {
-    //                 console.log("start")
-    //                 return item.startDate >= filterBoxState.startDate;
-    //             });
-
-    //         }
-    //         if (filterBoxState.endDate != undefined) {
-    //             data = data.filter((item) => {
-    //                 console.log("end")
-    //                 return item.endDate <= filterBoxState.endDate;
-    //             });
-    //         }
-    //     }
-    //     setDataList([...data]);
-    // }
-   
     useEffect(() => {
         console.log("from useEffect - 1")
+        console.log(queryData);
         getMyRequests(loadMore, queryData);
         setLoadMore(false);
-    }, [loadMore,queryData]);
+    }, [loadMore]);
    
     
     useEffect(() => {
@@ -211,6 +206,7 @@ export default function MyRequests(props) {
                     {dataList ? dataList.map((data, index) => {
                         // var statusType = statusBadges.find(type => type.id == data.status)
                         // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+                        // {console.log(data.startDate)}
                         return (
                             <MyRequestsCard
                                 id={index}
