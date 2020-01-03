@@ -99,10 +99,10 @@ export default class Firebase {
     return this.db.collection("leaveRequests").get();
   };
 
-  getIncomingRequests = (pageSize = 10) => {
+  getIncomingRequests = (queryData) => {
     return new Promise((resolve, reject) => {
-      const getTeamLeaves = app.functions().httpsCallable("getTeamLeavesTT");
-      getTeamLeaves({pageSize: pageSize})
+      const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
+      getTeamLeaves({queryData: queryData})
         .then(result => {        
           resolve(result.data);
         })
@@ -126,18 +126,18 @@ export default class Firebase {
     });
   };
 
-  getMyRequests = (count = 20) => {
-    return new Promise((resolve, reject) => {
-      const getMyRequests = app.functions().httpsCallable("getMyRequests");
-      getMyRequests({ count: count })
-        .then(result => {
-          resolve(result.data);
-        })
-        .catch(error => {
-          reject(error);
-        });
-    });
-  };
+  // getMyRequests = (count = 20) => {
+  //   return new Promise((resolve, reject) => {
+  //     const getMyRequests = app.functions().httpsCallable("getMyRequests");
+  //     getMyRequests({ count: count })
+  //       .then(result => {
+  //         resolve(result.data);
+  //       })
+  //       .catch(error => {
+  //         reject(error);
+  //       });
+  //   });
+  // };
 
   setLeaveStatus = (documentID, newStatus, description) => {
     return new Promise((resolve, reject) => {
@@ -194,7 +194,7 @@ export default class Firebase {
     return this.db.collection("leaveType").doc(leaveType);
   };
 
-  getMyRequestsC = (queryData) => {  
+  getMyRequests = (queryData) => {  
     console.log("getMyRequests Call",queryData)
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef, queryData);
