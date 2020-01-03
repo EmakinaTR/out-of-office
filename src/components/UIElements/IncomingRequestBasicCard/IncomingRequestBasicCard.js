@@ -13,6 +13,7 @@ import {
   Hidden
 } from "@material-ui/core";
 import DateFull from "../date/DateFull";
+import MoreDialog from "../moreDialog";
 import CheckIcon from "@material-ui/icons/Check";
 const useStyles = makeStyles(theme => ({
   request: {
@@ -26,14 +27,19 @@ const useStyles = makeStyles(theme => ({
       textAlign: "center"
     }
   }
-})); 
+}));
 const IncomingRequestBasicCard = props => {
   const classes = useStyles();
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   return (
     <Box padding={2}>
-      <Box display="flex" flexDirection="row" alignItems="center" style={{minHeight:"5rem"}}>
+      <Box
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+        style={{ minHeight: "5rem" }}
+      >
         <Box flexGrow={1}>
           <Grid container spacing={isLargeScreen ? 1 : 0} alignItems="center">
             <Grid item xs={12} lg={3}>
@@ -59,9 +65,11 @@ const IncomingRequestBasicCard = props => {
                 label={props.duration + " gün"}
               />
               <Chip
-              variant="outlined"
-                style={{ borderColor: props.leaveTypeColor,
-                  color: props.leaveTypeColor }}
+                variant="outlined"
+                style={{
+                  borderColor: props.leaveTypeColor,
+                  color: props.leaveTypeColor
+                }}
                 size="small"
                 label={props.leaveTypeContent}
               />
@@ -70,11 +78,11 @@ const IncomingRequestBasicCard = props => {
           </Grid>
         </Box>
         <Box>
-          <IconButton color="primary" aria-label="Approve" component="span">
+          <IconButton onClick={props.onApproveClick} color="primary" aria-label="Approve" component="span">
             <CheckIcon></CheckIcon>
           </IconButton>
         </Box>
-      </Box>
+      </Box>     
     </Box>
   );
 };
