@@ -245,8 +245,10 @@ const _isApprover = (user) => {
     return user.isApprover === true;
 }
 
-const _createQuery = (collectionRef, queryData = {}) => {
-    {     
+const _createQuery = (collectionRef, queryData) => {    
+      if(!queryData) {
+          queryData = {};
+      }            
       console.log("hiii",queryData)
       return new Promise((resolve, reject) => {
         if(queryData.lastDocument != "end"){       
@@ -289,8 +291,7 @@ const _createQuery = (collectionRef, queryData = {}) => {
           resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
         });
       }
-    });
-    }
+    });    
   };
 
 exports.Test = functions.https.onCall(async (data, context) => {
