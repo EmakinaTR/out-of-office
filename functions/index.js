@@ -38,12 +38,12 @@ exports.onTeamLeadChange = functions.firestore.document('teams/{leadUser}')
             .catch(err => console.log(err))
     });
 
-exports.getMyRequestsC = functions.https.onCall(async (queryData, context) => {
+exports.getMyRequests = functions.https.onCall(async (queryData, context) => {
     const userID = context.auth.uid;
     let leaveRequestArray = [];
     const collection = admin.firestore().collection('leaveRequests').where("createdBy", "==", userID);
     let query = _createQuery(collection,queryData)
-    const queryData = data.queryData;
+    queryData = data.queryData;
     if(data.count && data.count > 0) {
         query = query.limit(data.count);
     }
@@ -66,21 +66,21 @@ exports.getMyRequestsC = functions.https.onCall(async (queryData, context) => {
     return leaveRequestArray;
 });
 
-const _createQuery = (collectionRef,queryData) => {   
-    let query;   
-    for(const filter of queryData.filterArray) {       
-        collectionRef = collectionRef.where(filter.fieldPath,filter.condition,filter.value);
-        totalCount = collectionRef
-    }
-    query = collectionRef;
-    if(queryData.orderBy && queryData.orderBy.type, queryData.orderBy.fieldPath) {
-        query = query.orderBy(queryData.orderBy.type,queryData.orderBy.fieldPath);
-    }
-    if(queryData.count && queryData.count > 0 && queryData.currentPage) {
-        query = query.startAfter(count * pageNumber - count).limit(count)
-    }      
-    return [collectionRef,query];                                   
-}
+// const _createQuery = (collectionRef,queryData) => {   
+//     let query;   
+//     for(const filter of queryData.filterArray) {       
+//         collectionRef = collectionRef.where(filter.fieldPath,filter.condition,filter.value);
+//         totalCount = collectionRef
+//     }
+//     query = collectionRef;
+//     if(queryData.orderBy && queryData.orderBy.type, queryData.orderBy.fieldPath) {
+//         query = query.orderBy(queryData.orderBy.type,queryData.orderBy.fieldPath);
+//     }
+//     if(queryData.count && queryData.count > 0 && queryData.currentPage) {
+//         query = query.startAfter(count * pageNumber - count).limit(count)
+//     }      
+//     return [collectionRef,query];                                   
+// }
 
 
 exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => {
@@ -101,43 +101,55 @@ exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => 
 });
 
 
-exports.getTeamLeavesC = functions.https.onCall(async (data, context) => {
-        const userId = context.auth.uid;
-        const user = await _getUser(userId);        
-        const leaveRequestArray = await _getLeaves(userId,_isAdmin(user));
-        console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
-        if (leaveRequestArray.length > 0) {
-            await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
-                await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
-                    item.leaveType = documentSnapshot.data();
-                });
-            }))
-        }    
-        console.log("LEAVE ARRAY AFTER:", leaveRequestArray);
-    return leaveRequestArray;
+// exports.getTeamLeavesC = functions.https.onCall(async (data, context) => {
+//         const userId = context.auth.uid;
+//         const user = await _getUser(userId);        
+//         const leaveRequestArray = await _getLeaves(userId,_isAdmin(user));
+//         console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
+//         if (leaveRequestArray.length > 0) {
+//             await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+//                 await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+//                     item.leaveType = documentSnapshot.data();
+//                 });
+//             }))
+//         }    
+//         console.log("LEAVE ARRAY AFTER:", leaveRequestArray);
+//     return leaveRequestArray;
+// });
+
+// Team Leaves Test Method
+exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
+    const userId = context.auth.uid;
+    const user = await _getUser(userId);        
+    const leaveRequestArray = await _getLeaves(userId,_isAdmin(user),data.queryData);
+    console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
+    if (leaveRequestArray.length > 0) {
+        await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+            await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
+                item.leaveType = documentSnapshot.data();
+            });
+        }))
+    }    
+    console.log("LEAVE ARRAY AFTER:", leaveRequestArray);
+return leaveRequestArray;
 });
 
-const _getLeaves = async (userid, isAdmin = false) => {
+const _getLeaves = async (userid, isAdmin = false,queryData) => {
     let leaves = []
     if (isAdmin) {
-        leaves = _getAdminLeaves();
+        leaves = _getAdminLeaves(queryData);
     } else {
-        leaves = _getTeamLeaves(userid);
+        leaves = _getTeamLeaves(userid,queryData);
     }    
     return leaves;
 }
 
-const _getTeamLeaves = async (userid) => {
+const _getTeamLeaves = async (userid,queryData) => {
     const leaveRequestArray = [];
     let teamMemmbers = [];
-    await admin.firestore().collection('teams').where('leadUser', "==", userid).get()
-        .then(snapshot => {
-            if (!snapshot.empty) { // If he/she is, get members of the team
-                teamMemmbers = snapshot.docs[0].data().members;
-            } else {
-                return null;
-            }
-
+    const collection = admin.firestore().collection('teams').where('leadUser', "==", userid);
+    await _createQuery(collection,queryData).then(response => {
+          teamMemmbers = response;
         }).catch(err => console.log(err))
     if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
         await Promise.all(teamMemmbers.map(async (member) => {
@@ -154,17 +166,59 @@ const _getTeamLeaves = async (userid) => {
     }
     return leaveRequestArray;
 }
-const _getAdminLeaves = async(userid) => {
-    const leaveRequestArray = [];
-    await admin.firestore().collection('leaveRequests').get().then(querySnapshot => {
-        querySnapshot.docs.map(doc => {
-            const docObject = doc.data();
-            docObject.id = doc.id;
-            leaveRequestArray.push(docObject);
-        })
-    }).catch(err => { return null; });
+const _getAdminLeaves = async(queryData) => {
+    let leaveRequestArray = [];    
+    const collection = admin.firestore().collection("leaveRequests");
+    await _createQuery(collection,queryData).then(response => {
+        leaveRequestArray = response.data;
+    })   
     return leaveRequestArray;
 }
+
+const _getSpecificLeaveType = docReference => {
+    return admin.firestore().doc(docReference).get();
+  };
+
+// Test Methods End
+
+// const _getLeaves = async (userid, isAdmin = false) => {
+//     let leaves = []
+//     if (isAdmin) {
+//         leaves = _getAdminLeaves();
+//     } else {
+//         leaves = _getTeamLeaves(userid);
+//     }    
+//     return leaves;
+// }
+
+// const _getTeamLeaves = async (userid) => {
+//     const leaveRequestArray = [];
+//     let teamMemmbers = [];
+//     await admin.firestore().collection('teams').where('leadUser', "==", userid).get()
+//         .then(snapshot => {
+//             if (!snapshot.empty) { // If he/she is, get members of the team
+//                 teamMemmbers = snapshot.docs[0].data().members;
+//             } else {
+//                 return null;
+//             }
+
+//         }).catch(err => console.log(err))
+//     if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
+//         await Promise.all(teamMemmbers.map(async (member) => {
+//             await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
+//                 then(querySnapshot => {
+//                     querySnapshot.docs.map(doc => {
+//                         const docObject = doc.data();
+//                         docObject.id = doc.id;
+//                         leaveRequestArray.push(docObject);
+
+//                     })
+//                 }).catch(err => { return null; });
+//         }))
+//     }
+//     return leaveRequestArray;
+// }
+
 const _getUser = (userid) => {
     return new Promise((resolve, reject) => {
         admin.firestore().doc(`users/${userid}`).get().then(response => {
@@ -190,6 +244,54 @@ const _isAdmin = (user) => {
 const _isApprover = (user) => {
     return user.isApprover === true;
 }
+
+const _createQuery = (collectionRef, queryData = {}) => {
+    {     
+      console.log("hiii",queryData)
+      return new Promise((resolve, reject) => {
+        if(queryData.lastDocument != "end"){       
+        let query;
+        if(queryData.filterArray && queryData.filterArray.length > 0) {
+          for (const filter of queryData.filterArray) {
+            collectionRef = collectionRef.where(
+              filter.fieldPath,
+              filter.condition,
+              filter.value
+            );
+          }
+        }       
+        query = collectionRef;
+        if (
+          (queryData.orderBy && queryData.orderBy.type &&
+          queryData.orderBy.fieldPath)
+        ) {
+          query = query.orderBy(
+            queryData.orderBy.fieldPath,
+            queryData.orderBy.type
+          );
+        }
+        if (queryData.lastDocument) {
+          query = query.startAfter(queryData.lastDocument)
+        }
+        if (queryData.pageSize) {
+          query = query.limit(queryData.pageSize);
+        }
+        query.get().then( async querySnapshot => {
+          const dataArray = [];         
+          for(const doc of querySnapshot.docs) {
+            const leaveDoc = doc.data();
+            leaveDoc.id = doc.id
+            await _getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
+              leaveDoc.leaveType = documentSnapShot.data();
+            })
+            dataArray.push(leaveDoc);
+          }
+          resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
+        });
+      }
+    });
+    }
+  };
 
 exports.Test = functions.https.onCall(async (data, context) => {
     let user;

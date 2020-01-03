@@ -42,7 +42,7 @@ const LeaveSummaryItem = props => {
           </Grid>
         </Box>
         <Box>
-          <IconButton color="primary" aria-label="Request Detail" component="span">
+          <IconButton onClick={() => props.onItemClick()} color="primary" aria-label="Request Detail" component="span">
             <ChevronRightIcon />
           </IconButton>
         </Box>

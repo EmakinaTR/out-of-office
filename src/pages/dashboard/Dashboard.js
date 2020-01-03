@@ -8,7 +8,13 @@ import {
   Button,
   Box,
   Paper,
-  Divider
+  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,Slide
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
@@ -20,6 +26,9 @@ import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
 import app from "firebase";
 import moment from "moment";
+import { useHistory } from "react-router-dom";
+import SnackBar from "../../components/UIElements/snackBar/SnackBar";
+import { snackbars } from "../../constants/snackbarContents";
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
@@ -28,7 +37,6 @@ const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
 const MY_LEAVE_REQUEST = "My Leaves";
 const REQUESTED_LEAVES = "Incoming Requests";
 const LIST_ITEM_COUNT = 5;
-
 
 const useStyles = makeStyles(theme => ({
   newRequestButton: {
@@ -49,30 +57,106 @@ const useStyles = makeStyles(theme => ({
   },
   divider: {}
 }));
-
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+let selectedIncomingRequest;
 const Dashboard = () => {
   const classes = useStyles();
-  const incomingRequests = incomingRequestData.slice(0, 5);
+  const history = useHistory();
+  const [snackbarState, setSnackbarState] = useState(false);
+  const [snackbarType, setSnackbarType] = useState({});
+  const [openMenu, setOpenMenu] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const initialState ={
+    approverDescription : '',
+    statusType : undefined,
+};
+const [state, setState] = useState(initialState);  
+  // Modal Handlers
+  const closeDialog = () => {
+    setOpenDialog(false);
+};
+
+const handleYesClick = () => {
+  changeFormStatusHandler(selectedIncomingRequest.id, 1, state.approverDescription);
+  closeDialog();
+}
+
+const handleDescriptionChange = (e)=> {
+  setState({ ...state, approverDescription: e.target.value }); 
+}
+  // My Request Detail Handler
+  const detailHandler = document => {
+    history.push({
+      pathname: "/request-detail",
+      search: "?formId=" + document
+    });
+  };
+  // Incoming Request Approve Handler
+   const onApproveButtonClick = (document) => {     
+    selectedIncomingRequest = document;
+    setOpenDialog(true);
+  }
+  const changeFormStatusHandler = async (documentID, type, description) => {
+    await firebaseContext
+      .setLeaveStatus(documentID, type, description)
+      .then(() => {
+        setSnackbarState(true);
+        setSnackbarType(snackbars.success);
+        _getIncomingRequest();
+      })
+      .catch(err => console.log(err));
+  };
   const { currentUser } = useContext(AuthContext);
   const firebaseContext = useContext(FirebaseContext);
-  const [myRequests,setMyRequests] = useState([]);
-  const isAdmin = currentUser.role >= ROLE.APPROVER; 
+  const [myRequests, setMyRequests] = useState([]);
+  const [_incomingRequests, setIncomingRequests] = useState([]);
+  const isAdmin = currentUser.role >= ROLE.APPROVER;
 
-  const _getMyRequests = async () => {      
-    await firebaseContext.getMyRequestsC({
-      filterArray: [{
-        fieldPath: "createdBy",
-        condition: "==",
-        value: currentUser.uid
-      }],
-      pageSize:LIST_ITEM_COUNT
-    }).then(result => {          
-      setMyRequests([...result.data]);
-    });
-  }
+  const _getMyRequests = async () => {
+    await firebaseContext
+      .getMyRequests({
+        filterArray: [
+          {
+            fieldPath: "createdBy",
+            condition: "==",
+            value: currentUser.uid
+          }
+        ],
+        pageSize: LIST_ITEM_COUNT
+      })
+      .then(result => {        
+        setMyRequests([...result.data]);
+      });
+  };
+
+  const _getIncomingRequest = async () => {
+    if (isAdmin) {      
+      const filterArray = [
+        {
+          fieldPath: "status",
+          condition: "==",
+          value: 0
+        }
+      ];      
+      const queryData = {
+        filterArray: filterArray,
+        orderBy: { fieldPath: "requestedDate", type: "desc" },
+        pageSize: LIST_ITEM_COUNT
+      }
+      await firebaseContext
+        .getIncomingRequests(queryData)
+        .then(result => {
+          setIncomingRequests([...result]);
+        });
+    }
+  };
 
   useEffect(() => {
     _getMyRequests();
+    _getIncomingRequest();
+
     // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
     // filterData(dataList, filterBoxState)
   }, []);
@@ -138,23 +222,27 @@ const Dashboard = () => {
                   </Box>
                 </Box>
                 <Box>
-                  {incomingRequests.map((data, index) => {
+                  {_incomingRequests.map((data, index) => {
                     return (
                       <div key={index}>
                         <IncomingRequestBasicCard
-                          userName={data.userName}
-                          leaveTypeContent={
-                            leaveBadges[data.leaveType].badgeContent
-                          }
-                          leaveTypeColor={leaveBadges[data.leaveType].color}
+                          userName={data.requesterName}
+                          documentId={data.id}
+                          leaveTypeContent={data.leaveType.name}
+                          leaveTypeColor={data.leaveType.color}
                           statusTypeContent={
                             statusBadges[data.status].badgeContent
                           }
                           statusTypeColor={statusBadges[data.status].color}
-                          startDate={data.startDate}
-                          endDate={data.endDate}
+                          startDate={moment(
+                            data.startDate._seconds * 1000
+                          ).toDate()}
+                          endDate={moment(
+                            data.endDate._seconds * 1000
+                          ).toDate()}
                           duration={data.duration}
                           description={data.description}
+                          onApproveClick={() => onApproveButtonClick(data)}
                         ></IncomingRequestBasicCard>
                         <Divider />
                       </div>
@@ -185,10 +273,11 @@ const Dashboard = () => {
                   return (
                     <div key={index}>
                       <LeaveSummaryItem
-                        date={moment(leave.startDate.seconds*1000).toDate()}
+                        date={moment(leave.startDate.seconds * 1000).toDate()}
                         statusTypeContent={leave.leaveType.name}
                         statusTypeColor={leave.leaveType.color}
                         leaveCount={leave.duration}
+                        onItemClick={() => detailHandler(leave.id)}
                       ></LeaveSummaryItem>
                       <Divider />
                     </div>
@@ -199,6 +288,54 @@ const Dashboard = () => {
           </Grid>
         </Grid>
       </Box>
+      <Dialog
+        open={openDialog}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={closeDialog}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">
+          {"İyice düşündünüz mü?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            Form üzerinde yapmış olduğunuz değişiklikler kalıcı olacaktır. Devam
+            etmek istiyor musunuz ?
+          </DialogContentText>
+          <DialogContent>
+            <TextField      
+              onChange={handleDescriptionChange}        
+              fullWidth
+              id="outlined-multiline-static"
+              label="Description"
+              multiline
+              rows="4"
+              variant="outlined"
+            />
+          </DialogContent>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={handleYesClick}
+            color="secondary"
+          >
+            Done
+          </Button>
+          <Button variant="contained" onClick={closeDialog} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <SnackBar
+        snackbarType={snackbarType}
+        snackBarState={snackbarState}
+        onClose={() => {
+          setSnackbarState(false);
+        }}
+      ></SnackBar>
     </Container>
   );
 };

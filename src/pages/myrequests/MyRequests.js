@@ -111,7 +111,7 @@ export default function MyRequests(props) {
 
     let getMyRequests = async (loadMore, queryData) => {
         if(loadMore){
-            await firebaseContext.getMyRequestsC(queryData, currentUser.uid)
+            await firebaseContext.getMyRequests(queryData, currentUser.uid)
                 .then(result => {
                     if(result.data.length>0){
                         setDataList([...result.data, ...dataList]);
