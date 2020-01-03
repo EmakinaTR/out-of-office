@@ -99,6 +99,7 @@ const handleDescriptionChange = (e)=> {
     setOpenDialog(true);
   }
   const changeFormStatusHandler = async (documentID, type, description) => {
+    setIsLoading(true);
     await firebaseContext
       .setLeaveStatus(documentID, type, description)
       .then(() => {
@@ -108,13 +109,16 @@ const handleDescriptionChange = (e)=> {
       })
       .catch(err => console.log(err));
   };
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, setIsLoading } = useContext(AuthContext);  
   const firebaseContext = useContext(FirebaseContext);
   const [myRequests, setMyRequests] = useState([]);
   const [_incomingRequests, setIncomingRequests] = useState([]);
   const isAdmin = currentUser.role >= ROLE.APPROVER;
+  
+  
 
   const _getMyRequests = async () => {
+    setIsLoading(true);
     await firebaseContext
       .getMyRequests({
         filterArray: [
@@ -128,11 +132,13 @@ const handleDescriptionChange = (e)=> {
       })
       .then(result => {        
         setMyRequests([...result.data]);
+        setIsLoading(false);
       });
   };
 
   const _getIncomingRequest = async () => {
-    if (isAdmin) {      
+    if (isAdmin) {    
+      setIsLoading(true);  
       const filterArray = [
         {
           fieldPath: "status",
@@ -149,6 +155,7 @@ const handleDescriptionChange = (e)=> {
         .getIncomingRequests(queryData)
         .then(result => {
           setIncomingRequests([...result]);
+          setIsLoading(false);
         });
     }
   };

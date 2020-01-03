@@ -9,11 +9,13 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { getUserRole } from "./constants/roles";
 import moment from 'moment-business-days';
 import { HOLIDAYS } from './constants/holidays';
+import LinearProgress from '@material-ui/core/LinearProgress';
 let isSignedIn = false;
 
 function App(props) { 
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(false);
+  const [isLoading,setIsLoading] = useState(false);
   const firebaseContext = useContext(FirebaseContext);
 
   // Moment week days initialization
@@ -93,10 +95,11 @@ function App(props) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession, currentUser }}>
+    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession, currentUser, isLoading, setIsLoading }}>
       <MuiThemeProvider theme={theme}>
         <Router>
-          <Navigation title="OOO" isLoggedIn={isLoggedIn}></Navigation>
+         <LinearProgress hidden={!isLoading} style={{height: "6px", width: "100%", position: "absolute",top: "0", zIndex:3000 }} color="secondary"/>
+          <Navigation title="OOO" isLoggedIn={isLoggedIn}></Navigation>          
         </Router>
       </MuiThemeProvider>
     </AuthContext.Provider>

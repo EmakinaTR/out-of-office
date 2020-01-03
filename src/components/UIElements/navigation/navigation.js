@@ -22,6 +22,7 @@ import { FirebaseContext } from "../../firebase";
 import ProtectedRouteHoc from "../../protectedRouteHoc";
 import { withRouter, useHistory } from "react-router-dom";
 import LaunchScreen from "../launchScreen/LaunchScreen";
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { getUserRole } from "../../../constants/roles";
 const drawerWidth = 240;
 const Navigation = props => {  
@@ -107,8 +108,8 @@ const Navigation = props => {
     setMobileOpen(false);
   };
   return (
-    <div className={classes.root}>
-      <Router>
+    <div className={classes.root}>    
+      <Router>   
         {/* AppBar */}
         <AppBar className={classes.appBar}>
           <Toolbar>
@@ -167,8 +168,9 @@ const Navigation = props => {
         ) : (
           <LaunchScreen></LaunchScreen>
         )}
-        <main className={classes.content}>
-          <div className={classes.toolbar} />
+        
+        <main className={classes.content}>     
+          <div className={classes.toolbar} />         
           <Switch>
             {userRoutes.map(route => (
               <ProtectedRouteHoc
