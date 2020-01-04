@@ -3,9 +3,10 @@ import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
-DialogTitle, useMediaQuery } from '@material-ui/core';
+DialogTitle, useMediaQuery, FormHelperText } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import { useForm } from "react-hook-form";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -22,6 +23,10 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
+    checkBoxError: {
+        border: '2px solid red',
+        padding: '0.5rem'
+    }
   }));
 
 export default function LeaveRequestForm(props) {
@@ -35,6 +40,8 @@ export default function LeaveRequestForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // Default Date
     const defaultDate = moment().set({hour:9,minute:0,second:0}).format('YYYY-MM-DDTHH:mm:ss');
+    // Form Validation
+    const {register, handleSubmit, errors} = useForm();
     // States
     const [state, setState] = useState({
         leaveType: '',
@@ -50,9 +57,6 @@ export default function LeaveRequestForm(props) {
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
-    // Required description check
-    const [isRequired, setIsRequired] = useState(false);
-    
     // Handle Methods
     const handleChange = name => event => {
         setState({
@@ -95,7 +99,6 @@ export default function LeaveRequestForm(props) {
         console.log("LOCALTIMEEND", dateTimeLocalEnd);
     }
     
-
     const handleCheck = event => {
         setChecked(event.target.checked);
         console.log(event.target.checked)
@@ -110,7 +113,7 @@ export default function LeaveRequestForm(props) {
         setOpen(false);
     }
 
-    const handleSubmit = async (e) => {
+    const onSubmit = async (data, e) => {
         e.preventDefault();
         const uid = props.auth().uid;
         const processedBy = "";
@@ -125,8 +128,7 @@ export default function LeaveRequestForm(props) {
         let endDate = moment()._d;
         if ((screenSize() > 768)) {
             startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
-            
+            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));   
         }
         else {
             startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
@@ -135,7 +137,7 @@ export default function LeaveRequestForm(props) {
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, status }
-        await props.firebase.sendNewLeaveRequest(requestFormObj)
+        // await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj);
     }
 
@@ -164,17 +166,19 @@ export default function LeaveRequestForm(props) {
         await window.addEventListener('resize', screenSize);
     }
 
+    const checkIfRequired = (leaveTypeIndex) => {
+        const leaveType = leaveTypes[leaveTypeIndex];
+        return leaveType?.isDescriptionMandatory;
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         addResizeEvent();
+        register({ name: "description" });
     }, []);
-      
-    const checkIfRequired = (leaveTypeIndex) => {
-        const leaveType = leaveTypes[leaveTypeIndex];
-        return leaveType?.isDescriptionMandatory;
-    }
+    
     
     // Approver obj, it can be changed into props
     const approvers = [
@@ -188,10 +192,9 @@ export default function LeaveRequestForm(props) {
 
     return (           
         <Container maxWidth="lg">
-            {console.log(leaveTypes)}
             <Box marginY={4}>
                 <Paper className={classes.root}>
-                    <form className={classes.form} onSubmit={handleSubmit}>
+                    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
                         <Box marginTop={2}>
                             <FormControl variant="outlined" className={classes.formControl}>
@@ -201,7 +204,9 @@ export default function LeaveRequestForm(props) {
                                 value={state.leaveType}
                                 onChange={handleChange('leaveType')}
                                 labelWidth={labelWidth}
-                                required
+                                name="leaveTypeSelect"
+                                inputRef={register({ required: true, minLength: 1 })}
+                                error={errors.leaveTypeSelect}
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
@@ -227,6 +232,7 @@ export default function LeaveRequestForm(props) {
                             margin="normal"
                             label="End Date and Time"
                             type="datetime-local"
+                            inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
@@ -258,7 +264,6 @@ export default function LeaveRequestForm(props) {
                                         className={classes.inputWidth}
                                         margin="normal"
                                         label="Start Time"
-                                        // defaultValue={moment('09:00', 'HH:mm')}
                                         value={selectedStartDate}
                                         onChange={handleStartDateChange}
                                         KeyboardButtonProps={{
@@ -311,31 +316,32 @@ export default function LeaveRequestForm(props) {
                         }
                         
                         <Box my={3}>
-                        
                             <Typography variant="caption" component="div">Approver</Typography>
-
                             {approvers.map((item, index) => {
-                                    return  <Box key={index} component="span">
-                                                <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
-                                            </Box>; 
-                                })}
-                                                    
+                                return  <Box key={index} component="span">
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
+                                        </Box>; 
+                            })}                      
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
-                                    <Grid item><Checkbox
-                                id="kvkk"
-                                    checked={checked}
-                                    onChange={handleCheck}
-                                    value={checked}
-                                    color="primary"
-                                    inputProps={{ 'aria-label': 'primary checkbox' }}
-                                    /></Grid> 
-                                    <Grid item xs>
-                                    <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
-                                    <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                        <Grid item>
+                                            <Checkbox
+                                            id="kvkk"
+                                            checked={checked}
+                                            onChange={handleCheck}
+                                            value={checked}
+                                            color="primary"
+                                            name="kvkkCheck"
+                                            required
+                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                            />
+                                        </Grid> 
+                                        <Grid item xs>
+                                            <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                            <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
                                         </Grid> 
                                     </Grid>                            
                                     <Dialog
