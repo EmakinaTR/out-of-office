@@ -1,9 +1,9 @@
 import moment from 'moment-business-days';
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
+import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
-DialogTitle, useMediaQuery, FormHelperText } from '@material-ui/core';
+DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { useForm } from "react-hook-form";
@@ -25,8 +25,9 @@ const useStyles = makeStyles(theme => ({
     },
     kvkkCheckBox: {
         '& .MuiIconButton-label': {
-            border: '2px solid red', 
-            margin: '-3px'
+            border: '2px solid red',
+            height: '17px',
+            width: '17px'
         },
     }
 }));
@@ -43,11 +44,10 @@ export default function LeaveRequestForm(props) {
     // Default Date
     const defaultDate = moment().set({hour:9,minute:0,second:0}).format('YYYY-MM-DDTHH:mm:ss');
     // Form Validation
-    const {register, handleSubmit, errors} = useForm();
+    const {register, handleSubmit, errors, watch} = useForm();
+    const watchFields = watch(["leaveType", "description"]);
     // States
     const [state, setState] = useState({
-        leaveType: '',
-        description: '',
         protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
@@ -63,12 +63,11 @@ export default function LeaveRequestForm(props) {
     const handleChange = name => event => {
         const {value} = event.target;
         setState({
-          ...state,
-          [name]: value,
+        ...state,
+        [name]: value,
         });
         console.log(value);
     }
-
     // Desktop DateTimePickers
     const handleStartDateChange = date => {
         setSelectedStartDate(date);
@@ -124,7 +123,9 @@ export default function LeaveRequestForm(props) {
         const requesterName = props.auth().displayName;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const {leaveType, description, protocolNumber}  = state;
+        const leaveType = watchFields.leaveType;
+        const description = watchFields.description;
+        const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
         let startDate = moment()._d;
@@ -140,7 +141,7 @@ export default function LeaveRequestForm(props) {
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, status }
-        // await props.firebase.sendNewLeaveRequest(requestFormObj)
+        await props.firebase.sendNewLeaveRequest(requestFormObj)
         console.log(requestFormObj);
     }
 
@@ -203,12 +204,10 @@ export default function LeaveRequestForm(props) {
                                 <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                                 <Select
                                 native
-                                value={state.leaveType}
-                                onChange={handleChange('leaveType')}
                                 labelWidth={labelWidth}
-                                name="leaveTypeSelect"
+                                name="leaveType"
                                 inputRef={register({ required: true, minLength: 1 })}
-                                error={errors.leaveTypeSelect}
+                                error={errors.leaveType}
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
@@ -308,14 +307,12 @@ export default function LeaveRequestForm(props) {
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                        
-                        <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                        onChange={handleChange('description')} value={state.description}
-                        name="description" inputRef={register({ required: checkIfRequired(state.leaveType), minLength: 5 })} error={errors.description}/>
+                        <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal"
+                        name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description}/>
 
-                        {(state.leaveType == 2) ? 
-                        <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                        onChange={handleChange('protocolNumber')} value={state.protocolNumber} /> : 
-                        ''
+                        {(watchFields.leaveType == 2) ? 
+                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal"
+                            value={state.protocolNumber} onChange={handleChange('protocolNumber')}/> : ''
                         }
                         
                         <Box my={3}>
