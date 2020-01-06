@@ -22,8 +22,10 @@ import { FirebaseContext } from "../../firebase";
 import ProtectedRouteHoc from "../../protectedRouteHoc";
 import { withRouter, useHistory } from "react-router-dom";
 import LaunchScreen from "../launchScreen/LaunchScreen";
-import LinearProgress from '@material-ui/core/LinearProgress';
-import { getUserRole } from "../../../constants/roles";
+import Popover from '@material-ui/core/Popover';
+import { Button } from "@material-ui/core";
+
+import app from "firebase";
 const drawerWidth = 240;
 const Navigation = props => {  
  
@@ -47,8 +49,9 @@ const Navigation = props => {
     setSelectedIndex(activeIndex);
   });
 
-  const signOut = () => {
-    firebase.auth.signOut();
+  const signOut = () => {       
+    firebase.auth.signOut();   
+    window.localStorage.clear()
   };
   const useStyles = makeStyles(theme => ({
     root: {
@@ -84,7 +87,11 @@ const Navigation = props => {
       // backgroundColor: "#e8e8e8",
       // minHeight: "94.8vh"
     },
-    toolbar: theme.mixins.toolbar
+    toolbar: theme.mixins.toolbar,
+    popover: {
+      zIndex: 1000,
+      marginTop: "1rem"
+    }
   }));
   const theme = useTheme();
   const classes = useStyles();
@@ -96,9 +103,20 @@ const Navigation = props => {
     selectedIndex state indicates the active route
   */
   const activeIndex = _getCurrentRouteIndex(props.location.pathname);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);  
   const [selectedIndex, setSelectedIndex] = React.useState(activeIndex);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
   const matches = useMediaQuery(theme.breakpoints.up("md"));
+  
+  const handlePopOverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const onAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  }
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -126,7 +144,25 @@ const Navigation = props => {
               {props.title}
             </Typography>
             {/* <Avatar className={classes.avatar}>{props.avatarText}</Avatar> */}
-            <Avatar src={user?.photoURL}></Avatar>
+            <Avatar onClick={onAvatarClick} src={user?.photoURL}></Avatar>   
+            {/* Sign Out Pop Over */}
+            <Popover
+              className={classes.popover}
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handlePopOverClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',               
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+            >
+              <Button onClick={signOut} style={{padding:"0.5rem 1rem"}}>Sign Out</Button>
+      </Popover>         
           </Toolbar>
         </AppBar>
         {/* Side Nav Bar */}

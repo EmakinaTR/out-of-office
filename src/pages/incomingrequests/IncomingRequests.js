@@ -65,9 +65,8 @@ export default function IncomingRequests(props) {
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarType, setSnackbarType] = useState({});
     const [isProcessing, setIsProcessing] = useState(true);
-    const firebaseContext = useContext(FirebaseContext);
-    const Auth = useContext(AuthContext);
-
+    const firebaseContext = useContext(FirebaseContext);  
+    const { setIsLoading } = useContext(AuthContext);  
     const onSearchQueryChange = (value) => {
         if (!isProcessing) {
             setIsProcessing(true);
@@ -90,6 +89,7 @@ export default function IncomingRequests(props) {
         setSelectedFilterType(e.target.value);
     }
     const changeFormStatusHandler = async (documentID, type,description) => {
+        setIsLoading(true);
         await firebaseContext.setLeaveStatus(documentID, type ,description)
             .then(()=>{
                 
@@ -100,15 +100,19 @@ export default function IncomingRequests(props) {
                 }))
             }
             )
-            .catch(err => console.log(err));
+            .catch(err => console.log(err)).finally(() => {
+                setIsLoading(false);
+            });
     }
     let getAllLeaveRequests = async () => {
         setIsProcessing(true);
+        setIsLoading(true);
         let leaveRequestArray = [];
         await firebaseContext.getIncomingRequests()
             .then(result => {
                 setDataList([...result])
                 setIsProcessing(false);
+                setIsLoading(false);
             });
     }
 

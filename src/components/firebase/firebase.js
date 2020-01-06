@@ -11,14 +11,14 @@ export default class Firebase {
     this.emailAuthProvider = app.auth.EmailAuthProvider;
     /* Firebase APIs */
     this.auth = app.auth();
-    this.db = app.firestore();
+    this.db = app.firestore();   
     this.storage = app.storage();
     /* Google Provider */
     app.googleProvider = new app.auth.GoogleAuthProvider();
   }
 
   /* Auth API */
-  doSignInWithGoogle = () => {
+  doSignInWithGoogle = () => {       
     return new Promise((resolve, reject) => {
       app
         .auth()
@@ -154,7 +154,13 @@ export default class Firebase {
     });
   };
   sendNewLeaveRequest = leaveRequestObj => {
-    this.db.collection("leaveRequests").add(leaveRequestObj);
+    return new Promise((resolve,reject) => {
+      this.db.collection("leaveRequests").add(leaveRequestObj).then(response => {
+        resolve(response);
+      }).catch(error => {
+        reject(error);
+      })
+    });  
   };
 
   updateLeaveRequest = (uid, leaveRequestObj) => {

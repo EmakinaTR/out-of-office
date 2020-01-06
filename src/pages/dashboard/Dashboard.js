@@ -20,16 +20,15 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
 import { statusBadges, leaveBadges } from "../../constants/badgeTypes";
-import { incomingRequestData } from "../../constants/dummyData";
 import IncomingRequestBasicCard from "../../components/UIElements/IncomingRequestBasicCard/IncomingRequestBasicCard";
 import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
-import app from "firebase";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import SnackBar from "../../components/UIElements/snackBar/SnackBar";
 import { snackbars } from "../../constants/snackbarContents";
+
 // String sources
 const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
@@ -51,12 +50,7 @@ const useStyles = makeStyles(theme => ({
   newRequestButtonText: {
     flex: 1,
     textAlign: "left"
-  },
-  listCard: {
-    // padding: theme.spacing(3),
-    // textAlign: "center"
-  },
-  divider: {}
+  }  
 }));
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -164,9 +158,6 @@ const handleDescriptionChange = (e)=> {
   useEffect(() => {
     _getMyRequests();
     _getIncomingRequest();
-
-    // sortDataByTypeAscDesc(isDescending, dataList, orderByFilterOptions[selectedFilterType].key);
-    // filterData(dataList, filterBoxState)
   }, []);
 
   return (
