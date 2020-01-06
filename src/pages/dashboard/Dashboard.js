@@ -149,7 +149,7 @@ const handleDescriptionChange = (e)=> {
       await firebaseContext
         .getIncomingRequests(queryData)
         .then(result => {
-          setIncomingRequests([...result]);
+          setIncomingRequests([...result.data]);
           setIsLoading(false);
         });
     }

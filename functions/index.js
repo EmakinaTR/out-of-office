@@ -124,7 +124,7 @@ exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
     const leaveRequestArray = await _getLeaves(userId,_isAdmin(user),data.queryData);
     console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
     if (leaveRequestArray.length > 0) {
-        await Promise.all(leaveRequestArray.map(async (item) => { // Retrieve leave types of the leave requests
+        await Promise.all(leaveRequestArray.data.map(async (item) => { // Retrieve leave types of the leave requests
             await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
                 item.leaveType = documentSnapshot.data();
             });
@@ -152,7 +152,7 @@ const _getTeamLeaves = async (userid,queryData) => {
           teamMemmbers = response;
         }).catch(err => console.log(err))
     if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
-        await Promise.all(teamMemmbers.map(async (member) => {
+        await Promise.all(teamMemmbers.data.map(async (member) => {
             await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
                 then(querySnapshot => {
                     querySnapshot.docs.map(doc => {
@@ -164,15 +164,16 @@ const _getTeamLeaves = async (userid,queryData) => {
                 }).catch(err => { return null; });
         }))
     }
-    return leaveRequestArray;
+    teamMemmbers.data = leaveRequestArray;
+    return teamMemmbers;
 }
 const _getAdminLeaves = async(queryData) => {
-    let leaveRequestArray = [];    
+    let leaveResponse = {};    
     const collection = admin.firestore().collection("leaveRequests");
     await _createQuery(collection,queryData).then(response => {
-        leaveRequestArray = response.data;
+        leaveResponse = response;
     })   
-    return leaveRequestArray;
+    return leaveResponse;
 }
 
 const _getSpecificLeaveType = docReference => {

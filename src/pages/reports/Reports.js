@@ -30,7 +30,7 @@ export class Reports extends React.Component {
             Test({queryData:{}}).then(res => {
                 this.setState((state) => {
                     console.log(res)
-                    return res
+                    return res.data
                     });
                 }
             );

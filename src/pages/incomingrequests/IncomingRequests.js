@@ -12,7 +12,14 @@ import LaunchScreen from '../../components/UIElements/launchScreen'
 import SnackBar from '../../components/UIElements/snackBar/SnackBar';
 import {snackbars}  from '../../constants/snackbarContents'
 
-
+const PAGE_ITEM_SIZE = 10;
+let lastDocument = null;
+const _createIncomingQueryData = () => {
+    return {
+        pageSize: PAGE_ITEM_SIZE,
+        lastDocument: lastDocument
+    }
+}
 const useStyles = makeStyles(theme => ({
     contentContainer: {
         // padding:0
@@ -108,9 +115,10 @@ export default function IncomingRequests(props) {
         setIsProcessing(true);
         setIsLoading(true);
         let leaveRequestArray = [];
-        await firebaseContext.getIncomingRequests()
+        const queryData = _createIncomingQueryData();
+        await firebaseContext.getIncomingRequests(queryData)
             .then(result => {
-                setDataList([...result])
+                setDataList([...result.data])
                 setIsProcessing(false);
                 setIsLoading(false);
             });

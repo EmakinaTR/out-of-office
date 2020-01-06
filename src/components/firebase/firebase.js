@@ -103,7 +103,7 @@ export default class Firebase {
     return new Promise((resolve, reject) => {
       const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
       getTeamLeaves({queryData: queryData})
-        .then(result => {        
+        .then(result => {               
           resolve(result.data);
         })
         .catch(error => {
