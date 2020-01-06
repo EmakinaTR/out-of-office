@@ -60,6 +60,8 @@ export default function LeaveRequestForm(props) {
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     // Handle Methods
+    // Wee need this handleChnage metho  because watchFields doesn't recognize
+    // conditional rendiring
     const handleChange = name => event => {
         const {value} = event.target;
         setState({
@@ -224,7 +226,6 @@ export default function LeaveRequestForm(props) {
                             className={classes.inputWidth}
                             defaultValue={dateTimeLocalStart}
                             onChange={handleDateTimeLocalStart}
-                            required
                             InputLabelProps={{
                             shrink: true,
                             }}
@@ -237,7 +238,6 @@ export default function LeaveRequestForm(props) {
                             defaultValue={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
-                            required
                             InputLabelProps={{
                             shrink: true,
                             }}
@@ -344,8 +344,7 @@ export default function LeaveRequestForm(props) {
                                             <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
                                             <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
                                         </Grid>
-                                    </Grid>
-                                    {errors.kvkkCheck ? <span style={{color: 'red'}}>Please read the KVKK and check</span>: ''}                        
+                                    </Grid>           
                                     <Dialog
                                     fullScreen={fullScreen}
                                     open={open}
