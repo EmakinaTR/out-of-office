@@ -23,11 +23,13 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-    checkBoxError: {
-        border: '2px solid red',
-        padding: '0.5rem'
+    kvkkCheckBox: {
+        '& .MuiIconButton-label': {
+            border: '2px solid red', 
+            margin: '-3px'
+        },
     }
-  }));
+}));
 
 export default function LeaveRequestForm(props) {
     // Styles
@@ -59,12 +61,13 @@ export default function LeaveRequestForm(props) {
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     // Handle Methods
     const handleChange = name => event => {
+        const {value} = event.target;
         setState({
           ...state,
-          [name]: event.target.value,
+          [name]: value,
         });
-        console.log(event.target.value);
-    };
+        console.log(value);
+    }
 
     // Desktop DateTimePickers
     const handleStartDateChange = date => {
@@ -176,7 +179,6 @@ export default function LeaveRequestForm(props) {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         addResizeEvent();
-        register({ name: "description" });
     }, []);
     
     
@@ -307,7 +309,8 @@ export default function LeaveRequestForm(props) {
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                        
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                        onChange={handleChange('description')} value={state.description} required={checkIfRequired(state.leaveType)} />
+                        onChange={handleChange('description')} value={state.description}
+                        name="description" inputRef={register({ required: checkIfRequired(state.leaveType), minLength: 5 })} error={errors.description}/>
 
                         {(state.leaveType == 2) ? 
                         <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
@@ -335,15 +338,17 @@ export default function LeaveRequestForm(props) {
                                             value={checked}
                                             color="primary"
                                             name="kvkkCheck"
-                                            required
+                                            className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                            inputRef={register({required: !checked})}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                             />
                                         </Grid> 
                                         <Grid item xs>
                                             <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
                                             <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                        </Grid> 
-                                    </Grid>                            
+                                        </Grid>
+                                    </Grid>
+                                    {errors.kvkkCheck ? <span style={{color: 'red'}}>Please read the KVKK and check</span>: ''}                        
                                     <Dialog
                                     fullScreen={fullScreen}
                                     open={open}
