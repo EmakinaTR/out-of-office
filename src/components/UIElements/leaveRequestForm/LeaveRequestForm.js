@@ -1,11 +1,12 @@
 import moment from 'moment-business-days';
 import React, {useRef, useState, useEffect} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Divider, Box, Checkbox, 
+import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import { useForm } from "react-hook-form";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -22,7 +23,14 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-  }));
+    kvkkCheckBox: {
+        '& .MuiIconButton-label': {
+            border: '2px solid red',
+            height: '17px',
+            width: '17px'
+        },
+    }
+}));
 
 export default function LeaveRequestForm(props) {
     // Styles
@@ -35,10 +43,11 @@ export default function LeaveRequestForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // Default Date
     const defaultDate = moment().set({hour:9,minute:0,second:0}).format('YYYY-MM-DDTHH:mm:ss');
+    // Form Validation
+    const {register, handleSubmit, errors, watch} = useForm();
+    const watchFields = watch(["leaveType", "description"]);
     // States
     const [state, setState] = useState({
-        leaveType: '',
-        description: '',
         protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
@@ -50,16 +59,17 @@ export default function LeaveRequestForm(props) {
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
-    
     // Handle Methods
+    // Wee need this handleChnage metho  because watchFields doesn't recognize
+    // conditional rendiring
     const handleChange = name => event => {
+        const {value} = event.target;
         setState({
-          ...state,
-          [name]: event.target.value,
+        ...state,
+        [name]: value,
         });
-        console.log(event.target.value);
-    };
-
+        console.log(value);
+    }
     // Desktop DateTimePickers
     const handleStartDateChange = date => {
         setSelectedStartDate(date);
@@ -72,7 +82,13 @@ export default function LeaveRequestForm(props) {
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
         // I used parseInt to prevent duration to be stringified in firebase
         // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
-        const duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
+        let duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
+        if (await moment(selectedEndDate).diff(moment(selectedStartDate))>7200000 && await moment(selectedEndDate).diff(moment(selectedStartDate))<21600000) {
+            console.log('START->', selectedStartDate)
+            console.log('END->', selectedEndDate)
+            duration += 0.5;
+            console.log("Ekledim");
+        }
         setDuration(duration);
     }
 
@@ -87,7 +103,6 @@ export default function LeaveRequestForm(props) {
         console.log("LOCALTIMEEND", dateTimeLocalEnd);
     }
     
-
     const handleCheck = event => {
         setChecked(event.target.checked);
         console.log(event.target.checked)
@@ -102,7 +117,7 @@ export default function LeaveRequestForm(props) {
         setOpen(false);
     }
 
-    const handleSubmit = async (e) => {
+    const onSubmit = async (data, e) => {
         e.preventDefault();
         const uid = props.auth().uid;
         const processedBy = "";
@@ -110,15 +125,16 @@ export default function LeaveRequestForm(props) {
         const requesterName = props.auth().displayName;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const {leaveType, description, protocolNumber}  = state;
+        const leaveType = watchFields.leaveType;
+        const description = watchFields.description;
+        const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
         let startDate = moment()._d;
         let endDate = moment()._d;
         if ((screenSize() > 768)) {
             startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
-            
+            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));   
         }
         else {
             startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
@@ -156,13 +172,18 @@ export default function LeaveRequestForm(props) {
         await window.addEventListener('resize', screenSize);
     }
 
+    const checkIfRequired = (leaveTypeIndex) => {
+        const leaveType = leaveTypes[leaveTypeIndex];
+        return leaveType?.isDescriptionMandatory;
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         addResizeEvent();
     }, []);
-      
+    
     
     // Approver obj, it can be changed into props
     const approvers = [
@@ -178,23 +199,25 @@ export default function LeaveRequestForm(props) {
         <Container maxWidth="lg">
             <Box marginY={4}>
                 <Paper className={classes.root}>
-                    <form className={classes.form} onSubmit={handleSubmit}>
+                    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
                         <Box marginTop={2}>
-                        <FormControl variant="outlined" className={classes.formControl}>
-                            <InputLabel ref={inputLabel}>Leave Type</InputLabel>
-                            <Select
-                            native
-                            value={state.leaveType}
-                            onChange={handleChange('leaveType')}
-                            labelWidth={labelWidth}
-                            >
-                            <option value="" />
-                            {leaveTypes.map((item, index) => {
-                                return <option key={index} value={index}>{item.name}</option>
-                            })}
-                            </Select>
-                        </FormControl></Box>
+                            <FormControl variant="outlined" className={classes.formControl}>
+                                <InputLabel ref={inputLabel}>Leave Type</InputLabel>
+                                <Select
+                                native
+                                labelWidth={labelWidth}
+                                name="leaveType"
+                                inputRef={register({ required: true, minLength: 1 })}
+                                error={errors.leaveType}
+                                >
+                                <option value="" />
+                                {leaveTypes.map((item, index) => {
+                                    return <option key={index} value={index}>{item.name}</option>
+                                })}
+                                </Select>
+                            </FormControl>
+                        </Box>
                         <Box display={{xs: 'block', md: 'none'}}>
                             <TextField
                             margin="normal"
@@ -211,6 +234,7 @@ export default function LeaveRequestForm(props) {
                             margin="normal"
                             label="End Date and Time"
                             type="datetime-local"
+                            inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
@@ -241,7 +265,6 @@ export default function LeaveRequestForm(props) {
                                         className={classes.inputWidth}
                                         margin="normal"
                                         label="Start Time"
-                                        // defaultValue={moment('09:00', 'HH:mm')}
                                         value={selectedStartDate}
                                         onChange={handleStartDateChange}
                                         KeyboardButtonProps={{
@@ -280,44 +303,48 @@ export default function LeaveRequestForm(props) {
                                 </Grid>
                             </MuiPickersUtilsProvider>
                         </Box>
+                        
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
-                        <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                        onChange={handleChange('description')} value={state.description} />
-                        {(state.leaveType === '2') ? 
-                        <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                        onChange={handleChange('protocolNumber')} value={state.protocolNumber} /> : 
-                        ''
+                       
+                        <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal"
+                        name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description}/>
+
+                        {(watchFields.leaveType == 2) ? 
+                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal"
+                            value={state.protocolNumber} onChange={handleChange('protocolNumber')}/> : ''
                         }
                         
                         <Box my={3}>
-                        
                             <Typography variant="caption" component="div">Approver</Typography>
-
                             {approvers.map((item, index) => {
-                                    return  <Box key={index} component="span">
-                                                <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
-                                            </Box>; 
-                                })}
-                                                    
+                                return  <Box key={index} component="span">
+                                            <Chip avatar={<Avatar>{item.name.charAt(0)}</Avatar>} label={item.name} style={{margin:".25rem .5rem .25rem 0"}} />
+                                        </Box>; 
+                            })}                      
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
-                                    <Grid item><Checkbox
-                                id="kvkk"
-                                    checked={checked}
-                                    onChange={handleCheck}
-                                    value={checked}
-                                    color="primary"
-                                    inputProps={{ 'aria-label': 'primary checkbox' }}
-                                    /></Grid> 
-                                    <Grid item xs>
-                                    <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
-                                    <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                        <Grid item>
+                                            <Checkbox
+                                            id="kvkk"
+                                            checked={checked}
+                                            onChange={handleCheck}
+                                            value={checked}
+                                            color="primary"
+                                            name="kvkkCheck"
+                                            className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                            inputRef={register({required: !checked})}
+                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                            />
                                         </Grid> 
-                                    </Grid>                            
+                                        <Grid item xs>
+                                            <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                            <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                        </Grid>
+                                    </Grid>           
                                     <Dialog
                                     fullScreen={fullScreen}
                                     open={open}
