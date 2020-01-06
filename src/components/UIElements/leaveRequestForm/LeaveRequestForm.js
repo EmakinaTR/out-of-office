@@ -61,6 +61,7 @@ export default function LeaveRequestForm(props) {
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     const [approvers, setApprovers] = useState([]);
     const { setIsLoading } = useContext(AuthContext);      
+    const [approvers, setApprovers] = useState([]);
     // Handle Methods
     // Wee need this handleChnage metho  because watchFields doesn't recognize
     // conditional rendiring
