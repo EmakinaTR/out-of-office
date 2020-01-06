@@ -8,6 +8,7 @@ import {
   Button,
   Box,
   Paper,
+  Link,
   Divider,
   Dialog,
   DialogActions,
@@ -174,6 +175,7 @@ const handleDescriptionChange = (e)=> {
         <Grid container spacing={3}>
           <Grid item xs={12} lg={6}>
             <Button
+              href="/leaverequest"
               color="primary"
               variant="contained"
               className={classes.newRequestButton}
