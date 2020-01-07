@@ -59,8 +59,8 @@ export default function LeaveRequestForm(props) {
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
+    const [approvers, setApprovers] = useState([]);
     const { setIsLoading } = useContext(AuthContext);      
-
     // Handle Methods
     // Wee need this handleChnage metho  because watchFields doesn't recognize
     // conditional rendiring
@@ -163,7 +163,6 @@ export default function LeaveRequestForm(props) {
             await firebasePromise.then(snapshot => {
                 for (let doc of snapshot.docs) {
                     leaveTypesArr.push(doc.data())
-                    
                 }
                 setLeaveTypes(leaveTypesArr);
                 setIsLoading(false);
@@ -171,6 +170,43 @@ export default function LeaveRequestForm(props) {
         }
     }
 
+    let getApproversWithId = async () => {
+        let firebasePromise = props.firebase.getApproversWithId(props.auth().uid);
+        let leadUsers = [];
+        if (firebasePromise[0] !== null) {
+            await firebasePromise[0].then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leadUsers.push(doc.data().leadUser);
+                }
+            })
+        }   
+        if (firebasePromise[1] !== null) {
+            await firebasePromise[1].then(snapshot => {
+                leadUsers.push(snapshot.data().leadUser);
+            });
+        }
+
+        searchApprovers(leadUsers);
+    }
+
+    let searchApprovers = async (leadUserId) => {
+        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
+        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
+        let approversArr = []
+        if (teamLeadPromise !== null) {
+            await teamLeadPromise.then(snapshot => {
+               approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+            })
+        }
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
+                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+             })
+        }
+        
+        setApprovers(approversArr);
+    }
+    
     let screenSize = () => {
        return window.innerWidth;
     }
@@ -189,18 +225,8 @@ export default function LeaveRequestForm(props) {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         addResizeEvent();
+        getApproversWithId();
     }, []);
-    
-    
-    // Approver obj, it can be changed into props
-    const approvers = [
-        {
-            name: "Onur Tepeli"
-        },
-        {
-            name: "Bekir Semih Turgut"
-        }
-    ]
 
     return (           
         <Container maxWidth="lg">

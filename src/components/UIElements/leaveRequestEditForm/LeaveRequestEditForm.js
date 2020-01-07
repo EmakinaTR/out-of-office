@@ -7,7 +7,9 @@ Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, Di
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import { useForm } from "react-hook-form";
 const queryString = require('query-string');
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -24,6 +26,13 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
+    kvkkCheckBox: {
+        '& .MuiIconButton-label': {
+            border: '2px solid red',
+            height: '17px',
+            width: '17px'
+        },
+    }
   }));
 
 export default function LeaveRequestEditForm(props) {
@@ -41,10 +50,11 @@ export default function LeaveRequestEditForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // Default Date
     const defaultDate = moment().format('YYYY-MM-DDTHH:mm:ss');
+    // Form Validation
+    const {register, handleSubmit, errors, watch, setValue} = useForm();
+    const watchFields = watch(["leaveType", "description"]);
     // States
     const [state, setState] = useState({
-        leaveType: '',
-        description: '',
         protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
@@ -56,17 +66,17 @@ export default function LeaveRequestEditForm(props) {
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
-    // const [fields, setFields] = useState({});
-    // const [leaveType, setLeaveType] = useState('');
     const [docUid, setDocUid] = useState('');
+    const [approvers, setApprovers] = useState([]);
     
      // Handle Methods
      const handleChange = name => event => {
+        const {value} = event.target;
         setState({
-          ...state,
-          [name]: event.target.value,
+        ...state,
+        [name]: value,
         });
-        console.log(event.target.value);
+        console.log(value);
     };
 
     // Desktop DateTimePickers
@@ -108,7 +118,7 @@ export default function LeaveRequestEditForm(props) {
         setOpen(false);
     }
 
-    const handleSubmit = async (e) => {
+    const onSubmit = async (data, e) => {
         e.preventDefault();
         const uid = props.auth().uid;
         const processedBy = "";
@@ -116,7 +126,9 @@ export default function LeaveRequestEditForm(props) {
         const requesterName = props.auth().displayName;
         const status = 0;
         const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const {leaveType, description, protocolNumber}  = state;
+        const leaveType = watchFields.leaveType;
+        const description = watchFields.description;
+        const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
         let startDate = moment()._d;
@@ -185,10 +197,10 @@ export default function LeaveRequestEditForm(props) {
             await firebasePromise.then(snapshot => {
                 formFields = snapshot.data();
                 getLeaveTypeId(formFields.leaveTypeRef?.path).then(id => {                   
+                    setValue("description", formFields.description)
+                    setValue("leaveType", id)
                     setState({
-                        description: formFields.description,
                         protocolNumber: formFields.protocolNumber,
-                        leaveType: id,
                     })
                 })
                 setSelectedStartDate(moment(formFields.startDate?.seconds*1000).format('YYYY-MM-DDTHH:mm:ss'));
@@ -200,7 +212,42 @@ export default function LeaveRequestEditForm(props) {
         console.log(formFields);
     }
 
- 
+    let getApproversWithId = async () => {
+        let firebasePromise = props.firebase.getApproversWithId(props.auth().uid);
+        let leadUsers = [];
+        if (firebasePromise[0] !== null) {
+            await firebasePromise[0].then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leadUsers.push(doc.data().leadUser);
+                }
+            })
+        }   
+        if (firebasePromise[1] !== null) {
+            await firebasePromise[1].then(snapshot => {
+                leadUsers.push(snapshot.data().leadUser);
+            });
+        }
+
+        searchApprovers(leadUsers);
+    }
+
+    let searchApprovers = async (leadUserId) => {
+        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
+        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
+        let approversArr = []
+        if (teamLeadPromise !== null) {
+            await teamLeadPromise.then(snapshot => {
+               approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+            })
+        }
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
+                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+             })
+        }
+        
+        setApprovers(approversArr);
+    }
 
     let screenSize = () => {
        return window.innerWidth;
@@ -210,39 +257,36 @@ export default function LeaveRequestEditForm(props) {
         await window.addEventListener('resize', screenSize);
     }
 
+    const checkIfRequired = (leaveTypeIndex) => {
+        const leaveType = leaveTypes[leaveTypeIndex];
+        return leaveType?.isDescriptionMandatory;
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         getFormFields();
+        getApproversWithId();
         addResizeEvent();
     }, []);
-    
-    
-    // Approver obj, it can be changed into props
-    const approvers = [
-        {
-            name: "Onur Tepeli"
-        },
-        {
-            name: "Bekir Semih Turgut"
-        }
-    ]
 
     return (
         <Container maxWidth="lg">
             <Box marginY={4}>
+                {console.log(watchFields)}
                 <Paper className={classes.root}>
-                    <form className={classes.form} onSubmit={handleSubmit}>
+                    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Edit</Typography>
                         <Box marginTop={2}>
                             <FormControl variant="outlined" className={classes.formControl}>
                                 <InputLabel ref={inputLabel}>Leave Type</InputLabel>
                                 <Select
                                 native
-                                value={state.leaveType}
-                                onChange={handleChange('leaveType')}
                                 labelWidth={labelWidth}
+                                name="leaveType"
+                                inputRef={register({ required: true, minLength: 1 })}
+                                error={errors.leaveType}
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
@@ -258,7 +302,6 @@ export default function LeaveRequestEditForm(props) {
                             type="datetime-local"
                             className={classes.inputWidth}
                             defaultValue={dateTimeLocalStart}
-                            value={dateTimeLocalStart}
                             onChange={handleDateTimeLocalStart}
                             InputLabelProps={{
                             shrink: true,
@@ -268,8 +311,8 @@ export default function LeaveRequestEditForm(props) {
                             margin="normal"
                             label="End Date and Time"
                             type="datetime-local"
+                            inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
-                            value={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
                             InputLabelProps={{
@@ -337,14 +380,16 @@ export default function LeaveRequestEditForm(props) {
                                 </Grid>
                             </MuiPickersUtilsProvider>
                         </Box>
+                        
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                        
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                        onChange={handleChange('description')} defaultValue={state.description} value={state.description} InputLabelProps={{shrink: true}} />
-                        {(state.leaveType === '2') ? 
-                        <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                        onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  /> : 
+                        name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description} InputLabelProps={{shrink: true}} />
+                        
+                        {(watchFields.leaveType === '2') ? 
+                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
+                            onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  /> : 
                         ''
                         }
                         <Box my={3}>
@@ -369,6 +414,9 @@ export default function LeaveRequestEditForm(props) {
                                         onChange={handleCheck}
                                         value={checked}
                                         color="primary"
+                                        name="kvkkCheck"
+                                        className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                        inputRef={register({required: !checked})}
                                         inputProps={{ 'aria-label': 'primary checkbox' }}
                                         />
                                     </Grid> 
