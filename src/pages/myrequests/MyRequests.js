@@ -55,7 +55,7 @@ export default function MyRequests(props) {
     const [searchQuery, setsearchQuery] = useState('');
     const [A_to_Z, setA_to_Z] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterType, setSelectedFilterType] = useState(0);
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser,setIsLoading } = useContext(AuthContext);
     const classes = useStyles();
     const [filterBoxState, setFilterBoxState] =useState();
     const [loadMore, setLoadMore] = useState(true);
@@ -111,6 +111,7 @@ export default function MyRequests(props) {
 
     let getMyRequests = async (loadMore, queryData) => {
         if(loadMore){
+            setIsLoading(true);
             await firebaseContext.getMyRequests(queryData, currentUser.uid)
                 .then(result => {
                     if(result.data.length>0){
@@ -120,6 +121,7 @@ export default function MyRequests(props) {
                     else{
                         setQueryData({ ...queryData,lastDocument: "end"})
                     }
+                    setIsLoading(false);
             });
         }
     }

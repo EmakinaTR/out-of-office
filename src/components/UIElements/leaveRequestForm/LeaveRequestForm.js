@@ -1,5 +1,5 @@
 import moment from 'moment-business-days';
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, FormControlLabel, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
@@ -7,7 +7,7 @@ DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { useForm } from "react-hook-form";
-
+import AuthContext from "../../session";
 const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(3, 3),
@@ -60,6 +60,7 @@ export default function LeaveRequestForm(props) {
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     const [approvers, setApprovers] = useState([]);
+    const { setIsLoading } = useContext(AuthContext);      
     // Handle Methods
     // Wee need this handleChnage metho  because watchFields doesn't recognize
     // conditional rendiring
@@ -118,7 +119,8 @@ export default function LeaveRequestForm(props) {
         setOpen(false);
     }
 
-    const onSubmit = async (data, e) => {
+    const onSubmit = async (data, e) => {    
+        setIsLoading(true);
         e.preventDefault();
         const uid = props.auth().uid;
         const processedBy = "";
@@ -144,14 +146,17 @@ export default function LeaveRequestForm(props) {
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, status }
-        await props.firebase.sendNewLeaveRequest(requestFormObj)
-        console.log(requestFormObj);
+        await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
+            setIsLoading(false);
+        })
+        console.log(requestFormObj);       
     }
 
     //Firebase
 
     // Firebase functions
     let getAllLeaveTypes = async () => {
+        setIsLoading(true);
         let firebasePromise = props.firebase.getAllLeaveTypes();
         let leaveTypesArr = [];
         if (firebasePromise !== null) {
@@ -160,6 +165,7 @@ export default function LeaveRequestForm(props) {
                     leaveTypesArr.push(doc.data())
                 }
                 setLeaveTypes(leaveTypesArr);
+                setIsLoading(false);
             });
         }
     }

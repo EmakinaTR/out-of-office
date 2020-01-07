@@ -17,21 +17,20 @@ export class Reports extends React.Component {
             term:'',
             data:[]
          };
-         this.firebaseContext = FirebaseContext;
-        this.toggleFilter = this.toggleFilter.bind(this);
+         this.firebaseContext = FirebaseContext;      
+         this.toggleFilter = this.toggleFilter.bind(this);
         this.handleChange = this.handleChange.bind(this);
         
     
     }
    
-    componentWillMount(){
-    
-        console.log("hi will")
+    componentWillMount(){    
+        console.log("hi will");
         const Test = app.functions().httpsCallable('getTeamLeaves');
-            Test().then(res => {
+            Test({queryData:{}}).then(res => {
                 this.setState((state) => {
                     console.log(res)
-                    return res
+                    return res.data
                     });
                 }
             );
