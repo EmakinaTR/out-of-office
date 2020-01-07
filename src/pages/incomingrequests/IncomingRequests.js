@@ -73,7 +73,7 @@ export default function IncomingRequests(props) {
     const [snackbarType, setSnackbarType] = useState({});
     const [isProcessing, setIsProcessing] = useState(true);
     const firebaseContext = useContext(FirebaseContext);  
-    const { setIsLoading } = useContext(AuthContext);  
+    const { setIsLoading, setHasError } = useContext(AuthContext);  
     const onSearchQueryChange = (value) => {
         if (!isProcessing) {
             setIsProcessing(true);
@@ -121,6 +121,8 @@ export default function IncomingRequests(props) {
                 setDataList([...result.data])
                 setIsProcessing(false);
                 setIsLoading(false);
+            }).catch(error => {
+                setHasError(true);
             });
     }
 

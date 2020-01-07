@@ -104,7 +104,7 @@ const handleDescriptionChange = (e)=> {
       })
       .catch(err => console.log(err));
   };
-  const { currentUser, setIsLoading } = useContext(AuthContext);  
+  const { currentUser, setIsLoading, setHasError } = useContext(AuthContext);  
   const firebaseContext = useContext(FirebaseContext);
   const [myRequests, setMyRequests] = useState([]);
   const [_incomingRequests, setIncomingRequests] = useState([]);
@@ -128,6 +128,8 @@ const handleDescriptionChange = (e)=> {
       .then(result => {        
         setMyRequests([...result.data]);
         setIsLoading(false);
+      }).catch(error => {
+         setHasError(true);
       });
   };
 

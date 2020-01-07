@@ -10,12 +10,14 @@ import { getUserRole } from "./constants/roles";
 import moment from 'moment-business-days';
 import { HOLIDAYS } from './constants/holidays';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import ErrorBoundary from "./pages/ErrorPage";
 let isSignedIn = false;
 
 function App(props) { 
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(false);
-  const [isLoading,setIsLoading] = useState(false);
+  const [isLoading,setIsLoading] = useState(false);  
+  const [hasError,setHasError] = useState(false);
   const firebaseContext = useContext(FirebaseContext);
 
   // Moment week days initialization
@@ -95,12 +97,14 @@ function App(props) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession, currentUser, isLoading, setIsLoading }}>
-      <MuiThemeProvider theme={theme}>
+    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession, currentUser, isLoading, setIsLoading, hasError, setHasError }}>
+      <MuiThemeProvider theme={theme}>       
         <Router>
+        <ErrorBoundary>
          <LinearProgress hidden={!isLoading} style={{height: "6px", width: "100%", position: "absolute",top: "0", zIndex:3000 }} color="secondary"/>
           <Navigation title="OOO" isLoggedIn={isLoggedIn}></Navigation>          
-        </Router>
+          </ErrorBoundary>
+        </Router>               
       </MuiThemeProvider>
     </AuthContext.Provider>
   );
