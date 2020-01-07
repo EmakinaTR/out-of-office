@@ -274,7 +274,7 @@ export default function LeaveRequestEditForm(props) {
             <Box marginY={4}>
                 {console.log(watchFields)}
                 <Paper className={classes.root}>
-                    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
+                    <form className={classes.form}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Edit</Typography>
                         <Box marginTop={2}>
                             <FormControl variant="outlined" className={classes.formControl}>
@@ -460,7 +460,7 @@ export default function LeaveRequestEditForm(props) {
                                     </Box>
                                     <Box clone order={{xs: 1, md: 2}}>
                                         <Grid item xs={12} md={6}>
-                                            <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
+                                            <Button className={classes.inputWidth} variant="contained" size="large" type="button" onClick={handleSubmit(onSubmit)} color="primary">SEND</Button>
                                         </Grid>
                                     </Box>
                                 </Grid>
