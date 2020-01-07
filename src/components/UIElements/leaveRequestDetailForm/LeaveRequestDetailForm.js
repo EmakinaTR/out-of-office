@@ -36,6 +36,7 @@ export default function  LeaveRequestForm(props)  {
     const [fields, setFields] = useState({});
     const [leaveType, setLeaveType] = useState('');
     const [docUid, setDocUid] = useState('');
+    const [approvers, setApprovers] = useState([]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -91,21 +92,48 @@ export default function  LeaveRequestForm(props)  {
         }
     }
 
+    let getApproversWithId = async () => {
+        let firebasePromise = props.firebase.getApproversWithId(props.auth().uid);
+        let leadUsers = [];
+        if (firebasePromise[0] !== null) {
+            await firebasePromise[0].then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leadUsers.push(doc.data().leadUser);
+                }
+            })
+        }   
+        if (firebasePromise[1] !== null) {
+            await firebasePromise[1].then(snapshot => {
+                leadUsers.push(snapshot.data().leadUser);
+            });
+        }
+
+        searchApprovers(leadUsers);
+    }
+
+    let searchApprovers = async (leadUserId) => {
+        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
+        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
+        let approversArr = []
+        if (teamLeadPromise !== null) {
+            await teamLeadPromise.then(snapshot => {
+               approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+            })
+        }
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
+                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+             })
+        }
+        
+        setApprovers(approversArr);
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         getFormFields();
+        getApproversWithId();
     }, []);
-    
-
-    // Approver obj, it can be changed into props
-    const approvers = [
-        {
-            name: "Onur Tepeli"
-        },
-        {
-            name: "Bekir Semih Turgut"
-        }
-    ]
 
     return (
         <Container maxWidth="lg">
