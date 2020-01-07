@@ -4,12 +4,11 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
-DialogTitle, useMediaQuery } from '@material-ui/core';
+DialogTitle, OutlinedInput, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { useForm } from "react-hook-form";
 const queryString = require('query-string');
-
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -33,7 +32,7 @@ const useStyles = makeStyles(theme => ({
             width: '17px'
         },
     }
-  }));
+}));
 
 export default function LeaveRequestEditForm(props) {
     // Styles
@@ -187,7 +186,6 @@ export default function LeaveRequestEditForm(props) {
         });
     }
        
-
     const getFormFields = async () => {
         const uid = queryString.parse(location.search).formId;
         setDocUid(uid);
@@ -276,17 +274,23 @@ export default function LeaveRequestEditForm(props) {
             <Box marginY={4}>
                 {console.log(watchFields)}
                 <Paper className={classes.root}>
-                    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
+                    <form className={classes.form}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Edit</Typography>
                         <Box marginTop={2}>
                             <FormControl variant="outlined" className={classes.formControl}>
-                                <InputLabel ref={inputLabel}>Leave Type</InputLabel>
+                                <InputLabel ref={inputLabel} shrink>Leave Type</InputLabel>
                                 <Select
-                                native
-                                labelWidth={labelWidth}
-                                name="leaveType"
-                                inputRef={register({ required: true, minLength: 1 })}
-                                error={errors.leaveType}
+                                    native
+                                    labelWidth={labelWidth}
+                                    input = {
+                                        <OutlinedInput
+                                            notched
+                                            labelWidth={labelWidth}
+                                            name="leaveType"
+                                            inputRef={register({ required: true, minLength: 1 })}
+                                            error={errors.leaveType}
+                                        />
+                                    }
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
@@ -456,7 +460,7 @@ export default function LeaveRequestEditForm(props) {
                                     </Box>
                                     <Box clone order={{xs: 1, md: 2}}>
                                         <Grid item xs={12} md={6}>
-                                            <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
+                                            <Button className={classes.inputWidth} variant="contained" size="large" type="button" onClick={handleSubmit(onSubmit)} color="primary">SEND</Button>
                                         </Grid>
                                     </Box>
                                 </Grid>
