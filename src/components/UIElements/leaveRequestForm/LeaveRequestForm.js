@@ -6,6 +6,8 @@ Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, Di
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
 import AuthContext from "../../session";
 const useStyles = makeStyles(theme => ({
@@ -61,6 +63,8 @@ export default function LeaveRequestForm(props) {
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     const [approvers, setApprovers] = useState([]);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
     const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
     
@@ -83,16 +87,83 @@ export default function LeaveRequestForm(props) {
         setSelectedEndDate(date);
     }
 
-    const handleDuration = async (selectedEndDate, selectedStartDate) => {
-        // I used parseInt to prevent duration to be stringified in firebase
-        // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
-        let duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
-        if (await moment(selectedEndDate).diff(moment(selectedStartDate))>7200000 && await moment(selectedEndDate).diff(moment(selectedStartDate))<21600000) {
-            console.log('START->', selectedStartDate)
-            console.log('END->', selectedEndDate)
-            duration += 0.5;
-            console.log("Ekledim");
+    const _calculateTimeAddition = (timeDiff) => {
+        const HOUR = 60;
+        const NO_ADDITION = 0;
+        const HALF_DAY = 0.5;
+        const FULL_DAY = 1;       
+        if(timeDiff <= 2.5 * HOUR) {
+            return NO_ADDITION;
+        } else if (timeDiff <= 4 * HOUR) {
+            return HALF_DAY;
+        } else {    
+            return FULL_DAY;
+        }         
+    } 
+    
+    const _calculateLeaveDuration = (dayDiff,timeDiff,isStartTimeAfter) => {  
+        let additionDate = _calculateTimeAddition(timeDiff);
+        if(isStartTimeAfter) {
+            additionDate = additionDate - 1;
         }
+        return dayDiff + additionDate;
+    }    
+
+    const _getTimeDifference = (startTime,endTime,dayDiff) => {
+        // Does not affect to calculation directly. Just used to craft a date object
+        const SPARE_DATE = "01/01/2020";
+        const BREAK_TIME = "12:00:00";
+        const MIDDAY_BOUNDARY = "11:59:59";
+        const LEAVE_BOUNDARY = "15:59:59";
+        const WORK_START_TIME = "09:00:00";
+        const WORK_END_TIME = "18:29:59";
+        
+        const startDate = moment(`${SPARE_DATE} ${startTime}`,"DD/MM/YYYY HH:mm:ss");
+        const endDate = moment(`${SPARE_DATE} ${endTime}`,"DD/MM/YYYY HH:mm:ss");
+        const breakDate = moment(`${SPARE_DATE} ${BREAK_TIME}`,"DD/MM/YYYY HH:mm:ss");    
+        const leaveBoundaryDate = moment(`${SPARE_DATE} ${LEAVE_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss"); 
+        const middayBoundaryDate = moment(`${SPARE_DATE} ${MIDDAY_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss");     
+        const workStart = moment(`${SPARE_DATE} ${WORK_START_TIME}`,"DD/MM/YYYY HH:mm:ss");
+        const workEnd = moment(`${SPARE_DATE} ${WORK_END_TIME}`,"DD/MM/YYYY HH:mm:ss");
+
+        let timeDiff;    
+        let isStartTimeAfter = false;   
+        if(dayDiff === 0 || startDate.isBefore(endDate)) {
+            timeDiff = endDate.diff(startDate,"minutes");
+            // if(startDate.isBetween(breakDate,leaveBoundaryDate)) {
+            //     timeDiff = timeDiff - 180;               
+            // } else if(startDate.isBetween(workStart,breakDate)) {
+            //     timeDiff = timeDiff + 180;
+            // }
+        } else {
+            let firstDayLeave = workEnd.diff(startDate,"minutes");    
+            if(startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
+                firstDayLeave = 180;
+                console.log("SU Elsin içindeki bu IFE girdi");
+            }
+            const lastDayLeave = endDate.diff(workStart,"minutes");
+            timeDiff = firstDayLeave + lastDayLeave;                 
+            isStartTimeAfter = true;           
+        }               
+        // If the times contains break time, exclude from calculation
+        if(breakDate.isBetween(startDate,endDate)) {
+            timeDiff = timeDiff - 60;
+        }           
+        return [timeDiff,isStartTimeAfter];
+    }
+
+    const handleDuration = async (selectedEndDate, selectedStartDate) => {
+              
+        const _selectedStartDate = moment.isMoment(selectedStartDate) ? selectedStartDate.format() : selectedStartDate;
+        const _selectedEndDate = moment.isMoment(selectedEndDate) ? selectedEndDate.format() : selectedEndDate;         
+
+        const [startDate,startTime] = _selectedStartDate.toString().split('T');
+        const [endDate,endTime] = _selectedEndDate.toString().split('T');         
+
+        const dayDiff = await moment(endDate).businessDiff(moment(startDate));      
+        const [timeDiff,isStartTimeAfter] = _getTimeDifference(startTime,endTime, dayDiff);        
+        const duration = _calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
+       
         setDuration(duration);
     }
 
@@ -155,7 +226,9 @@ export default function LeaveRequestForm(props) {
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
-            setIsLoading(false);
+            
+            setSnackbarState(true);
+            setSnackbarType(snackbars.success);
         })
         console.log(requestFormObj);       
     }
