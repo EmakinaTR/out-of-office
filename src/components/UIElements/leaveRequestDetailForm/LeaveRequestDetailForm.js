@@ -112,18 +112,20 @@ export default function  LeaveRequestForm(props)  {
     }
 
     let searchApprovers = async (leadUserId) => {
-        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
-        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
         let approversArr = []
-        if (teamLeadPromise !== null) {
-            await teamLeadPromise.then(snapshot => {
+        let adminPromise = props.firebase.searchApprovers(leadUserId[0]);
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
             })
         }
-        if (adminPromise !== null) {
-            await adminPromise.then(snapshot => {
-                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
-             })
+        if (leadUserId[1] !== undefined) {
+            let teamLeadPromise = props.firebase.searchApprovers(leadUserId[1]);
+            if (teamLeadPromise !== null) {
+                await teamLeadPromise.then(snapshot => {
+                    approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+                 })
+            }
         }
         
         setApprovers(approversArr);
@@ -146,10 +148,10 @@ export default function  LeaveRequestForm(props)  {
                         </Box>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} lg={4}>
-                                    <TextField className={classes.inputWidth} label="Leave Start" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                    <TextField className={classes.inputWidth} label="Start Date" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
                                 </Grid>
                                 <Grid item xs={12} lg={4}>
-                                    <TextField className={classes.inputWidth} label="Leave End" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                    <TextField className={classes.inputWidth} label="Return Date" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
                                 </Grid>
                                 <Grid item xs={12} lg={4}>
                                     <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value={fields.duration || ''} InputProps={{readOnly: true,}} />

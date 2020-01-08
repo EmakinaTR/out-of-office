@@ -6,7 +6,10 @@ Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, Di
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
 import AuthContext from "../../session";
 const useStyles = makeStyles(theme => ({
     root: {
@@ -23,7 +26,7 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-    kvkkCheckBox: {
+    checkBoxError: {
         '& .MuiIconButton-label': {
             border: '2px solid red',
             height: '17px',
@@ -41,6 +44,8 @@ export default function LeaveRequestForm(props) {
     const theme = useTheme();
     // MediaQuery
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+    // History
+    const history = useHistory();
     // Default Date
     const defaultDate = moment().set({hour:9,minute:0,second:0}).format('YYYY-MM-DDTHH:mm:ss');
     // Form Validation
@@ -55,14 +60,18 @@ export default function LeaveRequestForm(props) {
     const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
+    const [negativeLeaveCheck, setNegativeLeaveCheck] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     const [approvers, setApprovers] = useState([]);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
     const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
-    // Wee need this handleChnage metho  because watchFields doesn't recognize
+    
+    // Wee need this handleChnage method  because watchFields doesn't recognize
     // conditional rendiring
     const handleChange = name => event => {
         const {value} = event.target;
@@ -81,16 +90,80 @@ export default function LeaveRequestForm(props) {
         setSelectedEndDate(date);
     }
 
-    const handleDuration = async (selectedEndDate, selectedStartDate) => {
-        // I used parseInt to prevent duration to be stringified in firebase
-        // let duration = await parseInt(Math.ceil((selectedEndDate - selectedStartDate) / (1000*60*60*24)));
-        let duration = await moment(selectedEndDate).businessDiff(moment(selectedStartDate));
-        if (await moment(selectedEndDate).diff(moment(selectedStartDate))>7200000 && await moment(selectedEndDate).diff(moment(selectedStartDate))<21600000) {
-            console.log('START->', selectedStartDate)
-            console.log('END->', selectedEndDate)
-            duration += 0.5;
-            console.log("Ekledim");
+    const _calculateTimeAddition = (timeDiff) => {
+        const HOUR = 60;
+        const NO_ADDITION = 0;
+        const HALF_DAY = 0.5;
+        const FULL_DAY = 1;       
+        if (timeDiff <= 2.5 * HOUR) {
+            return NO_ADDITION;
+        } else if (timeDiff <= 4 * HOUR) {
+            return HALF_DAY;
+        } else {    
+            return FULL_DAY;
+        }         
+    } 
+    
+    const _calculateLeaveDuration = (dayDiff,timeDiff,isStartTimeAfter) => {  
+        let additionDate = _calculateTimeAddition(timeDiff);
+        if (isStartTimeAfter) {
+            additionDate = additionDate - 1;
         }
+        return dayDiff + additionDate;
+    }    
+
+    const _getTimeDifference = (startTime,endTime,dayDiff) => {
+        // Does not affect to calculation directly. Just used to craft a date object
+        const SPARE_DATE = "01/01/2020";
+        const BREAK_TIME = "12:00:00";
+        const MIDDAY_BOUNDARY = "11:59:59";
+        const LEAVE_BOUNDARY = "15:59:59";
+        const WORK_START_TIME = "09:00:00";
+        const WORK_END_TIME = "18:29:59";
+        
+        const startDate = moment(`${SPARE_DATE} ${startTime}`,"DD/MM/YYYY HH:mm:ss");
+        const endDate = moment(`${SPARE_DATE} ${endTime}`,"DD/MM/YYYY HH:mm:ss");
+        const breakDate = moment(`${SPARE_DATE} ${BREAK_TIME}`,"DD/MM/YYYY HH:mm:ss");    
+        const leaveBoundaryDate = moment(`${SPARE_DATE} ${LEAVE_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss"); 
+        const middayBoundaryDate = moment(`${SPARE_DATE} ${MIDDAY_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss");     
+        const workStart = moment(`${SPARE_DATE} ${WORK_START_TIME}`,"DD/MM/YYYY HH:mm:ss");
+        const workEnd = moment(`${SPARE_DATE} ${WORK_END_TIME}`,"DD/MM/YYYY HH:mm:ss");
+
+        let timeDiff;    
+        let isStartTimeAfter = false;   
+        if (dayDiff === 0 || startDate.isBefore(endDate)) {
+            timeDiff = endDate.diff(startDate,"minutes");
+        }
+
+        else {
+            let firstDayLeave = workEnd.diff(startDate,"minutes");    
+            if (startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
+                firstDayLeave = 180;
+            }
+            const lastDayLeave = endDate.diff(workStart,"minutes");
+            timeDiff = firstDayLeave + lastDayLeave;                 
+            isStartTimeAfter = true;           
+        }
+
+        // If the times contains break time, exclude from calculation
+        if (breakDate.isBetween(startDate,endDate)) {
+            timeDiff = timeDiff - 60;
+        }           
+        return [timeDiff,isStartTimeAfter];
+    }
+
+    const handleDuration = async (selectedEndDate, selectedStartDate) => {
+              
+        const _selectedStartDate = moment.isMoment(selectedStartDate) ? selectedStartDate.format() : selectedStartDate;
+        const _selectedEndDate = moment.isMoment(selectedEndDate) ? selectedEndDate.format() : selectedEndDate;         
+
+        const [startDate,startTime] = _selectedStartDate.toString().split('T');
+        const [endDate,endTime] = _selectedEndDate.toString().split('T');         
+
+        const dayDiff = await moment(endDate).businessDiff(moment(startDate));      
+        const [timeDiff,isStartTimeAfter] = _getTimeDifference(startTime,endTime, dayDiff);        
+        const duration = _calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
+       
         setDuration(duration);
     }
 
@@ -107,6 +180,11 @@ export default function LeaveRequestForm(props) {
     
     const handleCheck = event => {
         setChecked(event.target.checked);
+        // console.log(event.target.checked)
+    }
+
+    const handleNegativeLeaveCheck = event => {
+        setNegativeLeaveCheck(event.target.checked);
         console.log(event.target.checked)
     }
 
@@ -133,6 +211,7 @@ export default function LeaveRequestForm(props) {
         const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
+        const isNegativeCreditUsageApproved = negativeLeaveCheck;
         let startDate = moment()._d;
         let endDate = moment()._d;
         if ((screenSize() > 768)) {
@@ -145,13 +224,17 @@ export default function LeaveRequestForm(props) {
         }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, status }
+            description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
             setIsLoading(false);
+            setSnackbarState(true);
+            setSnackbarType(snackbars.success);
         })
         console.log(requestFormObj);       
     }
 
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
     //Firebase
 
     // Firebase functions
@@ -190,18 +273,20 @@ export default function LeaveRequestForm(props) {
     }
 
     let searchApprovers = async (leadUserId) => {
-        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
-        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
         let approversArr = []
-        if (teamLeadPromise !== null) {
-            await teamLeadPromise.then(snapshot => {
+        let adminPromise = props.firebase.searchApprovers(leadUserId[0]);
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
             })
         }
-        if (adminPromise !== null) {
-            await adminPromise.then(snapshot => {
-                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
-             })
+        if (leadUserId[1] !== undefined) {
+            let teamLeadPromise = props.firebase.searchApprovers(leadUserId[1]);
+            if (teamLeadPromise !== null) {
+                await teamLeadPromise.then(snapshot => {
+                    approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+                 })
+            }
         }
         
         setApprovers(approversArr);
@@ -265,7 +350,7 @@ export default function LeaveRequestForm(props) {
                             />
                             <TextField
                             margin="normal"
-                            label="End Date and Time"
+                            label="Return Date and Time"
                             type="datetime-local"
                             inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
@@ -310,7 +395,7 @@ export default function LeaveRequestForm(props) {
                                     <Grid item xs={12} md={6}>
                                         <KeyboardDatePicker
                                         className={classes.inputWidth}
-                                        label="End Date"
+                                        label="Return Date"
                                         format='MM/DD/YYYY'
                                         minDate={selectedStartDate}
                                         margin="normal"
@@ -325,7 +410,7 @@ export default function LeaveRequestForm(props) {
                                         <KeyboardTimePicker
                                         className={classes.inputWidth}
                                         margin="normal"
-                                        label="End Time"
+                                        label="Return Time"
                                         value={selectedEndDate}
                                         onChange={handleEndDateChange}
                                         KeyboardButtonProps={{
@@ -358,6 +443,29 @@ export default function LeaveRequestForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
+                                {(isLeaveCreditNegative(duration)) ?  
+                                <Grid item xs={12}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Grid item>
+                                                <Checkbox
+                                                id="negativeCredit" 
+                                                color="primary"
+                                                name="negativeCreditCheck"
+                                                checked={negativeLeaveCheck}
+                                                onChange={handleNegativeLeaveCheck}
+                                                value={negativeLeaveCheck}
+                                                className={(errors.negativeCreditCheck) ? classes.checkBoxError: ''}
+                                                inputRef={register({required: !negativeLeaveCheck})}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                        </Grid>
+                                        <Grid item xs>
+                                            <label htmlFor="negativeCredit" style={{paddingRight:".5rem"}}>Agree with Negative Leave Credit Usage</label>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                : ''
+                                }
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
                                         <Grid item>
@@ -368,7 +476,7 @@ export default function LeaveRequestForm(props) {
                                             value={checked}
                                             color="primary"
                                             name="kvkkCheck"
-                                            className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                            className={(errors.kvkkCheck) ? classes.checkBoxError: ''}
                                             inputRef={register({required: !checked})}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                             />
@@ -409,6 +517,16 @@ export default function LeaveRequestForm(props) {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: "/myrequests",
+                });
+            }}
+            ></SnackBar>
         </Container>
     )
 }

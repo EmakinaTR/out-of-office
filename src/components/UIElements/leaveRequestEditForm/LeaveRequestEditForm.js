@@ -7,7 +7,10 @@ Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, Di
 DialogTitle, OutlinedInput, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
+import AuthContext from "../../session";
 const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
@@ -25,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-    kvkkCheckBox: {
+    checkBoxError: {
         '& .MuiIconButton-label': {
             border: '2px solid red',
             height: '17px',
@@ -61,12 +64,15 @@ export default function LeaveRequestEditForm(props) {
     const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
+    const [negativeLeaveCheck, setNegativeLeaveCheck] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     const [docUid, setDocUid] = useState('');
     const [approvers, setApprovers] = useState([]);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
     
      // Handle Methods
      const handleChange = name => event => {
@@ -108,6 +114,11 @@ export default function LeaveRequestEditForm(props) {
         console.log(event.target.checked)
     }
 
+    const handleNegativeLeaveCheck = event => {
+        setNegativeLeaveCheck(event.target.checked);
+        console.log(event.target.checked)
+    }
+
     const handleDialogOpen = () => {
         setOpen(true);
         console.log('Working')
@@ -130,6 +141,7 @@ export default function LeaveRequestEditForm(props) {
         const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
+        const isNegativeCreditUsageApproved = negativeLeaveCheck;
         let startDate = moment()._d;
         let endDate = moment()._d;
         if ((screenSize() > 768)) {
@@ -142,11 +154,17 @@ export default function LeaveRequestEditForm(props) {
         }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, status }
+            description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         
-        await props.firebase.updateLeaveRequest(docUid, requestFormObj);
+        await props.firebase.updateLeaveRequest(docUid, requestFormObj).then(response => {
+            setSnackbarState(true);
+            setSnackbarType(snackbars.success);
+        });
         console.log(requestFormObj);
     }
+
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+
 
     const cancel = () => {
         history.push({
@@ -230,18 +248,20 @@ export default function LeaveRequestEditForm(props) {
     }
 
     let searchApprovers = async (leadUserId) => {
-        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
-        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
         let approversArr = []
-        if (teamLeadPromise !== null) {
-            await teamLeadPromise.then(snapshot => {
+        let adminPromise = props.firebase.searchApprovers(leadUserId[0]);
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
             })
         }
-        if (adminPromise !== null) {
-            await adminPromise.then(snapshot => {
-                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
-             })
+        if (leadUserId[1] !== undefined) {
+            let teamLeadPromise = props.firebase.searchApprovers(leadUserId[1]);
+            if (teamLeadPromise !== null) {
+                await teamLeadPromise.then(snapshot => {
+                    approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+                 })
+            }
         }
         
         setApprovers(approversArr);
@@ -313,7 +333,7 @@ export default function LeaveRequestEditForm(props) {
                             />
                             <TextField
                             margin="normal"
-                            label="End Date and Time"
+                            label="Return Date and Time"
                             type="datetime-local"
                             inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
@@ -358,7 +378,7 @@ export default function LeaveRequestEditForm(props) {
                                     <Grid item xs={12} md={6}>
                                         <KeyboardDatePicker
                                         className={classes.inputWidth}
-                                        label="End Date"
+                                        label="Return Date"
                                         format='MM/DD/YYYY'
                                         minDate={selectedStartDate}
                                         margin="normal"
@@ -373,7 +393,7 @@ export default function LeaveRequestEditForm(props) {
                                         <KeyboardTimePicker
                                         className={classes.inputWidth}
                                         margin="normal"
-                                        label="End Time"
+                                        label="Return Time"
                                         value={selectedEndDate}
                                         onChange={handleEndDateChange}
                                         KeyboardButtonProps={{
@@ -409,6 +429,29 @@ export default function LeaveRequestEditForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
+                            {(isLeaveCreditNegative(duration)) ?  
+                                <Grid item xs={12}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Grid item>
+                                                <Checkbox
+                                                id="negativeCredit" 
+                                                color="primary"
+                                                name="negativeCreditCheck"
+                                                checked={negativeLeaveCheck}
+                                                onChange={handleNegativeLeaveCheck}
+                                                value={negativeLeaveCheck}
+                                                className={(errors.negativeCreditCheck) ? classes.checkBoxError: ''}
+                                                inputRef={register({required: !negativeLeaveCheck})}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                        </Grid>
+                                        <Grid item xs>
+                                            <label htmlFor="negativeCredit" style={{paddingRight:".5rem"}}>Agree with Negative Leave Credit Usage</label>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                : ''
+                                }
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
                                     <Grid item>
@@ -419,16 +462,16 @@ export default function LeaveRequestEditForm(props) {
                                         value={checked}
                                         color="primary"
                                         name="kvkkCheck"
-                                        className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                        className={(errors.kvkkCheck) ? classes.checkBoxError: ''}
                                         inputRef={register({required: !checked})}
                                         inputProps={{ 'aria-label': 'primary checkbox' }}
                                         />
                                     </Grid> 
                                     <Grid item xs>
-                                    <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
-                                    <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                        </Grid> 
-                                    </Grid>                            
+                                        <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                        <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                    </Grid> 
+                                </Grid>                            
                                     <Dialog
                                     fullScreen={fullScreen}
                                     open={open}
@@ -469,6 +512,17 @@ export default function LeaveRequestEditForm(props) {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: '/request-detail',
+                    search: '?formId='+ docUid,
+                })
+            }}
+            ></SnackBar>
         </Container>
     )
 }
