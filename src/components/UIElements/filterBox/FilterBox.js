@@ -1,5 +1,5 @@
 import React, { useState,useRef,useContext} from 'react';
-import { Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem, Badge, IconButton, Box, Drawer, Icon} from '@material-ui/core';
+import { Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem, Badge, IconButton, Box, Drawer, Icon, SwipeableDrawer} from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { leaveBadges } from '../../../constants/badgeTypes';
@@ -84,7 +84,7 @@ export function FilterBox(props) {
             <IconButton aria-label="show-hide filters" ref={anchorRef} onClick={onToggle}>
                 <Badge color="secondary" variant="dot" invisible={props.filterBoxState !== undefined && props.filterBoxState.length !== 0  ? false : true} ><FilterListIcon /></Badge>
             </IconButton>
-            <Drawer
+            <SwipeableDrawer
                 className={classes.drawer}
                 anchor="right"
                 variant="temporary"
@@ -168,7 +168,7 @@ export function FilterBox(props) {
                </div>
                     {/* </ClickAwayListener> */}
 
-            </Drawer>
+            </SwipeableDrawer>
             </Box>
     );
 }

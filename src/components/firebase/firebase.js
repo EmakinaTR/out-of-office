@@ -200,7 +200,6 @@ export default class Firebase {
     return this.db.collection("leaveType").doc(leaveType);
   };
 
-<<<<<<< HEAD
 
   getApproversWithId = (uid) => {
     const teamsRef = this.db.collection('teams');
@@ -217,16 +216,12 @@ export default class Firebase {
 
   getMyRequests = (queryData) => {  
     console.log("getMyRequests Call",queryData)
-=======
-  getMyRequestsC = (queryData) => {  
->>>>>>> 43bd4e514464a894a1110bddbeafe8daa863bcb9
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef, queryData);
   };
 
   _createQuery = (collectionRef, queryData) => {
     {     
-      console.log("hiii",queryData)
       return new Promise((resolve, reject) => {
         if(queryData.lastDocument != "end"){
         let query;
@@ -255,17 +250,12 @@ export default class Firebase {
         if (queryData.pageSize) {
           query = query.limit(queryData.pageSize);
         }
-        console.log(query)
         query.get().then( async querySnapshot => {
           const dataArray = [];
           console.log(querySnapshot)     
           for(const doc of querySnapshot.docs) {
             const leaveDoc = doc.data();
-<<<<<<< HEAD
             leaveDoc.id = doc.id;
-=======
-            console.log(doc.data())
->>>>>>> 43bd4e514464a894a1110bddbeafe8daa863bcb9
             await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
               leaveDoc.leaveType = documentSnapShot.data();
             })

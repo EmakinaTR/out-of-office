@@ -55,6 +55,7 @@ export default function MyRequests(props) {
     const [A_to_Z, setA_to_Z] = useState(true); // 0 is down direction - 1 is up direction
     const [selectedFilterField, setSelectedFilterField] = useState(0);
     const [filteredLeaveType, setFilteredLeaveType] = useState(-1);
+    const [prevQueryData, setprevQueryData] = useState()
     const [filteredDates, setFilteredDates] = useState({
         from: moment().subtract(30, 'd'),
         to : moment()
@@ -70,56 +71,60 @@ export default function MyRequests(props) {
     const [queryData, setQueryData] = useState(intitialQueryData)
     const onSelectedFilterFieldChanged = (e) => {
         setSelectedFilterField(e.target.value);
-        console.log(selectedFilterField)
+        // console.log(selectedFilterField)
 
     }
     const onFilterDirectionChanged = (e) => {
         setA_to_Z(A_to_Z => !A_to_Z)
-        console.log(A_to_Z)
+        // console.log(A_to_Z)
 
     }
 
     const onFilteredLeaveTypeChange = (e)  => {
         setFilteredLeaveType(e.target.value);
-        console.log(e.target.value)
+        // console.log(e.target.value)
     }
     const onSearchQueryChange = (value) => {
         setsearchQuery(value);
-        console.log(searchQuery)
+        // console.log(searchQuery)
 
     }
     const onStartDateChange = date => {
         setFilteredDates({
             ...filteredDates, from: date._d
         });
-        console.log(filteredDates)
+        // console.log(filteredDates)
 
     }
     const onEndDateChange = date => {
         setFilteredDates({
             ...filteredDates, to: date._d
         });
-        console.log(filteredDates)
+        // console.log(filteredDates)
     }
     const onFilterBoxClick = () => {
         var reference = firebaseContext.db.collection("leaveType");
-        console.log(filteredLeaveType)
+        let filterArray = [{ fieldPath: "createdBy", condition: "==", value: currentUser.uid }];
+        if(filteredLeaveType != -1){
+            filterArray.push({ fieldPath: "leaveTypeRef", condition: "==", value: reference.doc(filteredLeaveType.toString()) })
+        }
+        if (filteredDates.from != undefined){
+            filterArray.push({ fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from)) })
+        }
+
+        if (filteredDates.to != undefined) {
+            filterArray.push({ fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from)) })
+        }
         setQueryData(
             {
                 ...queryData,
-                filterArray: [
-                    { fieldPath: "createdBy", condition: "==", value: currentUser.uid },
-                    filteredLeaveType ? ({ fieldPath: "leaveTypeRef", condition: "==", value: reference.doc(filteredLeaveType.toString())}) : undefined,
-                    filteredDates.from ? { fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from))} : undefined,
-                    filteredDates.to ? { fieldPath: orderByFilterOptions[selectedFilterField].key, condition: "<=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.to)) } : undefined,
-                    // filterBoxState.endDate ? { fieldPath: "startDate", condition: "<=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filterBoxState.endDate))} : undefined
-                ],
+                filterArray:filterArray,
                 orderBy: { fieldPath: orderByFilterOptions[selectedFilterField].key, type: A_to_Z ? "desc" : "asc" },
                 lastDocument: undefined
             }
         )
         setLoadMore(true)
-        console.log(queryData)
+        // console.log(queryData)
     }
 
     // const onSearchQueryChange = (value) => {
@@ -129,32 +134,47 @@ export default function MyRequests(props) {
     //     })
     //     setDataList(filteredDataList);
     // }
-    
-
-    
-
     let getMyRequests = async (loadMore, queryData) => {
-        console.log("getMyReq")
+        // console.log("getMyReq")
+        
+        // console.log("queryData: ", queryData);
+        // console.log("prevQueryData: ", prevQueryData);
+        
         if(loadMore){
             setIsLoading(true);
             await firebaseContext.getMyRequests(queryData, currentUser.uid)
                 .then(result => {
-                    if(result.data.length>0){
-                        console.log(queryData)
-                        setDataList([...result.data, ...dataList]);
-                        setQueryData({ ...queryData, lastDocument: result.lastDocument })
+                    
+                    if ((queryData == intitialQueryData || queryData !=prevQueryData) && queryData.lastDocument == undefined){
+                        // console.log("query data");
+                        
+                            // console.log(result.data)
+                            setDataList([...result.data]);
+                            setQueryData({ ...queryData, lastDocument: result.lastDocument });
+                        
                     }
-                    else{
-                        setQueryData({ ...queryData,lastDocument: "end"})
+                    else {
+                        // console.log("Same query data");
+                        if (result.data.length > 0) {
+                            // console.log(queryData);
+                            setDataList([...dataList, ...result.data]);
+                           
+                            setQueryData({ ...queryData, lastDocument: result.lastDocument });
+                            
+                        }
+                        else {
+                            setQueryData({ ...queryData, lastDocument: "end" });
+                        }
                     }
-                    setIsLoading(false);
-            });
+                    setprevQueryData(queryData);
+                    
+                    
+                }).finally(setIsLoading(false))
         }
+      
     }
 
     useEffect(() => {
-        console.log("from useEffect - 1")
-        console.log(queryData);
         getMyRequests(loadMore, queryData);
         setLoadMore(false);
     }, [loadMore]);
@@ -166,7 +186,6 @@ export default function MyRequests(props) {
             window.addEventListener('scroll', () => {
                 if (window.scrollY + window.innerHeight >= list.clientHeight + list.offsetTop) {
                     setLoadMore(loadMore=> !loadMore);
-                    console.log(loadMore)
                 }
             });
     }, []);
