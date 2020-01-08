@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-    kvkkCheckBox: {
+    checkBoxError: {
         '& .MuiIconButton-label': {
             border: '2px solid red',
             height: '17px',
@@ -55,6 +55,7 @@ export default function LeaveRequestForm(props) {
     const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
+    const [negativeLeaveCheck, setNegativeLeaveCheck] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
@@ -62,7 +63,8 @@ export default function LeaveRequestForm(props) {
     const [approvers, setApprovers] = useState([]);
     const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
-    // Wee need this handleChnage metho  because watchFields doesn't recognize
+    
+    // Wee need this handleChnage method  because watchFields doesn't recognize
     // conditional rendiring
     const handleChange = name => event => {
         const {value} = event.target;
@@ -107,6 +109,11 @@ export default function LeaveRequestForm(props) {
     
     const handleCheck = event => {
         setChecked(event.target.checked);
+        // console.log(event.target.checked)
+    }
+
+    const handleNegativeLeaveCheck = event => {
+        setNegativeLeaveCheck(event.target.checked);
         console.log(event.target.checked)
     }
 
@@ -133,6 +140,7 @@ export default function LeaveRequestForm(props) {
         const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
+        const isNegativeCreditUsageApproved = negativeLeaveCheck;
         let startDate = moment()._d;
         let endDate = moment()._d;
         if ((screenSize() > 768)) {
@@ -145,13 +153,15 @@ export default function LeaveRequestForm(props) {
         }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, status }
+            description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
             setIsLoading(false);
         })
         console.log(requestFormObj);       
     }
 
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
     //Firebase
 
     // Firebase functions
@@ -358,6 +368,29 @@ export default function LeaveRequestForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
+                                {(isLeaveCreditNegative(duration)) ?  
+                                <Grid item xs={12}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Grid item>
+                                                <Checkbox
+                                                id="negativeCredit" 
+                                                color="primary"
+                                                name="negativeCreditCheck"
+                                                checked={negativeLeaveCheck}
+                                                onChange={handleNegativeLeaveCheck}
+                                                value={negativeLeaveCheck}
+                                                className={(errors.negativeCreditCheck) ? classes.checkBoxError: ''}
+                                                inputRef={register({required: !negativeLeaveCheck})}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                        </Grid>
+                                        <Grid item xs>
+                                            <label htmlFor="negativeCredit" style={{paddingRight:".5rem"}}>Agree with Negative Leave Credit Usage</label>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                : ''
+                                }
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
                                         <Grid item>
@@ -368,7 +401,7 @@ export default function LeaveRequestForm(props) {
                                             value={checked}
                                             color="primary"
                                             name="kvkkCheck"
-                                            className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                            className={(errors.kvkkCheck) ? classes.checkBoxError: ''}
                                             inputRef={register({required: !checked})}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                             />

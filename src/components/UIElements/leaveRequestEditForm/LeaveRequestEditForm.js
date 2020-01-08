@@ -8,6 +8,7 @@ DialogTitle, OutlinedInput, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import { useForm } from "react-hook-form";
+import AuthContext from "../../session";
 const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
@@ -25,7 +26,7 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-    kvkkCheckBox: {
+    checkBoxError: {
         '& .MuiIconButton-label': {
             border: '2px solid red',
             height: '17px',
@@ -61,6 +62,7 @@ export default function LeaveRequestEditForm(props) {
     const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
+    const [negativeLeaveCheck, setNegativeLeaveCheck] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
@@ -108,6 +110,11 @@ export default function LeaveRequestEditForm(props) {
         console.log(event.target.checked)
     }
 
+    const handleNegativeLeaveCheck = event => {
+        setNegativeLeaveCheck(event.target.checked);
+        console.log(event.target.checked)
+    }
+
     const handleDialogOpen = () => {
         setOpen(true);
         console.log('Working')
@@ -130,6 +137,7 @@ export default function LeaveRequestEditForm(props) {
         const protocolNumber = state.protocolNumber;
         const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
         const isPrivacyPolicyApproved = checked;
+        const isNegativeCreditUsageApproved = negativeLeaveCheck;
         let startDate = moment()._d;
         let endDate = moment()._d;
         if ((screenSize() > 768)) {
@@ -142,11 +150,14 @@ export default function LeaveRequestEditForm(props) {
         }
         
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, status }
+            description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         
         await props.firebase.updateLeaveRequest(docUid, requestFormObj);
         console.log(requestFormObj);
     }
+
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+
 
     const cancel = () => {
         history.push({
@@ -409,6 +420,29 @@ export default function LeaveRequestEditForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
+                            {(isLeaveCreditNegative(duration)) ?  
+                                <Grid item xs={12}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Grid item>
+                                                <Checkbox
+                                                id="negativeCredit" 
+                                                color="primary"
+                                                name="negativeCreditCheck"
+                                                checked={negativeLeaveCheck}
+                                                onChange={handleNegativeLeaveCheck}
+                                                value={negativeLeaveCheck}
+                                                className={(errors.negativeCreditCheck) ? classes.checkBoxError: ''}
+                                                inputRef={register({required: !negativeLeaveCheck})}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                        </Grid>
+                                        <Grid item xs>
+                                            <label htmlFor="negativeCredit" style={{paddingRight:".5rem"}}>Agree with Negative Leave Credit Usage</label>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                : ''
+                                }
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
                                     <Grid item>
@@ -419,16 +453,16 @@ export default function LeaveRequestEditForm(props) {
                                         value={checked}
                                         color="primary"
                                         name="kvkkCheck"
-                                        className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                        className={(errors.kvkkCheck) ? classes.checkBoxError: ''}
                                         inputRef={register({required: !checked})}
                                         inputProps={{ 'aria-label': 'primary checkbox' }}
                                         />
                                     </Grid> 
                                     <Grid item xs>
-                                    <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
-                                    <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                        </Grid> 
-                                    </Grid>                            
+                                        <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                        <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                    </Grid> 
+                                </Grid>                            
                                     <Dialog
                                     fullScreen={fullScreen}
                                     open={open}
