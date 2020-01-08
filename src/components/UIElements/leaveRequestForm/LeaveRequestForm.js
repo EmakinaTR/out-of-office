@@ -9,6 +9,7 @@ import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from 
 import SnackBar from "../snackBar/SnackBar";
 import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
 import AuthContext from "../../session";
 const useStyles = makeStyles(theme => ({
     root: {
@@ -43,6 +44,8 @@ export default function LeaveRequestForm(props) {
     const theme = useTheme();
     // MediaQuery
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+    // History
+    const history = useHistory();
     // Default Date
     const defaultDate = moment().set({hour:9,minute:0,second:0}).format('YYYY-MM-DDTHH:mm:ss');
     // Form Validation
@@ -92,7 +95,7 @@ export default function LeaveRequestForm(props) {
         const NO_ADDITION = 0;
         const HALF_DAY = 0.5;
         const FULL_DAY = 1;       
-        if(timeDiff <= 2.5 * HOUR) {
+        if (timeDiff <= 2.5 * HOUR) {
             return NO_ADDITION;
         } else if (timeDiff <= 4 * HOUR) {
             return HALF_DAY;
@@ -103,7 +106,7 @@ export default function LeaveRequestForm(props) {
     
     const _calculateLeaveDuration = (dayDiff,timeDiff,isStartTimeAfter) => {  
         let additionDate = _calculateTimeAddition(timeDiff);
-        if(isStartTimeAfter) {
+        if (isStartTimeAfter) {
             additionDate = additionDate - 1;
         }
         return dayDiff + additionDate;
@@ -128,25 +131,22 @@ export default function LeaveRequestForm(props) {
 
         let timeDiff;    
         let isStartTimeAfter = false;   
-        if(dayDiff === 0 || startDate.isBefore(endDate)) {
+        if (dayDiff === 0 || startDate.isBefore(endDate)) {
             timeDiff = endDate.diff(startDate,"minutes");
-            // if(startDate.isBetween(breakDate,leaveBoundaryDate)) {
-            //     timeDiff = timeDiff - 180;               
-            // } else if(startDate.isBetween(workStart,breakDate)) {
-            //     timeDiff = timeDiff + 180;
-            // }
-        } else {
+        }
+
+        else {
             let firstDayLeave = workEnd.diff(startDate,"minutes");    
-            if(startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
+            if (startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
                 firstDayLeave = 180;
-                console.log("SU Elsin içindeki bu IFE girdi");
             }
             const lastDayLeave = endDate.diff(workStart,"minutes");
             timeDiff = firstDayLeave + lastDayLeave;                 
             isStartTimeAfter = true;           
-        }               
+        }
+
         // If the times contains break time, exclude from calculation
-        if(breakDate.isBetween(startDate,endDate)) {
+        if (breakDate.isBetween(startDate,endDate)) {
             timeDiff = timeDiff - 60;
         }           
         return [timeDiff,isStartTimeAfter];
@@ -226,7 +226,7 @@ export default function LeaveRequestForm(props) {
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
-            
+            setIsLoading(false);
             setSnackbarState(true);
             setSnackbarType(snackbars.success);
         })
@@ -517,6 +517,16 @@ export default function LeaveRequestForm(props) {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: "/myrequests",
+                });
+            }}
+            ></SnackBar>
         </Container>
     )
 }

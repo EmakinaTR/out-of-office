@@ -7,6 +7,8 @@ Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, Di
 DialogTitle, OutlinedInput, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
 import AuthContext from "../../session";
 const queryString = require('query-string');
@@ -69,6 +71,8 @@ export default function LeaveRequestEditForm(props) {
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
     const [docUid, setDocUid] = useState('');
     const [approvers, setApprovers] = useState([]);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
     
      // Handle Methods
      const handleChange = name => event => {
@@ -152,7 +156,10 @@ export default function LeaveRequestEditForm(props) {
         const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
             description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
         
-        await props.firebase.updateLeaveRequest(docUid, requestFormObj);
+        await props.firebase.updateLeaveRequest(docUid, requestFormObj).then(response => {
+            setSnackbarState(true);
+            setSnackbarType(snackbars.success);
+        });
         console.log(requestFormObj);
     }
 
@@ -505,6 +512,17 @@ export default function LeaveRequestEditForm(props) {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: '/request-detail',
+                    search: '?formId='+ docUid,
+                })
+            }}
+            ></SnackBar>
         </Container>
     )
 }

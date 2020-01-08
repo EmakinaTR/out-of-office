@@ -164,21 +164,18 @@ export default class Firebase {
   };
 
   updateLeaveRequest = (uid, leaveRequestObj) => {
-    this.db.collection("leaveRequests").doc(uid).update(leaveRequestObj);
+    return new Promise((resolve, reject) => {
+      this.db.collection("leaveRequests").doc(uid).update(leaveRequestObj).then(response => {
+        resolve(response);
+      }).catch(error => {
+        reject(error);
+      })
+    });
   }
 
   getSpecificLeaveRequestWithId = (documentId) => {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }
-
-  updateLeaveRequest = (uid, leaveRequestObj) => {
-    this.db.collection("leaveRequests").doc(uid).update(leaveRequestObj);
-  }
-
-  getSpecificLeaveRequestWithId = (documentId) => {
-    return this.db.collection("leaveRequests").doc(documentId).get();
-  }
-
 
   getLeaveTypeOfGivenReference = ref => {
     return this.db.doc(ref).get();
