@@ -200,18 +200,20 @@ export default function LeaveRequestForm(props) {
     }
 
     let searchApprovers = async (leadUserId) => {
-        let teamLeadPromise = props.firebase.searchApprovers(leadUserId[0]);
-        let adminPromise = props.firebase.searchApprovers(leadUserId[1]);
         let approversArr = []
-        if (teamLeadPromise !== null) {
-            await teamLeadPromise.then(snapshot => {
+        let adminPromise = props.firebase.searchApprovers(leadUserId[0]);
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
             })
         }
-        if (adminPromise !== null) {
-            await adminPromise.then(snapshot => {
-                approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
-             })
+        if (leadUserId[1] !== undefined) {
+            let teamLeadPromise = props.firebase.searchApprovers(leadUserId[1]);
+            if (teamLeadPromise !== null) {
+                await teamLeadPromise.then(snapshot => {
+                    approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+                 })
+            }
         }
         
         setApprovers(approversArr);
