@@ -130,41 +130,47 @@ export default function LeaveRequestEditForm(props) {
 
     const onSubmit = async (data, e) => {
         e.preventDefault();
-        const uid = props.auth().uid;
-        const processedBy = "";
-        const createdBy = uid;
-        const requesterName = props.auth().displayName;
-        const status = 0;
-        const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const leaveType = watchFields.leaveType;
-        const description = watchFields.description;
-        const protocolNumber = state.protocolNumber;
-        const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
-        const isPrivacyPolicyApproved = checked;
-        const isNegativeCreditUsageApproved = negativeLeaveCheck;
-        let startDate = moment()._d;
-        let endDate = moment()._d;
-        if ((screenSize() > 768)) {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
-        }
-        else {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+            const uid = props.auth().uid;
+            const processedBy = "";
+            const createdBy = uid;
+            const requesterName = props.auth().displayName;
+            const status = 0;
+            const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
+            const leaveType = watchFields.leaveType;
+            const description = watchFields.description;
+            const protocolNumber = state.protocolNumber;
+            const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
+            const isPrivacyPolicyApproved = checked;
+            const isNegativeCreditUsageApproved = negativeLeaveCheck;
+            let startDate = moment()._d;
+            let endDate = moment()._d;
+            if ((screenSize() > 768)) {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
+            }
+            else {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+            }
+            
+            const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
+                description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
+            
+            await props.firebase.updateLeaveRequest(docUid, requestFormObj).then(response => {
+                setSnackbarState(true);
+                setSnackbarType(snackbars.success);
+            });
+            console.log(requestFormObj);
         }
         
-        const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
-        
-        await props.firebase.updateLeaveRequest(docUid, requestFormObj).then(response => {
-            setSnackbarState(true);
-            setSnackbarType(snackbars.success);
-        });
-        console.log(requestFormObj);
     }
 
+    // Check if user has negative leave credit
     const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
-
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
 
     const cancel = () => {
         history.push({

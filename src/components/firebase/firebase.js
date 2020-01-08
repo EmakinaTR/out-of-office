@@ -197,7 +197,7 @@ export default class Firebase {
     return this.db.collection("leaveType").doc(leaveType);
   };
 
-
+  // Approvers
   getApproversWithId = (uid) => {
     const teamsRef = this.db.collection('teams');
     const userSearch = teamsRef.where('members', 'array-contains', uid).get();
