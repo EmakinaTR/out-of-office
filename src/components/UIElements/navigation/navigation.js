@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import protectedRoutes from "../../../constants/routes";
 import { Switch, Link, BrowserRouter as Router } from "react-router-dom";
 import AuthContext from "../../session";
-import SignIn from "../../../pages/signin";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";

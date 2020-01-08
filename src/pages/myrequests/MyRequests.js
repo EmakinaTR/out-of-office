@@ -1,7 +1,7 @@
-import React,{useState,useEffect,useContext,useRef} from 'react'
-import { Container, Box, Typography, Grid,Button } from '@material-ui/core'
+import React,{useState,useEffect,useContext} from 'react'
+import { Container, Box, Typography, Grid } from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
-import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
+import { statusBadges } from '../../constants/badgeTypes';
 import MyRequestsCard from '../../components/UIElements/myRequestCard';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import LaunchScreen from '../../components/UIElements/launchScreen'
@@ -105,14 +105,14 @@ export default function MyRequests(props) {
     const onFilterBoxClick = () => {
         var reference = firebaseContext.db.collection("leaveType");
         let filterArray = [{ fieldPath: "createdBy", condition: "==", value: currentUser.uid }];
-        if(filteredLeaveType != -1){
+        if(filteredLeaveType !== -1){
             filterArray.push({ fieldPath: "leaveTypeRef", condition: "==", value: reference.doc(filteredLeaveType.toString()) })
         }
-        if (filteredDates.from != undefined){
+        if (filteredDates.from !== undefined){
             filterArray.push({ fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from)) })
         }
 
-        if (filteredDates.to != undefined) {
+        if (filteredDates.to !== undefined) {
             filterArray.push({ fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from)) })
         }
         setQueryData(
@@ -126,14 +126,6 @@ export default function MyRequests(props) {
         setLoadMore(true)
         // console.log(queryData)
     }
-
-    // const onSearchQueryChange = (value) => {
-    //     let filteredDataList = dataList;
-    //     filteredDataList = filteredDataList.filter((data) => {
-    //         return data.userName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
-    //     })
-    //     setDataList(filteredDataList);
-    // }
     let getMyRequests = async (loadMore, queryData) => {
         // console.log("getMyReq")
         
@@ -145,7 +137,7 @@ export default function MyRequests(props) {
             await firebaseContext.getMyRequests(queryData, currentUser.uid)
                 .then(result => {
                     
-                    if ((queryData == intitialQueryData || queryData !=prevQueryData) && queryData.lastDocument == undefined){
+                    if ((queryData === intitialQueryData || queryData !==prevQueryData) && queryData.lastDocument === undefined){
                         // console.log("query data");
                         
                             // console.log(result.data)
@@ -220,15 +212,16 @@ export default function MyRequests(props) {
                             filteredDates={filteredDates}
                             filteredLeaveType={filteredLeaveType}
                         >
-                        </FilterBox></Grid>
+                        </FilterBox>
+                        </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
                 </Box>
                     <div id= "list">
                     {dataList ? dataList.map((data, index) => {
-                        // var statusType = statusBadges.find(type => type.id == data.status)
-                        // var leaveType = leaveBadges.find(type => type.id == data.leaveType)
+                        // var statusType = statusBadges.find(type => type.id === data.status)
+                        // var leaveType = leaveBadges.find(type => type.id === data.leaveType)
                         // {console.log(data.startDate)}
                         return (
                             <MyRequestsCard
@@ -252,8 +245,6 @@ export default function MyRequests(props) {
                         :
                         <LaunchScreen></LaunchScreen>}
                     </div>
-
-                
             </Box>
         </Container>
     )

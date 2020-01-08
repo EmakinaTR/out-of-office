@@ -3,7 +3,7 @@ import { Grid, Button, ButtonGroup, Grow, Paper, Popper, MenuItem, MenuList} fro
 import { ArrowDownward,ArrowUpward} from '@material-ui/icons';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
     filterTypeButton: {
