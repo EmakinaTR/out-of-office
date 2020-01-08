@@ -100,6 +100,7 @@ export default class Firebase {
   };
 
   getIncomingRequests = (queryData) => {
+    console.log(queryData)
     return new Promise((resolve, reject) => {
       const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
       getTeamLeaves({queryData: queryData})
@@ -221,45 +222,45 @@ export default class Firebase {
     {     
       return new Promise((resolve, reject) => {
         if(queryData.lastDocument != "end"){
-        let query;
-        if(queryData.filterArray && queryData.filterArray.length > 0) {
-          for (const filter of queryData.filterArray) {
-            collectionRef = collectionRef.where(
-              filter.fieldPath,
-              filter.condition,
-              filter.value
+          let query;
+          if(queryData.filterArray && queryData.filterArray.length > 0) {
+            for (const filter of queryData.filterArray) {
+              collectionRef = collectionRef.where(
+                filter.fieldPath,
+                filter.condition,
+                filter.value
+              );
+            }
+          }       
+          query = collectionRef;
+          if (
+            (queryData.orderBy && queryData.orderBy.type &&
+            queryData.orderBy.fieldPath)
+          ) {
+            query = query.orderBy(
+              queryData.orderBy.fieldPath,
+              queryData.orderBy.type
             );
           }
-        }       
-        query = collectionRef;
-        if (
-          (queryData.orderBy && queryData.orderBy.type &&
-          queryData.orderBy.fieldPath)
-        ) {
-          query = query.orderBy(
-            queryData.orderBy.fieldPath,
-            queryData.orderBy.type
-          );
-        }
-        if (queryData.lastDocument) {
-          query = query.startAfter(queryData.lastDocument)
-        }
-        if (queryData.pageSize) {
-          query = query.limit(queryData.pageSize);
-        }
-        query.get().then( async querySnapshot => {
-          const dataArray = [];
-          console.log(querySnapshot)     
-          for(const doc of querySnapshot.docs) {
-            const leaveDoc = doc.data();
-            leaveDoc.id = doc.id;
-            await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
-              leaveDoc.leaveType = documentSnapShot.data();
-            })
-            dataArray.push(leaveDoc);
+          if (queryData.lastDocument) {
+            query = query.startAfter(queryData.lastDocument)
           }
-          resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
-        });
+          if (queryData.pageSize) {
+            query = query.limit(queryData.pageSize);
+          }
+          query.get().then( async querySnapshot => {
+            const dataArray = [];
+            console.log(querySnapshot)     
+            for(const doc of querySnapshot.docs) {
+              const leaveDoc = doc.data();
+              leaveDoc.id = doc.id;
+              await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
+                leaveDoc.leaveType = documentSnapShot.data();
+              })
+              dataArray.push(leaveDoc);
+            }
+            resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
+          });
       }
     });
     }
