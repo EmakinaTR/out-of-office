@@ -11,6 +11,7 @@ import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import AuthContext from "../../session";
+import { HOLIDAYS } from '../../../constants/holidays';
 const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(3, 3),
@@ -200,40 +201,46 @@ export default function LeaveRequestForm(props) {
     const onSubmit = async (data, e) => {    
         setIsLoading(true);
         e.preventDefault();
-        const uid = props.auth().uid;
-        const processedBy = "";
-        const createdBy = uid;
-        const requesterName = props.auth().displayName;
-        const status = 0;
-        const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const leaveType = watchFields.leaveType;
-        const description = watchFields.description;
-        const protocolNumber = state.protocolNumber;
-        const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
-        const isPrivacyPolicyApproved = checked;
-        const isNegativeCreditUsageApproved = negativeLeaveCheck;
-        let startDate = moment()._d;
-        let endDate = moment()._d;
-        if ((screenSize() > 768)) {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));   
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+            const uid = props.auth().uid;
+            const processedBy = "";
+            const createdBy = uid;
+            const requesterName = props.auth().displayName;
+            const status = 0;
+            const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
+            const leaveType = watchFields.leaveType;
+            const description = watchFields.description;
+            const protocolNumber = state.protocolNumber;
+            const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
+            const isPrivacyPolicyApproved = checked;
+            const isNegativeCreditUsageApproved = negativeLeaveCheck;
+            let startDate = moment()._d;
+            let endDate = moment()._d;
+            if ((screenSize() > 768)) {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));   
+            }
+            else {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+            }
+            
+            const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
+                description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
+            await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
+                setIsLoading(false);
+                setSnackbarState(true);
+                setSnackbarType(snackbars.success);
+            })
+            console.log(requestFormObj);       
         }
-        else {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
-        }
-        
-        const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
-        await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
-            setIsLoading(false);
-            setSnackbarState(true);
-            setSnackbarType(snackbars.success);
-        })
-        console.log(requestFormObj);       
     }
 
+    // Check if user has negative leave credit
     const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
     
     //Firebase
 
@@ -424,7 +431,7 @@ export default function LeaveRequestForm(props) {
                         
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
-                       
+                        
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal"
                         name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description}/>
 
