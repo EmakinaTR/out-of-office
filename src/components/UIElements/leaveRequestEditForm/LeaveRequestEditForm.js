@@ -333,7 +333,7 @@ export default function LeaveRequestEditForm(props) {
                             />
                             <TextField
                             margin="normal"
-                            label="End Date and Time"
+                            label="Return Date and Time"
                             type="datetime-local"
                             inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
@@ -378,7 +378,7 @@ export default function LeaveRequestEditForm(props) {
                                     <Grid item xs={12} md={6}>
                                         <KeyboardDatePicker
                                         className={classes.inputWidth}
-                                        label="End Date"
+                                        label="Return Date"
                                         format='MM/DD/YYYY'
                                         minDate={selectedStartDate}
                                         margin="normal"
@@ -393,7 +393,7 @@ export default function LeaveRequestEditForm(props) {
                                         <KeyboardTimePicker
                                         className={classes.inputWidth}
                                         margin="normal"
-                                        label="End Time"
+                                        label="Return Time"
                                         value={selectedEndDate}
                                         onChange={handleEndDateChange}
                                         KeyboardButtonProps={{

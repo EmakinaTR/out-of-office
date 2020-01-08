@@ -148,10 +148,10 @@ export default function  LeaveRequestForm(props)  {
                         </Box>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} lg={4}>
-                                    <TextField className={classes.inputWidth} label="Leave Start" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                    <TextField className={classes.inputWidth} label="Start Date" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
                                 </Grid>
                                 <Grid item xs={12} lg={4}>
-                                    <TextField className={classes.inputWidth} label="Leave End" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                    <TextField className={classes.inputWidth} label="Return Date" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
                                 </Grid>
                                 <Grid item xs={12} lg={4}>
                                     <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value={fields.duration || ''} InputProps={{readOnly: true,}} />
