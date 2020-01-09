@@ -7,8 +7,8 @@ export const snackbars = {
         variant: "error",
         message: "Something went wrong"
     },
-    formError: {
-        variant: "error",
-        message: "Please fill all fields"
+    requestCancel: {
+        variant: "success",
+        message: "Your request has been canceled."
     }
 }

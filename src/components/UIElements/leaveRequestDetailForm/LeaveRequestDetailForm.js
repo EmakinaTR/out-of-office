@@ -2,8 +2,11 @@ import moment from 'moment';
 import React, {useRef, useState, useEffect} from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Paper, Container, Grid, TextField, Box, Button, Typography, Chip, Avatar } from '@material-ui/core';
+import { Paper, Container, Grid, TextField, Box, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent,
+    DialogContentText, DialogTitle, useMediaQuery } from '@material-ui/core';
 import { ROLE } from "../../../constants/roles";
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
 const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
@@ -32,15 +35,30 @@ export default function  LeaveRequestForm(props)  {
     const location = useLocation();
     // Styles
     const classes = useStyles();
+    // Theme
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
     // States
     const [fields, setFields] = useState({});
     const [leaveType, setLeaveType] = useState('');
     const [docUid, setDocUid] = useState('');
     const [approvers, setApprovers] = useState([]);
+    const [open, setOpen] = React.useState(false);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
 
     const handleSubmit = (e) => {
         e.preventDefault();
     }
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+    
+    const handleClose = () => {
+        setOpen(false);
+    };
+    
 
     const editLeaveRequest = () => {
         history.push({
@@ -62,7 +80,11 @@ export default function  LeaveRequestForm(props)  {
     }
 
     const cancelLeaveRequest = () => {
-        props.firebase.setLeaveStatus(docUid, 3);
+        props.firebase.setLeaveStatus(docUid, 3).then(response => {
+            setSnackbarState(true);
+            setSnackbarType(snackbars.requestCancel);
+        });
+        handleClose();
     }
 
     // Firebase Functions
@@ -148,10 +170,10 @@ export default function  LeaveRequestForm(props)  {
                         </Box>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} lg={4}>
-                                    <TextField className={classes.inputWidth} label="Start Date" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                    <TextField className={classes.inputWidth} label="Start Date" variant="outlined" margin="normal" value={moment(fields.startDate?.seconds*1000).format('MM.DD.YYYY - hh:mm A') || ''} InputProps={{readOnly: true,}} />
                                 </Grid>
                                 <Grid item xs={12} lg={4}>
-                                    <TextField className={classes.inputWidth} label="Return Date" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                                    <TextField className={classes.inputWidth} label="Return Date" variant="outlined" margin="normal" value={moment(fields.endDate?.seconds*1000).format('MM.DD.YYYY - hh:mm A') || ''} InputProps={{readOnly: true,}} />
                                 </Grid>
                                 <Grid item xs={12} lg={4}>
                                     <TextField className={classes.inputWidth} label="Leave Duration" variant="outlined" margin="normal" value={fields.duration || ''} InputProps={{readOnly: true,}} />
@@ -170,7 +192,7 @@ export default function  LeaveRequestForm(props)  {
                 
                                     })}
                             </Box>
-                            <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value={moment(fields.requestedDate?.seconds*1000).format('MM.DD.YYYY - hh:mm') || ''} InputProps={{readOnly: true,}} />
+                            <TextField className={classes.inputWidth} label="Date of Record" variant="outlined" margin="normal" value={moment(fields.requestedDate?.seconds*1000).format('MM.DD.YYYY - hh:mm A') || ''} InputProps={{readOnly: true,}} />
                             {(isAdmin === false || props.user.id == fields.createdBy) ? 
                             <Box my={3}>
                                 <Grid container spacing={2}>
@@ -181,7 +203,28 @@ export default function  LeaveRequestForm(props)  {
                                         <Button className={classes.inputWidth} onClick={printLeaveRequest} variant="outlined" size="large" color="primary">PRINT</Button>
                                     </Grid>
                                     <Grid item xs={12} md={4}>
-                                        <Button className={classes.inputWidth} onClick={cancelLeaveRequest} variant="outlined" size="large">Cancel Request</Button>
+                                        <Button className={classes.inputWidth}  onClick={handleClickOpen} variant="outlined" size="large">Cancel Request</Button>
+                                        <Dialog
+                                        fullScreen={fullScreen}
+                                        open={open}
+                                        onClose={handleClose}
+                                        aria-labelledby="responsive-dialog-title"
+                                        >
+                                            <DialogTitle id="responsive-dialog-title">{"Cancel Request"}</DialogTitle>
+                                            <DialogContent>
+                                                <DialogContentText>
+                                                    Are you sure you want to cancel you leave request?
+                                                </DialogContentText>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button autoFocus onClick={handleClose} color="primary">
+                                                    No
+                                                </Button>
+                                                <Button onClick={cancelLeaveRequest} color="primary" autoFocus>
+                                                    Yes
+                                                 </Button>
+                                            </DialogActions>
+                                        </Dialog>
                                     </Grid>
                                 </Grid>
                             </Box>:
@@ -201,6 +244,16 @@ export default function  LeaveRequestForm(props)  {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: "/myrequests",
+                });
+            }}
+            ></SnackBar>
         </Container>
     )
 }
