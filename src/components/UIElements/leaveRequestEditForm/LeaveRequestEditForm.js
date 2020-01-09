@@ -35,6 +35,10 @@ const useStyles = makeStyles(theme => ({
             height: '17px',
             width: '17px'
         },
+    },
+    red: {
+        color: 'red',
+        fontSize: '0.8rem'
     }
 }));
 
@@ -109,6 +113,32 @@ export default function LeaveRequestEditForm(props) {
         setDuration(duration);
     }
 
+    // Check if user selected a date within two hours and leaveType is not compansate
+    const isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate = () => {
+        if (duration === 0 && watchFields.leaveType !== '' && watchFields.leaveType !== '1') {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Check if user selected a date greater than two hours and leaveType is compansate
+    const isDurationGreaterThanTwoHoursAndLeaveTypeCompansate = () => {
+        if (duration > 0 && watchFields.leaveType !== '' && watchFields.leaveType === '1') {
+            return true;    
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Check if user has negative leave credit
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
+
     // Mobile DateTimePickers
     const handleDateTimeLocalStart = date => {
         setDateTimeLocalStart(date.target.value);
@@ -141,7 +171,8 @@ export default function LeaveRequestEditForm(props) {
 
     const onSubmit = async (data, e) => {
         e.preventDefault();
-        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
+        !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate()) {
             const uid = props.auth().uid;
             const processedBy = "";
             const createdBy = uid;
@@ -176,12 +207,6 @@ export default function LeaveRequestEditForm(props) {
         }
         
     }
-
-    // Check if user has negative leave credit
-    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
-    
-    // Check if start date is greater than end date
-    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
 
     const cancel = () => {
         history.push({
@@ -334,6 +359,8 @@ export default function LeaveRequestEditForm(props) {
                                     return <option key={index} value={index}>{item.name}</option>
                                 })}
                                 </Select>
+                                {isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() ? <Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography> : ''}
+                                {isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() ? <Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography> : ''}
                             </FormControl>
                         </Box>
                         <Box display={{xs: 'block', md: 'none'}}>

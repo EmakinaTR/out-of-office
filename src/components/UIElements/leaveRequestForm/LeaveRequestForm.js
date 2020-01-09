@@ -34,6 +34,10 @@ const useStyles = makeStyles(theme => ({
             height: '17px',
             width: '17px'
         },
+    },
+    red: {
+        color: 'red',
+        fontSize: '0.8rem'
     }
 }));
 
@@ -70,6 +74,7 @@ export default function LeaveRequestForm(props) {
     const [approvers, setApprovers] = useState([]);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarType, setSnackbarType] = useState({});
+    const [twoHourDuration, setTwoHourDuration] = useState(false);
     const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
     
@@ -103,9 +108,36 @@ export default function LeaveRequestForm(props) {
         const dayDiff = await moment(endDate).businessDiff(moment(startDate));      
         const [timeDiff,isStartTimeAfter] = durationCalculationUtil.getTimeDifference(startTime,endTime, dayDiff);        
         const duration = durationCalculationUtil.calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
-       
+        
         setDuration(duration);
+        
     }
+
+    // Check if user selected a date within two hours and leaveType is not compansate
+    const isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate = () => {
+        if (duration === 0 && watchFields.leaveType !== '' && watchFields.leaveType !== '1') {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Check if user selected a date greater than two hours and leaveType is compansate
+    const isDurationGreaterThanTwoHoursAndLeaveTypeCompansate = () => {
+        if (duration > 0 && watchFields.leaveType !== '' && watchFields.leaveType === '1') {
+            return true;    
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Check if user has negative leave credit
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
 
     // Mobile DateTimePickers
     const handleDateTimeLocalStart = date => {
@@ -140,7 +172,8 @@ export default function LeaveRequestForm(props) {
     const onSubmit = async (data, e) => {    
         setIsLoading(true);
         e.preventDefault();
-        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
+        !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate()) {
             const uid = props.auth().uid;
             const processedBy = "";
             const createdBy = uid;
@@ -167,26 +200,14 @@ export default function LeaveRequestForm(props) {
             const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
                 description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
             await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
-                setIsLoading(false);
                 setSnackbarState(true);
                 setSnackbarType(snackbars.success);
-            })
+            }).finally(() => {
+                setIsLoading(false);
+            });
             console.log(requestFormObj);       
         }
     }
-
-    // Check if user selected a date within two hours
-    const isDurationLessThanTwoHours = () => {
-        if (moment(selectedEndDate).diff(moment(selectedStartDate), "minutes") <= 120) {
-            console.log('Doğru case')
-        }
-    }
-
-    // Check if user has negative leave credit
-    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
-    
-    // Check if start date is greater than end date
-    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
     
     //Firebase
 
@@ -269,7 +290,6 @@ export default function LeaveRequestForm(props) {
     return (           
         <Container maxWidth="lg">
             <Box marginY={4}>
-                {console.log(isDurationLessThanTwoHours())}
                 <Paper className={classes.root}>
                     <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
@@ -288,6 +308,8 @@ export default function LeaveRequestForm(props) {
                                     return <option key={index} value={index}>{item.name}</option>
                                 })}
                                 </Select>
+                                {isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() ? <Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography> : ''}
+                                {isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() ? <Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography> : ''}
                             </FormControl>
                         </Box>
                         <Box display={{xs: 'block', md: 'none'}}>
