@@ -91,7 +91,6 @@ exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => 
             await admin.firestore().doc(leaveRequest.leaveTypeRef.path).get()
             .then(documentSnapshot => {
                 leaveRequest.leaveType = documentSnapshot.data();
-                
             });
             
         })
@@ -120,9 +119,9 @@ exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => 
 // Team Leaves Test Method
 exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
     const userId = context.auth.uid;
-    const user = await _getUser(userId);        
+    const user = await _getUser(userId);    
     const leaveRequestArray = await _getLeaves(userId,_isAdmin(user),data.queryData);
-    console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
+    // console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
     if (leaveRequestArray.length > 0) {
         await Promise.all(leaveRequestArray.data.map(async (item) => { // Retrieve leave types of the leave requests
             await admin.firestore().doc(item.leaveTypeRef.path).get().then(documentSnapshot => {
@@ -130,7 +129,7 @@ exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
             });
         }))
     }    
-    console.log("LEAVE ARRAY AFTER:", leaveRequestArray);
+    // console.log("LEAVE ARRAY AFTER:", leaveRequestArray);
 return leaveRequestArray;
 });
 
@@ -141,31 +140,34 @@ const _getLeaves = async (userid, isAdmin = false,queryData) => {
     } else {
         leaves = _getTeamLeaves(userid,queryData);
     }    
+    console.log(leaves)
     return leaves;
 }
 
 const _getTeamLeaves = async (userid,queryData) => {
-    const leaveRequestArray = [];
-    let teamMemmbers = [];
-    const collection = admin.firestore().collection('teams').where('leadUser', "==", userid);
-    await _createQuery(collection,queryData).then(response => {
-          teamMemmbers = response;
-        }).catch(err => console.log(err))
-    if (teamMemmbers.length > 0) {  // If the team has at least one memeber, retrieve their request data
-        await Promise.all(teamMemmbers.data.map(async (member) => {
-            await admin.firestore().collection('leaveRequests').where("createdBy", "==", member).get().
-                then(querySnapshot => {
-                    querySnapshot.docs.map(doc => {
-                        const docObject = doc.data();
-                        docObject.id = doc.id;
-                        leaveRequestArray.push(docObject);
+    let teamLeaves = {};
+    let leaveRequestArray = [];
+    let teamMembers ;
+     await admin.firestore().collection('teams').where('leadUser', "==", userid).get()
+        .then(snapshot => {
+            if (!snapshot.empty) { // If he/she is, get members of the team
+                teamMembers = snapshot.docs[0].data().members;
 
-                    })
-                }).catch(err => { return null; });
-        }))
-    }
-    teamMemmbers.data = leaveRequestArray;
-    return teamMemmbers;
+            } else {
+                return null;
+            }
+
+        }).catch(err => console.log(err))
+    if (teamMembers.length > 0) {  // If the team has at least one memeber, retrieve their request data
+        let collection = admin.firestore().collection('leaveRequests').where("createdBy", "in", teamMembers)
+        await _createQuery(collection,queryData)
+            .then(response => {
+                console.log("queryResult: ",response.data)
+                leaveRequestArray = response;
+            })
+    }   
+    // console.log("leaveRequestArray:",leaveRequestArray);   
+    return leaveRequestArray;
 }
 const _getAdminLeaves = async(queryData) => {
     let leaveResponse = {};    
@@ -273,12 +275,15 @@ const _createQuery = (collectionRef, queryData) => {
             queryData.orderBy.type
           );
         }
+        console.log("as", queryData.lastDocument)
         if (queryData.lastDocument) {
-          query = query.startAfter(queryData.lastDocument)
+          query = query.startAfter( queryData.lastDocument)
+          console.log("sa",queryData.lastDocument)
         }
         if (queryData.pageSize) {
           query = query.limit(queryData.pageSize);
         }
+        console.log(query)
         query.get().then( async querySnapshot => {
           const dataArray = [];         
           for(const doc of querySnapshot.docs) {
@@ -289,6 +294,9 @@ const _createQuery = (collectionRef, queryData) => {
             })
             dataArray.push(leaveDoc);
           }
+            console.log("last firebase :", querySnapshot.docs[querySnapshot.size - 1]);
+            console.log("last query: ", queryData.lastDocument)
+            console.log("isEq: ",queryData.lastDocument === querySnapshot.docs[querySnapshot.size - 1]._ref)
           resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
         });
       }

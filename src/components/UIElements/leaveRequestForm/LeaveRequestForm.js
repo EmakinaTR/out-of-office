@@ -6,8 +6,12 @@ Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, Di
 DialogTitle, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
 import AuthContext from "../../session";
+import { HOLIDAYS } from '../../../constants/holidays';
 const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(3, 3),
@@ -23,7 +27,7 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-    kvkkCheckBox: {
+    checkBoxError: {
         '& .MuiIconButton-label': {
             border: '2px solid red',
             height: '17px',
@@ -41,6 +45,8 @@ export default function LeaveRequestForm(props) {
     const theme = useTheme();
     // MediaQuery
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+    // History
+    const history = useHistory();
     // Default Date
     const defaultDate = moment().set({hour:9,minute:0,second:0}).format('YYYY-MM-DDTHH:mm:ss');
     // Form Validation
@@ -55,14 +61,18 @@ export default function LeaveRequestForm(props) {
     const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
+    const [negativeLeaveCheck, setNegativeLeaveCheck] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
-    const { setIsLoading } = useContext(AuthContext);      
-
+    const [approvers, setApprovers] = useState([]);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
+    const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
-    // Wee need this handleChnage metho  because watchFields doesn't recognize
+    
+    // Wee need this handleChnage method  because watchFields doesn't recognize
     // conditional rendiring
     const handleChange = name => event => {
         const {value} = event.target;
@@ -85,20 +95,21 @@ export default function LeaveRequestForm(props) {
         const HOUR = 60;
         const NO_ADDITION = 0;
         const HALF_DAY = 0.5;
-        const FULL_DAY = 1; 
-        const multipySign = (timeDiff >= 0) ? 1 : -1;
-        const absoluteDiff = timeDiff * multipySign;        
-        if(absoluteDiff <= 2 * HOUR) {
+        const FULL_DAY = 1;       
+        if (timeDiff <= 2.5 * HOUR) {
             return NO_ADDITION;
-        } else if (absoluteDiff <= 4 * HOUR) {
-            return HALF_DAY * multipySign;
+        } else if (timeDiff <= 4 * HOUR) {
+            return HALF_DAY;
         } else {    
-            return FULL_DAY * multipySign;
+            return FULL_DAY;
         }         
-    }
-
-    const _calculateLeaveDuration = (dayDiff,timeDiff) => {  
-        const additionDate = _calculateTimeAddition(timeDiff);
+    } 
+    
+    const _calculateLeaveDuration = (dayDiff,timeDiff,isStartTimeAfter) => {  
+        let additionDate = _calculateTimeAddition(timeDiff);
+        if (isStartTimeAfter) {
+            additionDate = additionDate - 1;
+        }
         return dayDiff + additionDate;
     }    
 
@@ -106,38 +117,40 @@ export default function LeaveRequestForm(props) {
         // Does not affect to calculation directly. Just used to craft a date object
         const SPARE_DATE = "01/01/2020";
         const BREAK_TIME = "12:00:00";
+        const MIDDAY_BOUNDARY = "11:59:59";
+        const LEAVE_BOUNDARY = "15:59:59";
         const WORK_START_TIME = "09:00:00";
-        const WORK_END_TIME = "18:30:00";
-
-        const MIDNIGHT = "23:59:59";
+        const WORK_END_TIME = "18:29:59";
         
         const startDate = moment(`${SPARE_DATE} ${startTime}`,"DD/MM/YYYY HH:mm:ss");
         const endDate = moment(`${SPARE_DATE} ${endTime}`,"DD/MM/YYYY HH:mm:ss");
         const breakDate = moment(`${SPARE_DATE} ${BREAK_TIME}`,"DD/MM/YYYY HH:mm:ss");    
-        const MIDNIGHT_DATE = moment(`${SPARE_DATE} ${MIDNIGHT}`,"DD/MM/YYYY HH:mm:ss");    
+        const leaveBoundaryDate = moment(`${SPARE_DATE} ${LEAVE_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss"); 
+        const middayBoundaryDate = moment(`${SPARE_DATE} ${MIDDAY_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss");     
         const workStart = moment(`${SPARE_DATE} ${WORK_START_TIME}`,"DD/MM/YYYY HH:mm:ss");
         const workEnd = moment(`${SPARE_DATE} ${WORK_END_TIME}`,"DD/MM/YYYY HH:mm:ss");
-        let startDiff;
-        let endDiff;
-        let timeDiff;
-        startDiff = workEnd.diff(startDate,"minutes"); // 2 saat
-        if(dayDiff === 0 || endDate.isBefore(startDate)) {
+
+        let timeDiff;    
+        let isStartTimeAfter = false;   
+        if (dayDiff === 0 || startDate.isBefore(endDate)) {
             timeDiff = endDate.diff(startDate,"minutes");
-        } else  {           
-            // endDiff = endDate.diff(workStart,"minutes"); //  0
-            // timeDiff = startDiff + endDiff;
-            timeDiff = endDate.diff(startDate,"minutes");
-        }        
-        console.log("Start DIFF: ", startDiff);
-        console.log("End DIFF: ", endDiff);     
-       
-       
+        }
+
+        else {
+            let firstDayLeave = workEnd.diff(startDate,"minutes");    
+            if (startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
+                firstDayLeave = 180;
+            }
+            const lastDayLeave = endDate.diff(workStart,"minutes");
+            timeDiff = firstDayLeave + lastDayLeave;                 
+            isStartTimeAfter = true;           
+        }
+
         // If the times contains break time, exclude from calculation
-        if(breakDate.isBetween(startDate,endDate)) {
+        if (breakDate.isBetween(startDate,endDate)) {
             timeDiff = timeDiff - 60;
-        }      
-        
-        return timeDiff;
+        }           
+        return [timeDiff,isStartTimeAfter];
     }
 
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
@@ -149,8 +162,8 @@ export default function LeaveRequestForm(props) {
         const [endDate,endTime] = _selectedEndDate.toString().split('T');         
 
         const dayDiff = await moment(endDate).businessDiff(moment(startDate));      
-        const timeDiff = _getTimeDifference(startTime,endTime, dayDiff);
-        const duration = _calculateLeaveDuration(dayDiff,timeDiff);      
+        const [timeDiff,isStartTimeAfter] = _getTimeDifference(startTime,endTime, dayDiff);        
+        const duration = _calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
        
         setDuration(duration);
     }
@@ -168,6 +181,11 @@ export default function LeaveRequestForm(props) {
     
     const handleCheck = event => {
         setChecked(event.target.checked);
+        // console.log(event.target.checked)
+    }
+
+    const handleNegativeLeaveCheck = event => {
+        setNegativeLeaveCheck(event.target.checked);
         console.log(event.target.checked)
     }
 
@@ -183,36 +201,47 @@ export default function LeaveRequestForm(props) {
     const onSubmit = async (data, e) => {    
         setIsLoading(true);
         e.preventDefault();
-        const uid = props.auth().uid;
-        const processedBy = "";
-        const createdBy = uid;
-        const requesterName = props.auth().displayName;
-        const status = 0;
-        const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const leaveType = watchFields.leaveType;
-        const description = watchFields.description;
-        const protocolNumber = state.protocolNumber;
-        const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
-        const isPrivacyPolicyApproved = checked;
-        let startDate = moment()._d;
-        let endDate = moment()._d;
-        if ((screenSize() > 768)) {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));   
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+            const uid = props.auth().uid;
+            const processedBy = "";
+            const createdBy = uid;
+            const requesterName = props.auth().displayName;
+            const status = 0;
+            const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
+            const leaveType = watchFields.leaveType;
+            const description = watchFields.description;
+            const protocolNumber = state.protocolNumber;
+            const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
+            const isPrivacyPolicyApproved = checked;
+            const isNegativeCreditUsageApproved = negativeLeaveCheck;
+            let startDate = moment()._d;
+            let endDate = moment()._d;
+            if ((screenSize() > 768)) {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));   
+            }
+            else {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+            }
+            
+            const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
+                description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
+            await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
+                setIsLoading(false);
+                setSnackbarState(true);
+                setSnackbarType(snackbars.success);
+            })
+            console.log(requestFormObj);       
         }
-        else {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
-        }
-        
-        const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, status }
-        await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
-            setIsLoading(false);
-        })
-        console.log(requestFormObj);       
     }
 
+    // Check if user has negative leave credit
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
+    
     //Firebase
 
     // Firebase functions
@@ -224,7 +253,6 @@ export default function LeaveRequestForm(props) {
             await firebasePromise.then(snapshot => {
                 for (let doc of snapshot.docs) {
                     leaveTypesArr.push(doc.data())
-                    
                 }
                 setLeaveTypes(leaveTypesArr);
                 setIsLoading(false);
@@ -232,6 +260,45 @@ export default function LeaveRequestForm(props) {
         }
     }
 
+    let getApproversWithId = async () => {
+        let firebasePromise = props.firebase.getApproversWithId(props.auth().uid);
+        let leadUsers = [];
+        if (firebasePromise[0] !== null) {
+            await firebasePromise[0].then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leadUsers.push(doc.data().leadUser);
+                }
+            })
+        }   
+        if (firebasePromise[1] !== null) {
+            await firebasePromise[1].then(snapshot => {
+                leadUsers.push(snapshot.data().leadUser);
+            });
+        }
+
+        searchApprovers(leadUsers);
+    }
+
+    let searchApprovers = async (leadUserId) => {
+        let approversArr = []
+        let adminPromise = props.firebase.searchApprovers(leadUserId[0]);
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
+               approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+            })
+        }
+        if (leadUserId[1] !== undefined) {
+            let teamLeadPromise = props.firebase.searchApprovers(leadUserId[1]);
+            if (teamLeadPromise !== null) {
+                await teamLeadPromise.then(snapshot => {
+                    approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+                 })
+            }
+        }
+        
+        setApprovers(approversArr);
+    }
+    
     let screenSize = () => {
        return window.innerWidth;
     }
@@ -250,18 +317,8 @@ export default function LeaveRequestForm(props) {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         addResizeEvent();
+        getApproversWithId();
     }, []);
-    
-    
-    // Approver obj, it can be changed into props
-    const approvers = [
-        {
-            name: "Onur Tepeli"
-        },
-        {
-            name: "Bekir Semih Turgut"
-        }
-    ]
 
     return (           
         <Container maxWidth="lg">
@@ -300,7 +357,7 @@ export default function LeaveRequestForm(props) {
                             />
                             <TextField
                             margin="normal"
-                            label="End Date and Time"
+                            label="Return Date and Time"
                             type="datetime-local"
                             inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
@@ -345,7 +402,7 @@ export default function LeaveRequestForm(props) {
                                     <Grid item xs={12} md={6}>
                                         <KeyboardDatePicker
                                         className={classes.inputWidth}
-                                        label="End Date"
+                                        label="Return Date"
                                         format='MM/DD/YYYY'
                                         minDate={selectedStartDate}
                                         margin="normal"
@@ -360,7 +417,7 @@ export default function LeaveRequestForm(props) {
                                         <KeyboardTimePicker
                                         className={classes.inputWidth}
                                         margin="normal"
-                                        label="End Time"
+                                        label="Return Time"
                                         value={selectedEndDate}
                                         onChange={handleEndDateChange}
                                         KeyboardButtonProps={{
@@ -374,7 +431,7 @@ export default function LeaveRequestForm(props) {
                         
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
-                       
+                        
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal"
                         name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description}/>
 
@@ -393,6 +450,29 @@ export default function LeaveRequestForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
+                                {(isLeaveCreditNegative(duration)) ?  
+                                <Grid item xs={12}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Grid item>
+                                                <Checkbox
+                                                id="negativeCredit" 
+                                                color="primary"
+                                                name="negativeCreditCheck"
+                                                checked={negativeLeaveCheck}
+                                                onChange={handleNegativeLeaveCheck}
+                                                value={negativeLeaveCheck}
+                                                className={(errors.negativeCreditCheck) ? classes.checkBoxError: ''}
+                                                inputRef={register({required: !negativeLeaveCheck})}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                        </Grid>
+                                        <Grid item xs>
+                                            <label htmlFor="negativeCredit" style={{paddingRight:".5rem"}}>Agree with Negative Leave Credit Usage</label>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                : ''
+                                }
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
                                         <Grid item>
@@ -403,7 +483,7 @@ export default function LeaveRequestForm(props) {
                                             value={checked}
                                             color="primary"
                                             name="kvkkCheck"
-                                            className={(errors.kvkkCheck) ? classes.kvkkCheckBox: ''}
+                                            className={(errors.kvkkCheck) ? classes.checkBoxError: ''}
                                             inputRef={register({required: !checked})}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                             />
@@ -444,6 +524,16 @@ export default function LeaveRequestForm(props) {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: "/myrequests",
+                });
+            }}
+            ></SnackBar>
         </Container>
     )
 }

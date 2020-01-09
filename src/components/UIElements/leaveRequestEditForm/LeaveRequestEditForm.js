@@ -4,9 +4,13 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Paper, Container, FormControl, InputLabel, Select, Grid, TextField, Box, Checkbox, 
 Link, Button, Typography, Chip, Avatar, Dialog, DialogActions, DialogContent, DialogContentText, 
-DialogTitle, useMediaQuery } from '@material-ui/core';
+DialogTitle, OutlinedInput, useMediaQuery } from '@material-ui/core';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import SnackBar from "../snackBar/SnackBar";
+import { snackbars } from "../../../constants/snackbarContents";
+import { useForm } from "react-hook-form";
+import AuthContext from "../../session";
 const queryString = require('query-string');
 
 const useStyles = makeStyles(theme => ({
@@ -24,7 +28,14 @@ const useStyles = makeStyles(theme => ({
     inputWidth: {
         width: '100%'
     },
-  }));
+    checkBoxError: {
+        '& .MuiIconButton-label': {
+            border: '2px solid red',
+            height: '17px',
+            width: '17px'
+        },
+    }
+}));
 
 export default function LeaveRequestEditForm(props) {
     // Styles
@@ -41,10 +52,11 @@ export default function LeaveRequestEditForm(props) {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     // Default Date
     const defaultDate = moment().format('YYYY-MM-DDTHH:mm:ss');
+    // Form Validation
+    const {register, handleSubmit, errors, watch, setValue} = useForm();
+    const watchFields = watch(["leaveType", "description"]);
     // States
     const [state, setState] = useState({
-        leaveType: '',
-        description: '',
         protocolNumber: '',
     });
     const [labelWidth, setLabelWidth] = useState(0);
@@ -52,21 +64,24 @@ export default function LeaveRequestEditForm(props) {
     const [selectedEndDate, setSelectedEndDate] = useState(defaultDate);
     const [duration, setDuration] = useState(0);
     const [checked, setChecked] = useState(false);
+    const [negativeLeaveCheck, setNegativeLeaveCheck] = useState(false);
     const [open, setOpen] = useState(false);
     const [leaveTypes, setLeaveTypes] = useState([]);
     const [dateTimeLocalStart, setDateTimeLocalStart] = useState(defaultDate);
     const [dateTimeLocalEnd, setDateTimeLocalEnd] = useState(defaultDate);
-    // const [fields, setFields] = useState({});
-    // const [leaveType, setLeaveType] = useState('');
     const [docUid, setDocUid] = useState('');
+    const [approvers, setApprovers] = useState([]);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
     
      // Handle Methods
      const handleChange = name => event => {
+        const {value} = event.target;
         setState({
-          ...state,
-          [name]: event.target.value,
+        ...state,
+        [name]: value,
         });
-        console.log(event.target.value);
+        console.log(value);
     };
 
     // Desktop DateTimePickers
@@ -99,6 +114,11 @@ export default function LeaveRequestEditForm(props) {
         console.log(event.target.checked)
     }
 
+    const handleNegativeLeaveCheck = event => {
+        setNegativeLeaveCheck(event.target.checked);
+        console.log(event.target.checked)
+    }
+
     const handleDialogOpen = () => {
         setOpen(true);
         console.log('Working')
@@ -108,34 +128,49 @@ export default function LeaveRequestEditForm(props) {
         setOpen(false);
     }
 
-    const handleSubmit = async (e) => {
+    const onSubmit = async (data, e) => {
         e.preventDefault();
-        const uid = props.auth().uid;
-        const processedBy = "";
-        const createdBy = uid;
-        const requesterName = props.auth().displayName;
-        const status = 0;
-        const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
-        const {leaveType, description, protocolNumber}  = state;
-        const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
-        const isPrivacyPolicyApproved = checked;
-        let startDate = moment()._d;
-        let endDate = moment()._d;
-        if ((screenSize() > 768)) {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
-        }
-        else {
-            startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
-            endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+            const uid = props.auth().uid;
+            const processedBy = "";
+            const createdBy = uid;
+            const requesterName = props.auth().displayName;
+            const status = 0;
+            const requestedDate = props.firebase.convertMomentObjectToFirebaseTimestamp(moment()._d);
+            const leaveType = watchFields.leaveType;
+            const description = watchFields.description;
+            const protocolNumber = state.protocolNumber;
+            const leaveTypeRef = props.firebase.convertLeaveTypeToFirebaseRef(leaveType);
+            const isPrivacyPolicyApproved = checked;
+            const isNegativeCreditUsageApproved = negativeLeaveCheck;
+            let startDate = moment()._d;
+            let endDate = moment()._d;
+            if ((screenSize() > 768)) {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedStartDate));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(selectedEndDate));
+            }
+            else {
+                startDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalStart));
+                endDate = props.firebase.convertMomentObjectToFirebaseTimestamp(new Date(dateTimeLocalEnd));
+            }
+            
+            const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
+                description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
+            
+            await props.firebase.updateLeaveRequest(docUid, requestFormObj).then(response => {
+                setSnackbarState(true);
+                setSnackbarType(snackbars.success);
+            });
+            console.log(requestFormObj);
         }
         
-        const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
-            description, protocolNumber, isPrivacyPolicyApproved, status }
-        
-        await props.firebase.updateLeaveRequest(docUid, requestFormObj);
-        console.log(requestFormObj);
     }
+
+    // Check if user has negative leave credit
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
 
     const cancel = () => {
         history.push({
@@ -175,7 +210,6 @@ export default function LeaveRequestEditForm(props) {
         });
     }
        
-
     const getFormFields = async () => {
         const uid = queryString.parse(location.search).formId;
         setDocUid(uid);
@@ -185,10 +219,10 @@ export default function LeaveRequestEditForm(props) {
             await firebasePromise.then(snapshot => {
                 formFields = snapshot.data();
                 getLeaveTypeId(formFields.leaveTypeRef?.path).then(id => {                   
+                    setValue("description", formFields.description)
+                    setValue("leaveType", id)
                     setState({
-                        description: formFields.description,
                         protocolNumber: formFields.protocolNumber,
-                        leaveType: id,
                     })
                 })
                 setSelectedStartDate(moment(formFields.startDate?.seconds*1000).format('YYYY-MM-DDTHH:mm:ss'));
@@ -200,7 +234,44 @@ export default function LeaveRequestEditForm(props) {
         console.log(formFields);
     }
 
- 
+    let getApproversWithId = async () => {
+        let firebasePromise = props.firebase.getApproversWithId(props.auth().uid);
+        let leadUsers = [];
+        if (firebasePromise[0] !== null) {
+            await firebasePromise[0].then(snapshot => {
+                for (let doc of snapshot.docs) {
+                    leadUsers.push(doc.data().leadUser);
+                }
+            })
+        }   
+        if (firebasePromise[1] !== null) {
+            await firebasePromise[1].then(snapshot => {
+                leadUsers.push(snapshot.data().leadUser);
+            });
+        }
+
+        searchApprovers(leadUsers);
+    }
+
+    let searchApprovers = async (leadUserId) => {
+        let approversArr = []
+        let adminPromise = props.firebase.searchApprovers(leadUserId[0]);
+        if (adminPromise !== null) {
+            await adminPromise.then(snapshot => {
+               approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+            })
+        }
+        if (leadUserId[1] !== undefined) {
+            let teamLeadPromise = props.firebase.searchApprovers(leadUserId[1]);
+            if (teamLeadPromise !== null) {
+                await teamLeadPromise.then(snapshot => {
+                    approversArr.push({'name': snapshot.data().firstName + ' ' + snapshot.data().lastName});
+                 })
+            }
+        }
+        
+        setApprovers(approversArr);
+    }
 
     let screenSize = () => {
        return window.innerWidth;
@@ -210,39 +281,42 @@ export default function LeaveRequestEditForm(props) {
         await window.addEventListener('resize', screenSize);
     }
 
+    const checkIfRequired = (leaveTypeIndex) => {
+        const leaveType = leaveTypes[leaveTypeIndex];
+        return leaveType?.isDescriptionMandatory;
+    }
+
     // Lifecycle Methods
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         getAllLeaveTypes();
         getFormFields();
+        getApproversWithId();
         addResizeEvent();
     }, []);
-    
-    
-    // Approver obj, it can be changed into props
-    const approvers = [
-        {
-            name: "Onur Tepeli"
-        },
-        {
-            name: "Bekir Semih Turgut"
-        }
-    ]
 
     return (
         <Container maxWidth="lg">
             <Box marginY={4}>
+                {console.log(watchFields)}
                 <Paper className={classes.root}>
-                    <form className={classes.form} onSubmit={handleSubmit}>
+                    <form className={classes.form}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>Leave Request Edit</Typography>
                         <Box marginTop={2}>
                             <FormControl variant="outlined" className={classes.formControl}>
-                                <InputLabel ref={inputLabel}>Leave Type</InputLabel>
+                                <InputLabel ref={inputLabel} shrink>Leave Type</InputLabel>
                                 <Select
-                                native
-                                value={state.leaveType}
-                                onChange={handleChange('leaveType')}
-                                labelWidth={labelWidth}
+                                    native
+                                    labelWidth={labelWidth}
+                                    input = {
+                                        <OutlinedInput
+                                            notched
+                                            labelWidth={labelWidth}
+                                            name="leaveType"
+                                            inputRef={register({ required: true, minLength: 1 })}
+                                            error={errors.leaveType}
+                                        />
+                                    }
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
@@ -258,7 +332,6 @@ export default function LeaveRequestEditForm(props) {
                             type="datetime-local"
                             className={classes.inputWidth}
                             defaultValue={dateTimeLocalStart}
-                            value={dateTimeLocalStart}
                             onChange={handleDateTimeLocalStart}
                             InputLabelProps={{
                             shrink: true,
@@ -266,10 +339,10 @@ export default function LeaveRequestEditForm(props) {
                             />
                             <TextField
                             margin="normal"
-                            label="End Date and Time"
+                            label="Return Date and Time"
                             type="datetime-local"
+                            inputProps={{ min: dateTimeLocalStart }}
                             defaultValue={dateTimeLocalEnd}
-                            value={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
                             InputLabelProps={{
@@ -311,7 +384,7 @@ export default function LeaveRequestEditForm(props) {
                                     <Grid item xs={12} md={6}>
                                         <KeyboardDatePicker
                                         className={classes.inputWidth}
-                                        label="End Date"
+                                        label="Return Date"
                                         format='MM/DD/YYYY'
                                         minDate={selectedStartDate}
                                         margin="normal"
@@ -326,7 +399,7 @@ export default function LeaveRequestEditForm(props) {
                                         <KeyboardTimePicker
                                         className={classes.inputWidth}
                                         margin="normal"
-                                        label="End Time"
+                                        label="Return Time"
                                         value={selectedEndDate}
                                         onChange={handleEndDateChange}
                                         KeyboardButtonProps={{
@@ -337,14 +410,16 @@ export default function LeaveRequestEditForm(props) {
                                 </Grid>
                             </MuiPickersUtilsProvider>
                         </Box>
+                        
                         <TextField className={classes.inputWidth} label="Leave Duration" variant="filled" margin="normal" InputProps={{readOnly: true,}} 
                         onChange={(screenSize() > 768) ? handleDuration(selectedEndDate, selectedStartDate) : handleDuration(dateTimeLocalEnd, dateTimeLocalStart)} value={duration}/>
                        
                         <TextField className={classes.inputWidth} label="Description" multiline rows="4" variant="outlined" margin="normal" 
-                        onChange={handleChange('description')} defaultValue={state.description} value={state.description} InputLabelProps={{shrink: true}} />
-                        {(state.leaveType === '2') ? 
-                        <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
-                        onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  /> : 
+                        name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description} InputLabelProps={{shrink: true}} />
+                        
+                        {(watchFields.leaveType === '2') ? 
+                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
+                            onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  /> : 
                         ''
                         }
                         <Box my={3}>
@@ -360,6 +435,29 @@ export default function LeaveRequestEditForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
+                            {(isLeaveCreditNegative(duration)) ?  
+                                <Grid item xs={12}>
+                                    <Grid container direction="row" alignItems="center">
+                                        <Grid item>
+                                                <Checkbox
+                                                id="negativeCredit" 
+                                                color="primary"
+                                                name="negativeCreditCheck"
+                                                checked={negativeLeaveCheck}
+                                                onChange={handleNegativeLeaveCheck}
+                                                value={negativeLeaveCheck}
+                                                className={(errors.negativeCreditCheck) ? classes.checkBoxError: ''}
+                                                inputRef={register({required: !negativeLeaveCheck})}
+                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                />
+                                        </Grid>
+                                        <Grid item xs>
+                                            <label htmlFor="negativeCredit" style={{paddingRight:".5rem"}}>Agree with Negative Leave Credit Usage</label>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                : ''
+                                }
                                 <Grid item xs={12} lg={6}>
                                     <Grid container direction="row" alignItems="center">
                                     <Grid item>
@@ -369,14 +467,17 @@ export default function LeaveRequestEditForm(props) {
                                         onChange={handleCheck}
                                         value={checked}
                                         color="primary"
+                                        name="kvkkCheck"
+                                        className={(errors.kvkkCheck) ? classes.checkBoxError: ''}
+                                        inputRef={register({required: !checked})}
                                         inputProps={{ 'aria-label': 'primary checkbox' }}
                                         />
                                     </Grid> 
                                     <Grid item xs>
-                                    <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
-                                    <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
-                                        </Grid> 
-                                    </Grid>                            
+                                        <label htmlFor="kvkk" style={{paddingRight:".5rem"}}>Agree with Terms and Conditions</label>
+                                        <Link style={{cursor: 'pointer'}} onClick={handleDialogOpen}>KVKK Contract</Link>
+                                    </Grid> 
+                                </Grid>                            
                                     <Dialog
                                     fullScreen={fullScreen}
                                     open={open}
@@ -408,7 +509,7 @@ export default function LeaveRequestEditForm(props) {
                                     </Box>
                                     <Box clone order={{xs: 1, md: 2}}>
                                         <Grid item xs={12} md={6}>
-                                            <Button className={classes.inputWidth} variant="contained" size="large" type="submit" color="primary">SEND</Button>
+                                            <Button className={classes.inputWidth} variant="contained" size="large" type="button" onClick={handleSubmit(onSubmit)} color="primary">SEND</Button>
                                         </Grid>
                                     </Box>
                                 </Grid>
@@ -417,6 +518,17 @@ export default function LeaveRequestEditForm(props) {
                     </form>
                 </Paper>
             </Box>
+            <SnackBar
+            snackbarType={snackbarType}
+            snackBarState={snackbarState}
+            onClose={() => {
+                setSnackbarState(false);
+                history.push({
+                    pathname: '/request-detail',
+                    search: '?formId='+ docUid,
+                })
+            }}
+            ></SnackBar>
         </Container>
     )
 }

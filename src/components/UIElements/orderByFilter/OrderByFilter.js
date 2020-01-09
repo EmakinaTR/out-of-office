@@ -3,14 +3,22 @@ import { Grid, Button, ButtonGroup, Grow, Paper, Popper, MenuItem, MenuList} fro
 import { ArrowDownward,ArrowUpward} from '@material-ui/icons';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { makeStyles } from '@material-ui/core/styles';
 
-
-
+const useStyles = makeStyles(theme => ({
+    filterTypeButton: {
+        width : '80%'
+    },
+    filterDirectionButton : {
+        width :'20%'
+    }
+}));
 export function OrderByFilter(props) {
+    const classes = useStyles();
     const [open, setOpen] = useState(false);
     const anchorRef = useRef(null);
     const handleMenuItemClick = (event) => {
-        props.onSelectedFilterTypeChanged(event);
+        props.onSelectedFilterFieldChanged(event);
         setOpen(false);
     };
     const handleToggle = () => {
@@ -25,20 +33,22 @@ export function OrderByFilter(props) {
     return (
         <Grid container direction="column" >
             <Grid item xs={12}>
-                <ButtonGroup variant="outlined" size="small" ref={anchorRef} aria-label="split button">
-                    <Button onClick={props.onFilterDirectionChanged}>
+                <ButtonGroup variant="outlined" size="small" ref={anchorRef} aria-label="split button" fullWidth>
+                    <Button className={classes.filterTypeButton} onClick={props.onFilterDirectionChanged}>
                         {props.A_to_Z ?
                             <ArrowDownward fontSize="small" style={{ marginRight: '12px' }}></ArrowDownward> :
                             <ArrowUpward fontSize="small" style={{ marginRight: '12px' }}></ArrowUpward>
                         }
-                        {props.options[props.selectedFilterType].name}
+                        {props.options[props.selectedFilterField].name}
                     </Button>
-                    <Button
+                    <Button className={classes.filterDirectionButton}
+
                         aria-controls={open ? 'split-button-menu' : undefined}
                         aria-expanded={open ? 'true' : undefined}
                         aria-label="select merge strategy"
                         aria-haspopup="menu"
                         onClick={handleToggle}
+                        
                     >
                         <ArrowDropDownIcon fontSize="small" />
                     </Button>
@@ -59,7 +69,7 @@ export function OrderByFilter(props) {
                                             <MenuItem
                                                 key={option}
                                                 value={option}
-                                                selected={option === props.selectedFilterType}
+                                                selected={option === props.selectedFilterField}
                                                 onClick={handleMenuItemClick}
                                             >
                                                 {props.options[option].name}

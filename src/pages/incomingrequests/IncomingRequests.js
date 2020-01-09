@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react'
-import { Container, Box, Typography, Grid, Button } from '@material-ui/core'
+import React, { useState, useEffect, useContext } from 'react'
+import { Container, Box, Typography, Grid} from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
-import { statusBadges, leaveBadges } from '../../constants/badgeTypes';
+import { statusBadges} from '../../constants/badgeTypes';
 import IncomingRequestCard from '../../components/UIElements/incomingRequestCard';
 import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
-import OrderByFilter from '../../components/UIElements/orderByFilter';
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import LaunchScreen from '../../components/UIElements/launchScreen'
 import SnackBar from '../../components/UIElements/snackBar/SnackBar';
 import {snackbars}  from '../../constants/snackbarContents'
-
+import moment from 'moment';
 const PAGE_ITEM_SIZE = 10;
 let lastDocument = null;
 const _createIncomingQueryData = () => {
@@ -44,20 +43,16 @@ const useStyles = makeStyles(theme => ({
 
 const orderByFilterOptions = {
     0: {
+        key: 'requestedDate',
+        name: 'Created Date'
+    },
+    1: {
         key: 'startDate',
         name: 'Start Date'
     },
-    1: {
+    2: {
         key: 'endDate',
         name: 'End Date'
-    },
-    2: {
-        key: 'userName',
-        name: 'Name'
-    },
-    3: {
-        key: 'duration',
-        name: 'Day Count'
     },
 
 };
@@ -65,35 +60,61 @@ const orderByFilterOptions = {
 export default function IncomingRequests(props) {
     const classes = useStyles();
     const [dataList, setDataList] = useState();
-    const [searchQuery, setsearchQuery] = useState('');
-    const [A_to_Z, setA_to_Z] = useState(true); // 0 is down direction - 1 is up direction
-    const [selectedFilterType, setSelectedFilterType] = useState(0);
-    const [filterBoxState, setFilterBoxState] = useState(); 
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarType, setSnackbarType] = useState({});
-    const [isProcessing, setIsProcessing] = useState(true);
     const firebaseContext = useContext(FirebaseContext);  
-    const { setIsLoading, setHasError } = useContext(AuthContext);  
-    const onSearchQueryChange = (value) => {
-        if (!isProcessing) {
-            setIsProcessing(true);
-            let filteredDataList = dataList;
-            filteredDataList = filteredDataList.filter((data) => {
-                return data.requesterName.toLowerCase().search(value.toLowerCase()) != -1 || data.description.toLowerCase().search(value.toLowerCase()) != -1;
-            })
-            setDataList(filteredDataList);
-            setIsProcessing(false);
-        }
+    const { currentUser, setIsLoading } = useContext(AuthContext);
+    const [loadMore, setLoadMore] = useState(true);
+    const [searchQuery, setsearchQuery] = useState('');
+    const [A_to_Z, setA_to_Z] = useState(true); // 0 is down direction - 1 is up direction
+    const [selectedFilterField, setSelectedFilterField] = useState(0);
+    const [filteredLeaveType, setFilteredLeaveType] = useState(-1);
+    const [prevQueryData, setprevQueryData] = useState()
+    const [filteredDates, setFilteredDates] = useState({
+        from: moment().subtract(30, 'd'),
+        to: moment()
+    })
+    const intitialQueryData = {
+        filterArray: [
+            
+        ],
+        orderBy: { fieldPath: "requestedDate", type: "desc" },
+        pageSize: 10,
+        // lastDocument : lastDocument
+    }
+    const [queryData, setQueryData] = useState(intitialQueryData)
+    const onSelectedFilterFieldChanged = (e) => {
+        setSelectedFilterField(e.target.value);
+        // console.log(selectedFilterField)
 
     }
     const onFilterDirectionChanged = (e) => {
         setA_to_Z(A_to_Z => !A_to_Z)
+        // console.log(A_to_Z)
+
     }
-    const onFilterBoxClick = (filterBoxState) => {
-        setFilterBoxState({ ...filterBoxState });
+
+    const onFilteredLeaveTypeChange = (e) => {
+        setFilteredLeaveType(e.target.value);
+        // console.log(e.target.value)
     }
-    const onSelectedFilterTypeChanged = (e) => {
-        setSelectedFilterType(e.target.value);
+    const onSearchQueryChange = (value) => {
+        setsearchQuery(value);
+        // console.log(searchQuery)
+
+    }
+    const onStartDateChange = date => {
+        setFilteredDates({
+            ...filteredDates, from: date._d
+        });
+        // console.log(filteredDates)
+
+    }
+    const onEndDateChange = date => {
+        setFilteredDates({
+            ...filteredDates, to: date._d
+        });
+        // console.log(filteredDates)
     }
     const changeFormStatusHandler = async (documentID, type,description) => {
         setIsLoading(true);
@@ -111,80 +132,76 @@ export default function IncomingRequests(props) {
                 setIsLoading(false);
             });
     }
-    let getAllLeaveRequests = async () => {
-        setIsProcessing(true);
+    let getAllLeaveRequests = async (loadMore, queryData) => {
         setIsLoading(true);
-        let leaveRequestArray = [];
-        const queryData = _createIncomingQueryData();
-        await firebaseContext.getIncomingRequests(queryData)
-            .then(result => {
-                setDataList([...result.data])
-                setIsProcessing(false);
-                setIsLoading(false);
-            }).catch(error => {
-                setHasError(true);
-            });
-    }
+        if (loadMore) {
+            setIsLoading(true);
+            await firebaseContext.getIncomingRequests(queryData)
+                .then(result => {
+                    console.log(result.data)
+                    if ((queryData === intitialQueryData || queryData !== prevQueryData) && queryData.lastDocument === undefined) {
+                        setDataList([...result.data]);
+                        console.log(result.lastDocument )
+                        setQueryData({ ...queryData, lastDocument: result.lastDocument });
 
-    const filterData = (data, filterBoxState) => {
-        if (!isProcessing) {
-            if (data != undefined && data.length > 0 && filterBoxState != undefined && filterBoxState.length != 0) {
-                setIsProcessing(true);
-                if (filterBoxState.leaveType != undefined && filterBoxState.leaveType != '') {
-                    data = data.filter((item) => {
-                        console.log("leavetype")
-                        return filterBoxState.leaveType == item.leaveType;
-                    })
-                }
-                if (filterBoxState.startDate != undefined) {
-                    data = data.filter((item) => {
-                        console.log("start")
-                        return item.startDate >= filterBoxState.startDate;
-                    });
-
-                }
-                if (filterBoxState.endDate != undefined) {
-                    data = data.filter((item) => {
-                        console.log("end")
-                        return item.endDate <= filterBoxState.endDate;
-                    });
-                }
-                setDataList([...data]);
-
-            }
-            setIsProcessing(false);
-        }
-
-    }
-
-    const sortDataByTypeAscDesc = (A_to_Z, data, filterType) => {
-        if (!isProcessing) {
-            console.log("sort")
-            if (data != undefined && data.length > 0) {
-                setIsProcessing(true);
-                console.log(data);
-                console.log(filterType);
-                data.sort(function (a, b) {
-                    if (A_to_Z) {
-                        return (b[filterType] > a[filterType]) ? 1 : ((b[filterType] < a[filterType]) ? -1 : 0);
-                    } else {
-                        return (a[filterType] > b[filterType]) ? 1 : ((a[filterType] < b[filterType]) ? -1 : 0);
                     }
-                });
-                setDataList([...data]);
-                setIsProcessing(false);
-            }
-        }
-    }
-    useEffect(() => {
-        getAllLeaveRequests();
-    }, [])
+                    else {
+                        // console.log("Same query data");
+                        if (result.data.length > 0) {
+                            // console.log(queryData);
+                            setDataList([...dataList, ...result.data]);
+                            setQueryData({ ...queryData, lastDocument: result.lastDocument });
 
+                        }
+                        else {
+                            setQueryData({ ...queryData, lastDocument: "end" });
+                        }
+                    }
+                    setprevQueryData(queryData);
+                }).finally(setIsLoading(false))
+        }
+        
+    }
+    const onFilterBoxClick = () => {
+        var reference = firebaseContext.db.collection("leaveType");
+        let filterArray = [{ fieldPath: "createdBy", condition: "==", value: currentUser.uid }];
+        if (filteredLeaveType !== -1) {
+            filterArray.push({ fieldPath: "leaveTypeRef", condition: "==", value: reference.doc(filteredLeaveType.toString()) })
+        }
+        if (filteredDates.from !== undefined) {
+            filterArray.push({ fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from)) })
+        }
+
+        if (filteredDates.to !== undefined) {
+            filterArray.push({ fieldPath: orderByFilterOptions[selectedFilterField].key, condition: ">=", value: firebaseContext.convertMomentObjectToFirebaseTimestamp(new Date(filteredDates.from)) })
+        }
+        setQueryData(
+            {
+                ...queryData,
+                filterArray: filterArray,
+                orderBy: { fieldPath: orderByFilterOptions[selectedFilterField].key, type: A_to_Z ? "desc" : "asc" },
+                lastDocument: undefined
+            }
+        )
+        setLoadMore(true)
+        // console.log(queryData)
+    }
+   
     useEffect(() => {
-        // getAllLeaveRequests();
-        sortDataByTypeAscDesc(A_to_Z, dataList, orderByFilterOptions[selectedFilterType].key);
-        filterData(dataList, filterBoxState)
-    }, [selectedFilterType, A_to_Z, filterBoxState])
+        const list = document.getElementById('mainContent')
+     
+        window.addEventListener('scroll', () => {
+            console.log(list.scrollY)
+            if (window.scrollY + window.innerHeight >= list.clientHeight + list.offsetTop) {
+                setLoadMore(loadMore => !loadMore);
+            }
+        });
+    }, []);
+   
+    useEffect(() => {
+        getAllLeaveRequests(loadMore,queryData);
+        setLoadMore(false);
+    }, [loadMore])
 
 
     return (
@@ -205,27 +222,29 @@ export default function IncomingRequests(props) {
                         >
                         </SearchFilter>
                         </Grid>
+                        
                         <Grid item>
-                        <OrderByFilter
-                            options={orderByFilterOptions}
-                            onFilterDirectionChanged={onFilterDirectionChanged}
-                            A_to_Z={A_to_Z}
-                            selectedFilterType={selectedFilterType}
-                            onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
-                        >
-
-                        </OrderByFilter>
+                            <FilterBox
+                                onFilterBoxClick={onFilterBoxClick}
+                                onSearchQueryChange={onSearchQueryChange}
+                                onFilterDirectionChanged={onFilterDirectionChanged}
+                                onSelectedFilterFieldChanged={onSelectedFilterFieldChanged}
+                                onStartDateChange={onStartDateChange}
+                                onEndDateChange={onEndDateChange}
+                                onFilteredLeaveTypeChange={onFilteredLeaveTypeChange}
+                                orderByFilterOptions={orderByFilterOptions}
+                                selectedFilterField={selectedFilterField}
+                                A_to_Z={A_to_Z}
+                                filteredDates={filteredDates}
+                                filteredLeaveType={filteredLeaveType}
+                            >
+                            </FilterBox>
                         </Grid>
-                        <Grid item>
-                        <FilterBox
-                            onFilterBoxClick={onFilterBoxClick}
-                            filterBoxState={filterBoxState}
-                        >
-                        </FilterBox></Grid>
                         </Grid>
                     </Grid>
                 </Grid>
                 </Box>
+                <div id="mainContent">
                 {dataList ? dataList.map((data, index) => {
                     return (
                         <IncomingRequestCard
@@ -246,68 +265,11 @@ export default function IncomingRequests(props) {
                         ></IncomingRequestCard>
                     )
                 }) 
+                
             :
             <LaunchScreen></LaunchScreen>}
+                </div>
         </Box>
         </Container>
-
-/* 
-        <Container className={classes.contentContainer}  >
-            <Box >
-                    <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={()=>{setSnackbarState(false)}}></SnackBar>
-                <Grid container className={classes.headerContainer}>
-                    <Grid item xs={12} lg={4}>
-                        <Typography variant="h4" >Incoming Requests</Typography>
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={3} >
-                        <SearchFilter
-                            onChange={onSearchQueryChange}
-                        >
-                        </SearchFilter>
-                    </Grid>
-                    <Grid item xs={9} md={4} lg={3}>
-                        <OrderByFilter
-                            options={orderByFilterOptions}
-                            onFilterDirectionChanged={onFilterDirectionChanged}
-                            currentDirection={isDescending}
-                            selectedFilterType={selectedFilterType}
-                            onSelectedFilterTypeChanged={onSelectedFilterTypeChanged}
-                        >
-
-                        </OrderByFilter>
-                    </Grid>
-                    <Grid item xs={3} md={2} lg={2}>
-                        <FilterBox
-                            onFilterBoxClick={onFilterBoxClick}
-                            filterBoxState={filterBoxState}
-                        >
-                        </FilterBox>
-                    </Grid>
-                </Grid>
-                {dataList ? dataList.map((data, index) => {
-                    if(data.status == 0)
-                    return (
-                        // <p>{data}</p>
-                        <IncomingRequestCard
-                            key={index}
-                            userName={data?.requesterName}
-                            leaveTypeContent={data?.leaveType.name}
-                            leaveTypeColor={data?.leaveType.color}
-                            statusTypeContent={statusBadges[parseInt(data.status)].badgeContent}
-                            statusTypeColor={statusBadges[parseInt(data.status)].color}
-                            startDate={data?.startDate}
-                            endDate={data?.endDate}
-                            duration={data?.duration}
-                            description={data?.description}
-                            documentID = {data.id}
-                            changeFormStatusHandler={changeFormStatusHandler}
-                        ></IncomingRequestCard>
-                       
-                    )
-                }) 
-            :
-            <LaunchScreen></LaunchScreen>}
-            </Box>
-        </Container> */
     )
 }

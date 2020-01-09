@@ -1,9 +1,9 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  Typography,
-  Box,
-  Paper
+
+  Box
+
 } from "@material-ui/core";
 
 
@@ -64,22 +64,6 @@ export default function DateCalendar(props) {
     <Box className={classes.month}>{month}</Box>
     <Box className={classes.hour}>{year}</Box>
    
-    {/* <Card className={classes.card}>
-      <CardContent className={classes.cardContent}>
-        <Typography variant="h6" className={classes.lineHeightControl}>
-          15
-        </Typography>
-        <Typography variant="h6" className={classes.lineHeightControl}>
-          Ara
-        </Typography>
-        <Typography variant="h6" className={classes.lineHeightControl}>
-          2019
-        </Typography>
-      </CardContent>
-      <Box className={classes.time}>
-        <Typography>09:00</Typography>
-      </Box>
-    </Card> */}
     </Box>
   );  
 }

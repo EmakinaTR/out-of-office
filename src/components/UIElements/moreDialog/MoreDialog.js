@@ -1,8 +1,8 @@
-import React, { useState, useRef,useContext } from 'react';
+import React, { useState, useRef } from 'react';
 import {TextField, Grow, Paper, Popper, MenuItem, MenuList, 
     Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,Slide,Button, IconButton } from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles} from '@material-ui/core/styles';
 
 import { MoreVert, Check, Close, Visibility, Block, Edit } from '@material-ui/icons';
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -19,7 +19,6 @@ export const MoreDialog = (props)=>{
         approverDescription : '',
         statusType : undefined,
     }
-    const classes = useStyles();
     const [openMenu, setOpenMenu] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     // const [statusType, setStatusType] = useState([]);
@@ -112,12 +111,12 @@ export const MoreDialog = (props)=>{
                                    
                                     <ClickAwayListener onClickAway={handleCloseMenu}>
                                         <MenuList id="split-button-menu">
-                                        {(props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0 ) ?
+                                        {(props.from === "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0 ) ?
                                             (< MenuItem value="1" onClick={handleStatusChange}>
                                                 <Check htmlColor="green" style={{ marginRight: '12px' }}></Check>Approve
                                             </MenuItem>)
                                         : undefined}
-                                        {(props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0) ? (
+                                        {(props.from === "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0) ? (
                                             <MenuItem value="2" onClick={handleStatusChange}>
                                                 <Close htmlColor="red" style={{ marginRight: '12px' }}></Close>Reject
                                             </MenuItem>
@@ -126,14 +125,14 @@ export const MoreDialog = (props)=>{
                                             <MenuItem value="4" onClick={() => props.detailHandler(props.document)}>
                                                 <Visibility htmlColor="primary" style={{ marginRight: '12px' }}></Visibility>Details
                                             </MenuItem>
-                                        {((props.from == "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 1)
+                                        {((props.from === "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 1)
                                         ||
-                                            (props.from == "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (
+                                            (props.from === "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (
                                                 <MenuItem value="3" onClick={handleStatusChange} >
                                             <Block htmlColor="red" style={{ marginRight: '12px' }}></Block>Cancel
                                             </MenuItem>)
                                         :undefined}
-                                        {(props.from == "MyRequest" && props.leaveHasntBegin && props.isFormOwner && props.requestStatus === 0) ? 
+                                        {(props.from === "MyRequest" && props.leaveHasntBegin && props.isFormOwner && props.requestStatus === 0) ? 
                                         (<MenuItem value="5" >
                                             <Edit htmlColor="primary" style={{ marginRight: '12px' }}></Edit>Edit
                                         </MenuItem>) 
