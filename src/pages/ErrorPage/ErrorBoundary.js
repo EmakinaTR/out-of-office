@@ -33,7 +33,7 @@ const ErrorBoundary = props => {
         <Typography color="error" variant="h3">
           Unexpected Error :(
         </Typography>
-        <Button onClick={onButtonClick} color="secondary" variant="contained" className={classes.redirectButton}>Redirect To Dashboard Page</Button>
+        <Button onClick={onButtonClick} color="primary" variant="contained" className={classes.redirectButton}>Redirect To Dashboard Page</Button>
       </div>
     );
   } else {

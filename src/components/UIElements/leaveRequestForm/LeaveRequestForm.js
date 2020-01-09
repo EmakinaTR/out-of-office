@@ -11,7 +11,8 @@ import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import AuthContext from "../../session";
-import { HOLIDAYS } from '../../../constants/holidays';
+import * as durationCalculationUtil from '../../../utils/durationCalculationUtils';
+
 const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(3, 3),
@@ -33,6 +34,10 @@ const useStyles = makeStyles(theme => ({
             height: '17px',
             width: '17px'
         },
+    },
+    red: {
+        color: 'red',
+        fontSize: '0.8rem'
     }
 }));
 
@@ -69,6 +74,7 @@ export default function LeaveRequestForm(props) {
     const [approvers, setApprovers] = useState([]);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarType, setSnackbarType] = useState({});
+    const [twoHourDuration, setTwoHourDuration] = useState(false);
     const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
     
@@ -91,68 +97,6 @@ export default function LeaveRequestForm(props) {
         setSelectedEndDate(date);
     }
 
-    const _calculateTimeAddition = (timeDiff) => {
-        const HOUR = 60;
-        const NO_ADDITION = 0;
-        const HALF_DAY = 0.5;
-        const FULL_DAY = 1;       
-        if (timeDiff <= 2.5 * HOUR) {
-            return NO_ADDITION;
-        } else if (timeDiff <= 4 * HOUR) {
-            return HALF_DAY;
-        } else {    
-            return FULL_DAY;
-        }         
-    } 
-    
-    const _calculateLeaveDuration = (dayDiff,timeDiff,isStartTimeAfter) => {  
-        let additionDate = _calculateTimeAddition(timeDiff);
-        if (isStartTimeAfter) {
-            additionDate = additionDate - 1;
-        }
-        return dayDiff + additionDate;
-    }    
-
-    const _getTimeDifference = (startTime,endTime,dayDiff) => {
-        // Does not affect to calculation directly. Just used to craft a date object
-        const SPARE_DATE = "01/01/2020";
-        const BREAK_TIME = "12:00:00";
-        const MIDDAY_BOUNDARY = "11:59:59";
-        const LEAVE_BOUNDARY = "15:59:59";
-        const WORK_START_TIME = "09:00:00";
-        const WORK_END_TIME = "18:29:59";
-        
-        const startDate = moment(`${SPARE_DATE} ${startTime}`,"DD/MM/YYYY HH:mm:ss");
-        const endDate = moment(`${SPARE_DATE} ${endTime}`,"DD/MM/YYYY HH:mm:ss");
-        const breakDate = moment(`${SPARE_DATE} ${BREAK_TIME}`,"DD/MM/YYYY HH:mm:ss");    
-        const leaveBoundaryDate = moment(`${SPARE_DATE} ${LEAVE_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss"); 
-        const middayBoundaryDate = moment(`${SPARE_DATE} ${MIDDAY_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss");     
-        const workStart = moment(`${SPARE_DATE} ${WORK_START_TIME}`,"DD/MM/YYYY HH:mm:ss");
-        const workEnd = moment(`${SPARE_DATE} ${WORK_END_TIME}`,"DD/MM/YYYY HH:mm:ss");
-
-        let timeDiff;    
-        let isStartTimeAfter = false;   
-        if (dayDiff === 0 || startDate.isBefore(endDate)) {
-            timeDiff = endDate.diff(startDate,"minutes");
-        }
-
-        else {
-            let firstDayLeave = workEnd.diff(startDate,"minutes");    
-            if (startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
-                firstDayLeave = 180;
-            }
-            const lastDayLeave = endDate.diff(workStart,"minutes");
-            timeDiff = firstDayLeave + lastDayLeave;                 
-            isStartTimeAfter = true;           
-        }
-
-        // If the times contains break time, exclude from calculation
-        if (breakDate.isBetween(startDate,endDate)) {
-            timeDiff = timeDiff - 60;
-        }           
-        return [timeDiff,isStartTimeAfter];
-    }
-
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
               
         const _selectedStartDate = moment.isMoment(selectedStartDate) ? selectedStartDate.format() : selectedStartDate;
@@ -162,11 +106,38 @@ export default function LeaveRequestForm(props) {
         const [endDate,endTime] = _selectedEndDate.toString().split('T');         
 
         const dayDiff = await moment(endDate).businessDiff(moment(startDate));      
-        const [timeDiff,isStartTimeAfter] = _getTimeDifference(startTime,endTime, dayDiff);        
-        const duration = _calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
-       
+        const [timeDiff,isStartTimeAfter] = durationCalculationUtil.getTimeDifference(startTime,endTime, dayDiff);        
+        const duration = durationCalculationUtil.calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
+        
         setDuration(duration);
+        
     }
+
+    // Check if user selected a date within two hours and leaveType is not compansate
+    const isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate = () => {
+        if (duration === 0 && watchFields.leaveType !== '' && watchFields.leaveType !== '1') {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Check if user selected a date greater than two hours and leaveType is compansate
+    const isDurationGreaterThanTwoHoursAndLeaveTypeCompansate = () => {
+        if (duration > 0 && watchFields.leaveType !== '' && watchFields.leaveType === '1') {
+            return true;    
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Check if user has negative leave credit
+    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    
+    // Check if start date is greater than end date
+    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
 
     // Mobile DateTimePickers
     const handleDateTimeLocalStart = date => {
@@ -201,7 +172,8 @@ export default function LeaveRequestForm(props) {
     const onSubmit = async (data, e) => {    
         setIsLoading(true);
         e.preventDefault();
-        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate)) {
+        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
+        !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate()) {
             const uid = props.auth().uid;
             const processedBy = "";
             const createdBy = uid;
@@ -228,26 +200,14 @@ export default function LeaveRequestForm(props) {
             const requestFormObj = { requestedDate, processedBy, createdBy, requesterName, leaveTypeRef, startDate, endDate, duration,
                 description, protocolNumber, isPrivacyPolicyApproved, isNegativeCreditUsageApproved, status }
             await props.firebase.sendNewLeaveRequest(requestFormObj).then(response => {
-                setIsLoading(false);
                 setSnackbarState(true);
                 setSnackbarType(snackbars.success);
-            })
+            }).finally(() => {
+                setIsLoading(false);
+            });
             console.log(requestFormObj);       
         }
     }
-
-    // Check if user selected a date within two hours
-    const isDurationLessThanTwoHours = () => {
-        if (moment(selectedEndDate).diff(moment(selectedStartDate), "minutes") <= 120) {
-            console.log('Doğru case')
-        }
-    }
-
-    // Check if user has negative leave credit
-    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
-    
-    // Check if start date is greater than end date
-    const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
     
     //Firebase
 
@@ -330,7 +290,6 @@ export default function LeaveRequestForm(props) {
     return (           
         <Container maxWidth="lg">
             <Box marginY={4}>
-                {console.log(isDurationLessThanTwoHours())}
                 <Paper className={classes.root}>
                     <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
@@ -349,6 +308,8 @@ export default function LeaveRequestForm(props) {
                                     return <option key={index} value={index}>{item.name}</option>
                                 })}
                                 </Select>
+                                {isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() ? <Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography> : ''}
+                                {isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() ? <Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography> : ''}
                             </FormControl>
                         </Box>
                         <Box display={{xs: 'block', md: 'none'}}>
