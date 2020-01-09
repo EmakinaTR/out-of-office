@@ -236,6 +236,13 @@ export default function LeaveRequestForm(props) {
         }
     }
 
+    // Check if user selected a date within two hours
+    const isDurationLessThanTwoHours = () => {
+        if (moment(selectedEndDate).diff(moment(selectedStartDate), "minutes") <= 120) {
+            console.log('Doğru case')
+        }
+    }
+
     // Check if user has negative leave credit
     const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
     
@@ -323,6 +330,7 @@ export default function LeaveRequestForm(props) {
     return (           
         <Container maxWidth="lg">
             <Box marginY={4}>
+                {console.log(isDurationLessThanTwoHours())}
                 <Paper className={classes.root}>
                     <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
                         <Typography variant="h5" component="h2" align="center" gutterBottom>New Leave Request</Typography>
