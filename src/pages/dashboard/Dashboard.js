@@ -153,6 +153,8 @@ const handleDescriptionChange = (e)=> {
         .then(result => {
           setIncomingRequests([...result.data]);
           setIsLoading(false);
+        }).catch(error => {
+          setHasError(true);
         });
     }
   };

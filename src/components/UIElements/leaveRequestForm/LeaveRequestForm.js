@@ -11,7 +11,8 @@ import { snackbars } from "../../../constants/snackbarContents";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import AuthContext from "../../session";
-import { HOLIDAYS } from '../../../constants/holidays';
+import * as durationCalculationUtil from '../../../utils/durationCalculationUtils';
+
 const useStyles = makeStyles(theme => ({
     root: {
       padding: theme.spacing(3, 3),
@@ -91,68 +92,6 @@ export default function LeaveRequestForm(props) {
         setSelectedEndDate(date);
     }
 
-    const _calculateTimeAddition = (timeDiff) => {
-        const HOUR = 60;
-        const NO_ADDITION = 0;
-        const HALF_DAY = 0.5;
-        const FULL_DAY = 1;       
-        if (timeDiff <= 2.5 * HOUR) {
-            return NO_ADDITION;
-        } else if (timeDiff <= 4 * HOUR) {
-            return HALF_DAY;
-        } else {    
-            return FULL_DAY;
-        }         
-    } 
-    
-    const _calculateLeaveDuration = (dayDiff,timeDiff,isStartTimeAfter) => {  
-        let additionDate = _calculateTimeAddition(timeDiff);
-        if (isStartTimeAfter) {
-            additionDate = additionDate - 1;
-        }
-        return dayDiff + additionDate;
-    }    
-
-    const _getTimeDifference = (startTime,endTime,dayDiff) => {
-        // Does not affect to calculation directly. Just used to craft a date object
-        const SPARE_DATE = "01/01/2020";
-        const BREAK_TIME = "12:00:00";
-        const MIDDAY_BOUNDARY = "11:59:59";
-        const LEAVE_BOUNDARY = "15:59:59";
-        const WORK_START_TIME = "09:00:00";
-        const WORK_END_TIME = "18:29:59";
-        
-        const startDate = moment(`${SPARE_DATE} ${startTime}`,"DD/MM/YYYY HH:mm:ss");
-        const endDate = moment(`${SPARE_DATE} ${endTime}`,"DD/MM/YYYY HH:mm:ss");
-        const breakDate = moment(`${SPARE_DATE} ${BREAK_TIME}`,"DD/MM/YYYY HH:mm:ss");    
-        const leaveBoundaryDate = moment(`${SPARE_DATE} ${LEAVE_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss"); 
-        const middayBoundaryDate = moment(`${SPARE_DATE} ${MIDDAY_BOUNDARY}`,"DD/MM/YYYY HH:mm:ss");     
-        const workStart = moment(`${SPARE_DATE} ${WORK_START_TIME}`,"DD/MM/YYYY HH:mm:ss");
-        const workEnd = moment(`${SPARE_DATE} ${WORK_END_TIME}`,"DD/MM/YYYY HH:mm:ss");
-
-        let timeDiff;    
-        let isStartTimeAfter = false;   
-        if (dayDiff === 0 || startDate.isBefore(endDate)) {
-            timeDiff = endDate.diff(startDate,"minutes");
-        }
-
-        else {
-            let firstDayLeave = workEnd.diff(startDate,"minutes");    
-            if (startDate.isBetween(middayBoundaryDate,leaveBoundaryDate)) {
-                firstDayLeave = 180;
-            }
-            const lastDayLeave = endDate.diff(workStart,"minutes");
-            timeDiff = firstDayLeave + lastDayLeave;                 
-            isStartTimeAfter = true;           
-        }
-
-        // If the times contains break time, exclude from calculation
-        if (breakDate.isBetween(startDate,endDate)) {
-            timeDiff = timeDiff - 60;
-        }           
-        return [timeDiff,isStartTimeAfter];
-    }
-
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
               
         const _selectedStartDate = moment.isMoment(selectedStartDate) ? selectedStartDate.format() : selectedStartDate;
@@ -162,8 +101,8 @@ export default function LeaveRequestForm(props) {
         const [endDate,endTime] = _selectedEndDate.toString().split('T');         
 
         const dayDiff = await moment(endDate).businessDiff(moment(startDate));      
-        const [timeDiff,isStartTimeAfter] = _getTimeDifference(startTime,endTime, dayDiff);        
-        const duration = _calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
+        const [timeDiff,isStartTimeAfter] = durationCalculationUtil.getTimeDifference(startTime,endTime, dayDiff);        
+        const duration = durationCalculationUtil.calculateLeaveDuration(dayDiff,timeDiff,isStartTimeAfter);      
        
         setDuration(duration);
     }
