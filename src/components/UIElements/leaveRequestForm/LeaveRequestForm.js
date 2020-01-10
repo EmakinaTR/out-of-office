@@ -41,6 +41,20 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+export function Error(props) {
+    // Styles
+    const classes = useStyles();
+    if (props.less()) {
+        return(<Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography>)
+    }
+    else if (props.greater()) {
+        return(<Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography>);
+    }
+    else {
+        return('');
+    }
+}
+
 export default function LeaveRequestForm(props) {
     // Styles
     const classes = useStyles();
@@ -74,7 +88,7 @@ export default function LeaveRequestForm(props) {
     const [approvers, setApprovers] = useState([]);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarType, setSnackbarType] = useState({});
-    const [twoHourDuration, setTwoHourDuration] = useState(false);
+    const [hourChanged, setHourChanged] = useState(false);
     const { setIsLoading } = useContext(AuthContext);
     // Handle Methods
     
@@ -91,10 +105,12 @@ export default function LeaveRequestForm(props) {
     // Desktop DateTimePickers
     const handleStartDateChange = date => {
         setSelectedStartDate(date);
+        setHourChanged(true);
     }
 
     const handleEndDateChange = date => {
         setSelectedEndDate(date);
+        setHourChanged(true);
     }
 
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
@@ -142,12 +158,12 @@ export default function LeaveRequestForm(props) {
     // Mobile DateTimePickers
     const handleDateTimeLocalStart = date => {
         setDateTimeLocalStart(date.target.value);
-        console.log('LOCALTIMESTART', dateTimeLocalStart)
+        setHourChanged(true);
     }
 
     const handleDateTimeLocalEnd = date => {
         setDateTimeLocalEnd(date.target.value);
-        console.log("LOCALTIMEEND", dateTimeLocalEnd);
+        setHourChanged(true);
     }
     
     const handleCheck = event => {
@@ -308,8 +324,9 @@ export default function LeaveRequestForm(props) {
                                     return <option key={index} value={index}>{item.name}</option>
                                 })}
                                 </Select>
-                                {isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() ? <Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography> : ''}
-                                {isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() ? <Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography> : ''}
+                                {(hourChanged) ?
+                                    <Error less={isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate} greater={isDurationGreaterThanTwoHoursAndLeaveTypeCompansate} /> : ''
+                                }
                             </FormControl>
                         </Box>
                         <Box display={{xs: 'block', md: 'none'}}>
