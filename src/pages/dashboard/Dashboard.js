@@ -189,6 +189,14 @@ const handleDescriptionChange = (e)=> {
               color="#008fd4"
             ></InfoCard>
           </Grid>
+            {/* Remaining Pending Leave */}
+            <Grid item xs={12} lg={6}>
+            <InfoCard
+              text={PENDING_LEAVE_REQUEST}
+              count={1}
+              color="#8cc63f"
+            ></InfoCard>
+          </Grid>
           {/* Remaining Casual Leave */}
           <Grid item xs={12} lg={6}>
             <InfoCard
@@ -196,15 +204,7 @@ const handleDescriptionChange = (e)=> {
               count={currentUser.excuseCredit}
               color="#ff7f41"
             ></InfoCard>
-          </Grid>
-          {/* Remaining Pending Leave */}
-          <Grid item xs={12} lg={6}>
-            <InfoCard
-              text={PENDING_LEAVE_REQUEST}
-              count={1}
-              color="#8cc63f"
-            ></InfoCard>
-          </Grid>
+          </Grid>        
 
           {/* Incoming Requests - Visible Only For Admin Users */}
           {isAdmin && (
