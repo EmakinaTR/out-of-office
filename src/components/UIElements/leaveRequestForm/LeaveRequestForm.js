@@ -130,24 +130,10 @@ export default function LeaveRequestForm(props) {
     }
 
     // Check if user selected a date within two hours and leaveType is not compansate
-    const isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate = () => {
-        if (duration === 0 && watchFields.leaveType !== '' && watchFields.leaveType !== '1') {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+    const isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate = () => (duration === 0 && watchFields.leaveType !== '' && watchFields.leaveType !== '1');
 
     // Check if user selected a date greater than two hours and leaveType is compansate
-    const isDurationGreaterThanTwoHoursAndLeaveTypeCompansate = () => {
-        if (duration > 0 && watchFields.leaveType !== '' && watchFields.leaveType === '1') {
-            return true;    
-        }
-        else {
-            return false;
-        }
-    }
+    const isDurationGreaterThanTwoHoursAndLeaveTypeCompansate = () => (duration > 0 && watchFields.leaveType !== '' && watchFields.leaveType === '1');
 
     // Check if user has negative leave credit
     const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
