@@ -61,14 +61,14 @@ const Navigation = props => {
     },
     menuButton: {
       marginRight: theme.spacing(2),
-      [theme.breakpoints.up("md")]: {
+      [theme.breakpoints.up("lg")]: {
         display: "none"
       }
     },
     title: {
       flex: 1,
       textAlign: "center",
-      [theme.breakpoints.up("md")]: {
+      [theme.breakpoints.up("lg")]: {
         textAlign: "left"
       }
     },
@@ -107,7 +107,7 @@ const Navigation = props => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
-  const matches = useMediaQuery(theme.breakpoints.up("md"));
+  const matches = useMediaQuery(theme.breakpoints.up("lg"));
   
   const handlePopOverClose = () => {
     setAnchorEl(null);
