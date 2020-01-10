@@ -141,14 +141,14 @@ export default function IncomingRequests(props) {
                     console.log(result.data)
                     if ((queryData === intitialQueryData || queryData !== prevQueryData) && queryData.lastDocument === undefined) {
                         setDataList([...result.data]);
-                        console.log(result.lastDocument )
+                        console.log("LAST DOCUMENT ",result.lastDocument );
                         setQueryData({ ...queryData, lastDocument: result.lastDocument });
 
                     }
                     else {
                         // console.log("Same query data");
                         if (result.data.length > 0) {
-                            // console.log(queryData);
+                            console.log(result.data);
                             setDataList([...dataList, ...result.data]);
                             setQueryData({ ...queryData, lastDocument: result.lastDocument });
 

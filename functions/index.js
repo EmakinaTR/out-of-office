@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
+
 exports.onCreateUser = functions.auth.user().onCreate(async (userRecord, context) => {
     displayName = userRecord.displayName.split(' ')
     userDoc = {
@@ -275,11 +276,21 @@ const _createQuery = (collectionRef, queryData) => {
             queryData.orderBy.type
           );
         }
+        console.log("query", query)
+
         console.log("as", queryData.lastDocument)
         if (queryData.lastDocument) {
-          query = query.startAfter( queryData.lastDocument)
-          console.log("sa",queryData.lastDocument)
+            console.log("sa", queryData.lastDocument)
+            _getLeaveRequestFromdoc(queryData.lastDocument).then( resolve =>{
+                console.log("resolve ref:", resolve.ref)
+                console.log("resolve data", resolve.data())
+                console.log("resolve", resolve)
+
+                query = query.startAfter(resolve.doc)
+            })
         }
+        console.log("query", query)
+
         if (queryData.pageSize) {
           query = query.limit(queryData.pageSize);
         }
@@ -294,10 +305,12 @@ const _createQuery = (collectionRef, queryData) => {
             })
             dataArray.push(leaveDoc);
           }
-            console.log("last firebase :", querySnapshot.docs[querySnapshot.size - 1]);
-            console.log("last query: ", queryData.lastDocument)
-            console.log("isEq: ",queryData.lastDocument === querySnapshot.docs[querySnapshot.size - 1]._ref)
-          resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
+            console.log("quersnapshot docs: ", querySnapshot.docs);
+            console.log("Firebase ref :", querySnapshot.docs[querySnapshot.size - 1].ref);
+            console.log("Firebase'in bize verdiği :", querySnapshot.docs[querySnapshot.size - 1]);
+            console.log("Bizim Firebase'e gönderdiğimiz : ", queryData.lastDocument)
+            // console.log("isEq: ", queryData.lastDocument === querySnapshot.docs[querySnapshot.size - 1].ref)
+            resolve({ data: dataArray, size: querySnapshot.size, lastDocument: querySnapshot.docs[querySnapshot.size - 1].ref.path});
         });
       }
     });    
@@ -324,6 +337,18 @@ const _getLeaveRequestFromID = (documentId) => {
         });
     });     
 }
+
+const _getLeaveRequestFromdoc = (doc) => {
+    return new Promise((resolve, reject) => {
+        firebase.firestore().doc(doc).get().then(response => {
+            resolve(response);
+        }).catch(error => {
+            reject(error);
+        });
+    });
+}
+
+
 const status = {
     WAITING: 0,
     APPROVED: 1,
