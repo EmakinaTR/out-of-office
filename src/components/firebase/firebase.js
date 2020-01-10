@@ -145,7 +145,7 @@ export default class Firebase {
       const changeLeaveStatus = app
         .functions()
         .httpsCallable("changeLeaveStatus");
-      changeLeaveStatus({ documentID: documentID, newStatus: newStatus, approverDescription : description })
+      changeLeaveStatus({ documentID: documentID, newStatus: newStatus, processerDescription : description })
         .then(result => {
           resolve(result.data);
         })

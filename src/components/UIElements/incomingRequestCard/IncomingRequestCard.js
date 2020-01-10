@@ -125,6 +125,12 @@ export const IncomingRequestCard = props => {
       search: "?formId=" + document
     });
   };
+  const editHandler = (document) => {
+    history.push({
+      pathname: '/request-edit',
+      search: '?formId=' + document,
+    })
+  }
   return (
     <Box marginY={2}>
       <Paper>
@@ -210,6 +216,7 @@ export const IncomingRequestCard = props => {
                   currentUserRole ={currentUser.ROLE}
                   changeFormStatusHandler={props.changeFormStatusHandler}
                   detailHandler={detailHandler}
+                  editHandler={editHandler}
                   document={props.documentID}
                   requestStatus={props.requestStatus}
                 ></MoreDialog>
