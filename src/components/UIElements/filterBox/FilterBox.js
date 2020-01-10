@@ -1,12 +1,10 @@
-import React, { useState,useRef,useContext} from 'react';
-import { Button, Grow, Paper, Popper, Select, FormControl, InputLabel, MenuItem, Badge, IconButton, Box, Drawer, Icon, SwipeableDrawer} from '@material-ui/core';
+import React, { useState,useRef} from 'react';
+import { Button, Select, FormControl, Typography, InputLabel, MenuItem, Badge, IconButton, Box, Drawer, SwipeableDrawer} from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { leaveBadges } from '../../../constants/badgeTypes';
 import { KeyboardDatePicker, MuiPickersUtilsProvider, KeyboardTimePicker } from '@material-ui/pickers';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import moment from 'moment';
 import OrderByFilter from '../orderByFilter';
 import SearchFilter from '../searchFilter/SearchFilter';
 import MomentUtils from '@date-io/moment';
@@ -19,8 +17,8 @@ const useStyles = makeStyles(theme => ({
     title: {
         textAlign: 'center'
     },
-    formControl: {
-       marginBottom :theme.spacing(3),
+    formElements: {
+       margin :theme.spacing(1,0),
        minWidth: 120,
     },
    drawer : {
@@ -38,8 +36,17 @@ const useStyles = makeStyles(theme => ({
     closeButton :{
         height : '64px',
         width : '64px',
-        padding:theme.spacing(0,0)
+        padding:theme.spacing(2,2)
     },
+    filtersHeader:{
+        margin:theme.spacing(0,2),
+        marginTop:theme.spacing(2),
+    },
+    commandButtons :{
+        marginTop: theme.spacing(2),
+        display:'flex',
+        flexDirection:'column'
+    }
     
 }));
 export function FilterBox(props) {
@@ -94,17 +101,69 @@ export function FilterBox(props) {
                 onOpen={toggleDrawer('right', true)}
             >
                     {/* <ClickAwayListener onClickAway={onClose}> */}
+                    
                     <div className={classes.drawerContent}>
-                    <IconButton className={classes.closeButton} onClick={onClose}>
-                            <ChevronRightIcon />
-                    </IconButton>
+                    <Typography className={classes.filtersHeader} variant="h5">Filters</Typography>
+                    <FormControl className={classes.formElements}>
+                        <InputLabel >Leave Type</InputLabel>
+                        <Select
+                            name="leaveType"
+                            onChange={props.onFilteredLeaveTypeChange}
+                            defaultValue="-1"
+
+                        >
+                            <MenuItem value="-1">
+                                <em>None</em>
+                            </MenuItem>
+                            {Object.keys(leaveBadges).map((option) => (
+                                <MenuItem
+                                    key={option}
+                                    value={option}
+
+                                >
+                                    {leaveBadges[option].badgeContent}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                        <KeyboardDatePicker
+                            name="startDate"
+                            disableToolbar
+                            label="From"
+                            format='MM/DD/YYYY'
+                            margin="normal"
+                            className={classes.formElements}
+                            value={props.filteredDates.from}
+                            onChange={props.onStartDateChange}
+                            KeyboardButtonProps={{
+                                'aria-label': 'change date',
+                            }}
+                        />
+
+                        <KeyboardDatePicker
+                            name="endDate"
+                            disableToolbar
+                            label="To"
+                            format='MM/DD/YYYY'
+                            margin="normal"
+                            className={classes.formElements}
+                            value={props.filteredDates.to}
+                            onChange={props.onEndDateChange}
+                            KeyboardButtonProps={{
+                                'aria-label': 'change date',
+                            }}
+                        />
+                        
+                    </MuiPickersUtilsProvider>
                     <SearchFilter
 
-                        className={classes.searchFilter}
+                        className={classes.formElements}
                         onChange={props.onSearchQueryChange}
                     >
                     </SearchFilter>
                     <OrderByFilter
+                        className={classes.formElements}
                         options={props.orderByFilterOptions}
                         onFilterDirectionChanged={props.onFilterDirectionChanged}
                         A_to_Z={props.A_to_Z}
@@ -113,58 +172,12 @@ export function FilterBox(props) {
                     >
 
                     </OrderByFilter>
+                    <div className={classes.commandButtons} >
+                        <Button className={classes.formElements} variant="outlined" onClick={onFilterClick}>Filter</Button>
+                        <Button className={classes.formElements} variant="outlined" onClick={onClose}>Cancel</Button>
+                    </div>
                     
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <KeyboardDatePicker
-                                name="startDate"
-                                disableToolbar
-                                label="From"
-                                format='MM/DD/YYYY'
-                                margin="normal"
-                                value={props.filteredDates.from}
-                                onChange={props.onStartDateChange}
-                                KeyboardButtonProps={{
-                                    'aria-label': 'change date',
-                                }}
-                            />
-
-                            <KeyboardDatePicker
-                                name="endDate"
-                                disableToolbar
-                                label="To"
-                                format='MM/DD/YYYY'
-                                margin="normal"
-                                value={props.filteredDates.to}
-                                onChange={props.onEndDateChange}
-                                KeyboardButtonProps={{
-                                    'aria-label': 'change date',
-                                }}
-                            />
-                            <FormControl className={classes.formControl}>
-                                <InputLabel >Leave Type</InputLabel>
-                                <Select
-                                    name="leaveType"
-                                    onChange={props.onFilteredLeaveTypeChange}
-                                    defaultValue ="-1"
-
-                                >
-                                    <MenuItem value="-1">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    {Object.keys(leaveBadges).map((option) => (
-                                        <MenuItem
-                                            key={option}
-                                            value={option}
-
-                                        >
-                                            {leaveBadges[option].badgeContent}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            
-                            <Button variant="outlined" onClick={onFilterClick}>Filter</Button>
-                        </MuiPickersUtilsProvider>
+                        
                </div>
                     {/* </ClickAwayListener> */}
 

@@ -7,10 +7,15 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
     filterTypeButton: {
-        width : '80%'
+        width : '80%',
+        marginLeft : theme.spacing(1,0),
+        padding : theme.spacing(1)
     },
     filterDirectionButton : {
-        width :'20%'
+        width :'20%',
+        padding : theme.spacing(1),
+
+        marginRight: theme.spacing(1)
     }
 }));
 export function OrderByFilter(props) {

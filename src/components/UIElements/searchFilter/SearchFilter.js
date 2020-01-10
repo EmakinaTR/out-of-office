@@ -9,8 +9,9 @@ const useStyles = makeStyles(theme => ({
   
     SearchFilter: {
         
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2)
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        margin : theme.spacing(1,0)
     },
 
 }));
