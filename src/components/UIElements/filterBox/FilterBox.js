@@ -110,6 +110,7 @@ export function FilterBox(props) {
                             name="leaveType"
                             onChange={props.onFilteredLeaveTypeChange}
                             defaultValue="-1"
+                            value={props.filteredLeaveType}
 
                         >
                             <MenuItem value="-1">
