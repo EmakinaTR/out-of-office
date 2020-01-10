@@ -29,11 +29,16 @@ const useStyles = makeStyles(theme => ({
         width: '100%'
     },
     checkBoxError: {
-        '& .MuiIconButton-label': {
-            border: '2px solid red',
-            height: '17px',
-            width: '17px'
+        '&& .MuiIconButton-label': {
+            position: "relative",
         },
+        '&& .MuiIconButton-label::after': {
+            content: '""',
+            position: "absolute",
+            width: '60%',
+            height: '60%',
+            border: '2px solid red',
+        }
     },
     red: {
         color: 'red',
@@ -364,6 +369,8 @@ export default function LeaveRequestForm(props) {
                                         label="Start Time"
                                         value={selectedStartDate}
                                         onChange={handleStartDateChange}
+                                        minutesStep={30}
+                                        ampm={false}
                                         KeyboardButtonProps={{
                                             'aria-label': 'change time',
                                         }}
@@ -392,6 +399,8 @@ export default function LeaveRequestForm(props) {
                                         label="Return Time"
                                         value={selectedEndDate}
                                         onChange={handleEndDateChange}
+                                        minutesStep={30}
+                                        ampm={false}
                                         KeyboardButtonProps={{
                                             'aria-label': 'change time',
                                         }}
