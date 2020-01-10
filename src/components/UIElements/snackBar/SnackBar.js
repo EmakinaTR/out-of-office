@@ -82,7 +82,7 @@ export default function CustomizedSnackbars(props) {
 
     useEffect(() => {
         setOpen(props.snackBarState);
-      
+      console.log("Hİİ")
     }, [props.snackBarState])
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {

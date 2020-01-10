@@ -64,7 +64,7 @@ const Dashboard = () => {
   const [openMenu, setOpenMenu] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const initialState ={
-    approverDescription : '',
+    processerDescription : '',
     statusType : undefined,
 };
 const [state, setState] = useState(initialState);  
@@ -74,12 +74,12 @@ const [state, setState] = useState(initialState);
 };
 
 const handleYesClick = () => {
-  changeFormStatusHandler(selectedIncomingRequest.id, 1, state.approverDescription);
+  changeFormStatusHandler(selectedIncomingRequest.id, 1, state.processerDescription);
   closeDialog();
 }
 
 const handleDescriptionChange = (e)=> {
-  setState({ ...state, approverDescription: e.target.value }); 
+  setState({ ...state, processerDescription: e.target.value }); 
 }
   // My Request Detail Handler
   const detailHandler = document => {

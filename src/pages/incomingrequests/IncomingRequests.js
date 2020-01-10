@@ -3,7 +3,7 @@ import { Container, Box, Typography, Grid} from '@material-ui/core'
 import { makeStyles } from "@material-ui/core/styles";
 import { statusBadges} from '../../constants/badgeTypes';
 import IncomingRequestCard from '../../components/UIElements/incomingRequestCard';
-import SearchFilter from '../../components/UIElements/searchFilter/SearchFilter';
+
 import { FilterBox } from '../../components/UIElements/filterBox/FilterBox';
 import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
@@ -120,12 +120,9 @@ export default function IncomingRequests(props) {
         setIsLoading(true);
         await firebaseContext.setLeaveStatus(documentID, type ,description)
             .then(()=>{
-                
                 setSnackbarState(true);
                 setSnackbarType(snackbars.success);
-                setDataList(dataList.filter(function (obj) {
-                    return obj.id !== documentID;
-                }))
+                setIsLoading(true);
             }
             )
             .catch(err => console.log(err)).finally(() => {
@@ -216,11 +213,8 @@ export default function IncomingRequests(props) {
                     <Grid item xs={12} lg={8} >
                     <Grid container alignItems="center" spacing={2} className={classes.listControls} wrap="nowrap">
                         <Grid item>
-                            <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={() => { setSnackbarState(false) }}></SnackBar>
-                        <SearchFilter
-                            onChange={onSearchQueryChange}
-                        >
-                        </SearchFilter>
+                        <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={() => { setSnackbarState(false) }}></SnackBar>
+                       
                         </Grid>
                         
                         <Grid item>

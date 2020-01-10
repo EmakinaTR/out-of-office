@@ -8,7 +8,8 @@ import LaunchScreen from '../../components/UIElements/launchScreen'
 import { FirebaseContext } from "../../components/firebase"; 
 import AuthContext from "../../components/session";
 import moment from 'moment';
-
+import SnackBar from '../../components/UIElements/snackBar/SnackBar';
+import { snackbars } from '../../constants/snackbarContents'
 const orderByFilterOptions = {
     0: {
         key: 'requestedDate',
@@ -56,6 +57,8 @@ export default function MyRequests(props) {
     const [selectedFilterField, setSelectedFilterField] = useState(0);
     const [filteredLeaveType, setFilteredLeaveType] = useState(-1);
     const [prevQueryData, setprevQueryData] = useState()
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarType, setSnackbarType] = useState({});
     const [filteredDates, setFilteredDates] = useState({
         from: moment().subtract(30, 'd'),
         to : moment()
@@ -140,7 +143,7 @@ export default function MyRequests(props) {
                     if ((queryData === intitialQueryData || queryData !==prevQueryData) && queryData.lastDocument === undefined){
                         // console.log("query data");
                         
-                            // console.log(result.data)
+                            console.log(result.data)
                             setDataList([...result.data]);
                             setQueryData({ ...queryData, lastDocument: result.lastDocument });
                         
@@ -165,7 +168,22 @@ export default function MyRequests(props) {
         }
       
     }
+    const changeFormStatusHandler = async (documentID, type, description) => {
+        
+        await firebaseContext.setLeaveStatus(documentID, type, description)
+            .then(() => {
 
+                setSnackbarState(true);
+                setSnackbarType(snackbars.success);
+                setDataList(dataList.filter(function (obj) {
+                    return obj.id !== documentID;
+                }))
+            }
+            )
+            .catch(err => console.log(err)).finally(() => {
+                setIsLoading(false);
+            });
+    }
     useEffect(() => {
         getMyRequests(loadMore, queryData);
         setLoadMore(false);
@@ -187,6 +205,8 @@ export default function MyRequests(props) {
         <Box marginY={3}>
             <Box marginBottom={2}>
                     <Grid container className={classes.headerContainer} alignItems="center" >
+                    <SnackBar snackbarType={snackbarType} snackBarState={snackbarState} onClose={() => { setSnackbarState(false) }}></SnackBar>
+
                     <Grid item xs={12} lg={4}>
                     <Typography variant="h5" component="h2">My Requests</Typography>
                       
@@ -236,6 +256,8 @@ export default function MyRequests(props) {
                                 endDate={data?.endDate.seconds * 1000}
                                 duration={data?.duration}
                                 description={data?.description}
+                                changeFormStatusHandler={changeFormStatusHandler}
+
                                 documentID={data.id}
                                 requestStatus={data.status}
                                 createdBy={data.createdBy}

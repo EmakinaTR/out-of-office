@@ -13,10 +13,16 @@ const useStyles = makeStyles(theme => ({
         // backgroundColor: 'transparent',
     },
 }));
+
+const StatusTypes ={
+    APPROVE : 1,
+    REJECT : 2,
+    CANCEL : 3
+}
 export const MoreDialog = (props)=>{
 
     const initialState ={
-        approverDescription : '',
+        processerDescription : '',
         statusType : undefined,
     }
     const [openMenu, setOpenMenu] = useState(false);
@@ -41,19 +47,19 @@ export const MoreDialog = (props)=>{
     const closeDialog = () => {
         setOpenDialog(false);
     };
-    const handleStatusChange =(e) => {
+    const handleStatusChange =(newState) => {
         setOpenMenu(false);
         showDialog();
-        setState({ ...state, statusType: e.target.value });
+        setState(state => ({ ...state, statusType: newState }))
     }
 
     const handleDescriptionChange = (e)=> {
-        setState({ ...state, approverDescription: e.target.value });
-        console.log(state);
+        setState({ ...state, processerDescription: e.target.value });
     }
 
     const handleYesClick = ()=> {
-        props.changeFormStatusHandler(props.document, state.statusType, state.approverDescription);
+        console.log(state)
+        props.changeFormStatusHandler(props.document, state.statusType, state.processerDescription);
         closeDialog();
     }
         return (
@@ -78,17 +84,20 @@ export const MoreDialog = (props)=>{
                             <DialogContentText id="alert-dialog-slide-description">
                                 Form üzerinde yapmış olduğunuz değişiklikler kalıcı olacaktır. Devam etmek istiyor musunuz ? 
                             </DialogContentText>
+                        {state.statusType !== StatusTypes.APPROVE ? 
                             <DialogContent>
-                            <TextField
-                                onChange={handleDescriptionChange}
-                                fullWidth
-                                id="outlined-multiline-static"
-                                label="Description"
-                                multiline
-                                rows="4"
-                                variant="outlined"
-                            />
-                            </DialogContent>
+                                <TextField
+                                    onChange={handleDescriptionChange}
+                                    fullWidth
+                                    id="outlined-multiline-static"
+                                    label="Description"
+                                    multiline
+                                    rows="4"
+                                    variant="outlined"
+                                />
+                            </DialogContent> : (null)}
+
+                            
                         </DialogContent>
                         <DialogActions>
                             <Button variant="contained" onClick={handleYesClick} color="secondary">
@@ -111,13 +120,19 @@ export const MoreDialog = (props)=>{
                                    
                                     <ClickAwayListener onClickAway={handleCloseMenu}>
                                         <MenuList id="split-button-menu">
-                                        {(props.from === "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0 ) ?
-                                            (< MenuItem value="1" onClick={handleStatusChange}>
+                                        {(props.from === "IncomingRequest" && props.requestStatus === 0) ? //&& props.leaveHasntBegin
+                                            (< MenuItem value="1" onClick={e => {
+                                               
+                                                handleStatusChange(e.target.value)
+                                            }}>
                                                 <Check htmlColor="green" style={{ marginRight: '12px' }}></Check>Approve
                                             </MenuItem>)
                                         : undefined}
-                                        {(props.from === "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 0) ? (
-                                            <MenuItem value="2" onClick={handleStatusChange}>
+                                        {(props.from === "IncomingRequest" && props.requestStatus === 0) ? ( //&& props.leaveHasntBegin
+                                            <MenuItem value="2" onClick={e => {
+
+                                                handleStatusChange(e.target.value)
+                                            }}>
                                                 <Close htmlColor="red" style={{ marginRight: '12px' }}></Close>Reject
                                             </MenuItem>
                                         )
@@ -128,12 +143,15 @@ export const MoreDialog = (props)=>{
                                         {((props.from === "IncomingRequest" && props.leaveHasntBegin && props.requestStatus === 1)
                                         ||
                                             (props.from === "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (
-                                                <MenuItem value="3" onClick={handleStatusChange} >
+                                                <MenuItem value="3" onClick={e => {
+
+                                                    handleStatusChange(e.target.value)
+                                                }} >
                                             <Block htmlColor="red" style={{ marginRight: '12px' }}></Block>Cancel
                                             </MenuItem>)
                                         :undefined}
                                         {(props.from === "MyRequest" && props.leaveHasntBegin && props.isFormOwner && props.requestStatus === 0) ? 
-                                        (<MenuItem value="5" >
+                                            (<MenuItem value="5" onClick={() => props.editHandler(props.document)}>
                                             <Edit htmlColor="primary" style={{ marginRight: '12px' }}></Edit>Edit
                                         </MenuItem>) 
                                         : undefined}
