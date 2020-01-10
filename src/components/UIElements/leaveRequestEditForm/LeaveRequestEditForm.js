@@ -42,6 +42,20 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+export function Error(props) {
+    // Styles
+    const classes = useStyles();
+    if (props.less()) {
+        return(<Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography>)
+    }
+    else if (props.greater()) {
+        return(<Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography>);
+    }
+    else {
+        return('');
+    }
+}
+
 export default function LeaveRequestEditForm(props) {
     // Styles
     const classes = useStyles();
@@ -78,6 +92,7 @@ export default function LeaveRequestEditForm(props) {
     const [approvers, setApprovers] = useState([]);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarType, setSnackbarType] = useState({});
+    const [hourChanged, setHourChanged] = useState(false);
     
      // Handle Methods
      const handleChange = name => event => {
@@ -92,10 +107,12 @@ export default function LeaveRequestEditForm(props) {
     // Desktop DateTimePickers
     const handleStartDateChange = date => {
         setSelectedStartDate(date);
+        setHourChanged(true);
     }
 
     const handleEndDateChange = date => {
         setSelectedEndDate(date);
+        setHourChanged(true);
     }
 
     const handleDuration = async (selectedEndDate, selectedStartDate) => {
@@ -142,12 +159,12 @@ export default function LeaveRequestEditForm(props) {
     // Mobile DateTimePickers
     const handleDateTimeLocalStart = date => {
         setDateTimeLocalStart(date.target.value);
-        console.log('LOCALTIMESTART', dateTimeLocalStart)
+        setHourChanged(true);
     }
 
     const handleDateTimeLocalEnd = date => {
         setDateTimeLocalEnd(date.target.value);
-        console.log("LOCALTIMEEND", dateTimeLocalEnd);
+        setHourChanged(true);
     }
 
     const handleCheck = event => {
@@ -359,8 +376,9 @@ export default function LeaveRequestEditForm(props) {
                                     return <option key={index} value={index}>{item.name}</option>
                                 })}
                                 </Select>
-                                {isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() ? <Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography> : ''}
-                                {isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() ? <Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography> : ''}
+                                {(hourChanged) ?
+                                    <Error less={isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate} greater={isDurationGreaterThanTwoHoursAndLeaveTypeCompansate} /> : ''
+                                }
                             </FormControl>
                         </Box>
                         <Box display={{xs: 'block', md: 'none'}}>
@@ -369,7 +387,7 @@ export default function LeaveRequestEditForm(props) {
                             label="Start Date and Time"
                             type="datetime-local"
                             className={classes.inputWidth}
-                            defaultValue={dateTimeLocalStart}
+                            value={dateTimeLocalStart}
                             onChange={handleDateTimeLocalStart}
                             InputLabelProps={{
                             shrink: true,
@@ -380,7 +398,7 @@ export default function LeaveRequestEditForm(props) {
                             label="Return Date and Time"
                             type="datetime-local"
                             inputProps={{ min: dateTimeLocalStart }}
-                            defaultValue={dateTimeLocalEnd}
+                            value={dateTimeLocalEnd}
                             onChange={handleDateTimeLocalEnd}
                             className={classes.inputWidth}
                             InputLabelProps={{
