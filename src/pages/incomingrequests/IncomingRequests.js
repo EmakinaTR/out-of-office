@@ -123,8 +123,21 @@ export default function IncomingRequests(props) {
                 setSnackbarState(true);
                 setSnackbarType(snackbars.success);
                 setIsLoading(true);
-            }
-            )
+                
+            })
+            // .then(()=> {
+            //     var foundIndex = dataList.findIndex(x => x.id == documentID);
+            //     console.log(dataList[foundIndex])
+            //     dataListCopy = dataList;
+
+            //     dataListCopy = [...dataListCopy,dataListCopy[foundIndex].status = type ]
+            //     console.log(dataListCopy)
+            //     setDataList(prevDataList => ({
+            //         ...prevDataList,
+            //         [dataList[foundIndex].status]: type,
+            //     }));
+            //     console.log(dataList)
+            // })
             .catch(err => console.log(err)).finally(() => {
                 setIsLoading(false);
             });

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {TextField, Grow, Paper, Popper, MenuItem, MenuList, 
     Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,Slide,Button, IconButton } from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -41,21 +41,24 @@ export const MoreDialog = (props)=>{
     };
     const showDialog = () => {
         setOpenDialog(true);
-        setState({...state,statusType : undefined});
+        
     };
 
     const closeDialog = () => {
         setOpenDialog(false);
     };
-    const handleStatusChange =(newState) => {
-        setOpenMenu(false);
-        showDialog();
-        setState(state => ({ ...state, statusType: newState }))
+    const handleStatusChange = (newStatus) => {
+        setState( state => ({ ...state, statusType: newStatus }))
+        setOpenMenu( prev => false);
     }
 
     const handleDescriptionChange = (e)=> {
         setState({ ...state, processerDescription: e.target.value });
     }
+    useEffect(() => {
+        if(state.statusType != undefined)
+            showDialog();
+    }, [state])
 
     const handleYesClick = ()=> {
         console.log(state)
@@ -122,7 +125,6 @@ export const MoreDialog = (props)=>{
                                         <MenuList id="split-button-menu">
                                         {(props.from === "IncomingRequest" && props.requestStatus === 0) ? //&& props.leaveHasntBegin
                                             (< MenuItem value="1" onClick={e => {
-                                               
                                                 handleStatusChange(e.target.value)
                                             }}>
                                                 <Check htmlColor="green" style={{ marginRight: '12px' }}></Check>Approve
@@ -130,7 +132,6 @@ export const MoreDialog = (props)=>{
                                         : undefined}
                                         {(props.from === "IncomingRequest" && props.requestStatus === 0) ? ( //&& props.leaveHasntBegin
                                             <MenuItem value="2" onClick={e => {
-
                                                 handleStatusChange(e.target.value)
                                             }}>
                                                 <Close htmlColor="red" style={{ marginRight: '12px' }}></Close>Reject
@@ -144,7 +145,6 @@ export const MoreDialog = (props)=>{
                                         ||
                                             (props.from === "MyRequest" && !props.leaveHasntBegin && props.requestStatus === 0)) ? (
                                                 <MenuItem value="3" onClick={e => {
-
                                                     handleStatusChange(e.target.value)
                                                 }} >
                                             <Block htmlColor="red" style={{ marginRight: '12px' }}></Block>Cancel

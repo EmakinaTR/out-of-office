@@ -58,6 +58,7 @@ export default function MyRequests(props) {
     const [filteredLeaveType, setFilteredLeaveType] = useState(-1);
     const [prevQueryData, setprevQueryData] = useState()
     const [snackbarState, setSnackbarState] = useState(false);
+    const [changess, setchangess] = useState()
     const [snackbarType, setSnackbarType] = useState({});
     const [filteredDates, setFilteredDates] = useState({
         from: moment().subtract(30, 'd'),
@@ -142,8 +143,6 @@ export default function MyRequests(props) {
                     
                     if ((queryData === intitialQueryData || queryData !==prevQueryData) && queryData.lastDocument === undefined){
                         // console.log("query data");
-                        
-                            console.log(result.data)
                             setDataList([...result.data]);
                             setQueryData({ ...queryData, lastDocument: result.lastDocument });
                         
@@ -188,6 +187,11 @@ export default function MyRequests(props) {
         getMyRequests(loadMore, queryData);
         setLoadMore(false);
     }, [loadMore]);
+    
+    useEffect(() => {
+       firebaseContext.listenForRequests(queryData)
+        
+    }, [queryData]);
    
     
     useEffect(() => {
