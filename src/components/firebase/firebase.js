@@ -100,7 +100,7 @@ export default class Firebase {
   };
 
   getIncomingRequests = (queryData) => {
-    console.log(queryData)
+    // console.log(queryData)
     return new Promise((resolve, reject) => {
       const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
       getTeamLeaves({queryData: queryData})
@@ -173,7 +173,7 @@ export default class Firebase {
       })
     });
   }
-
+ 
   getSpecificLeaveRequestWithId = (documentId) => {
     return this.db.collection("leaveRequests").doc(documentId).get();
   }
@@ -212,12 +212,59 @@ export default class Firebase {
   }
 
 
+
   getMyRequests = (queryData) => {  
-    console.log("getMyRequests Call",queryData)
+  
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef, queryData);
   };
+  
+  listenForRequests = (queryData) => {
+    // return new Promise((resolve, reject) => {
+    var collectionRef = this.db.collection("leaveRequests");
+    let query;
+      let changedDocs = [];
+    if (queryData.lastDocument != "end") {
+      if (queryData.filterArray && queryData.filterArray.length > 0) {
+        for (const filter of queryData.filterArray) {
+          collectionRef = collectionRef.where(
+            filter.fieldPath,
+            filter.condition,
+            filter.value
+          );
+        }
+      }
+      query = collectionRef;
+      if (queryData.orderBy && queryData.orderBy.type && queryData.orderBy.fieldPath) {
+        query = query.orderBy(
+          queryData.orderBy.fieldPath,
+          queryData.orderBy.type
+        );
+      }
+      if (queryData.lastDocument) {
+        query = query.startAfter(queryData.lastDocument)
+      }
+      if (queryData.pageSize) {
+        query = query.limit(queryData.pageSize);
+      }
 
+      query.onSnapshot(snapshot => {
+        let changes = snapshot.docChanges();
+      
+        changes.forEach(change => {
+          if(change.type == "modified"){
+            console.log(change.doc.data())
+            changedDocs.push(change.doc.data());
+          }
+        })
+        
+      });
+
+    }
+      return changedDocs;
+  // })
+
+  }
   _createQuery = (collectionRef, queryData) => {
     {     
       return new Promise((resolve, reject) => {
@@ -250,7 +297,7 @@ export default class Firebase {
           }
           query.get().then( async querySnapshot => {
             const dataArray = [];
-            console.log(querySnapshot)     
+            // console.log(querySnapshot)     
             for(const doc of querySnapshot.docs) {
               const leaveDoc = doc.data();
               leaveDoc.id = doc.id;
@@ -266,4 +313,4 @@ export default class Firebase {
     }
   };
 }
-  
+
