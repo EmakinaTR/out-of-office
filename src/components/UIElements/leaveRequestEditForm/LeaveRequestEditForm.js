@@ -41,6 +41,10 @@ const useStyles = makeStyles(theme => ({
             border: '2px solid red',
         }
     },
+    disabledLeaveType: {
+        color: '#cccccc',
+        fontSize: '0.9rem'
+    },
     red: {
         color: 'red',
         fontSize: '0.8rem'
@@ -51,10 +55,14 @@ export function Error(props) {
     // Styles
     const classes = useStyles();
     if (props.less()) {
-        return(<Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography>)
+        return(
+            <Typography className={classes.red}>You can only select compansate leave on less than two hour selections</Typography>
+        );
     }
     else if (props.greater()) {
-        return(<Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography>);
+        return(
+            <Typography className={classes.red}>Compansate leaves can't be selected as more than two hours</Typography>
+        );
     }
     else {
         return('');
@@ -142,7 +150,10 @@ export default function LeaveRequestEditForm(props) {
     const isDurationGreaterThanTwoHoursAndLeaveTypeCompansate = () => (duration > 0 && watchFields.leaveType !== '' && watchFields.leaveType === '1');
 
     // Check if user has negative leave credit
-    const isLeaveCreditNegative = (duration) => props.user.annualCredit + props.user.excuseCredit - duration < 0;
+    const isAnnualLeaveRightFinished = (duration) => props.user.annualCredit - duration < 0 && watchFields.leaveType === '0';
+    
+    // Check if user has right to demand excuse leave
+    const isExcuseLeaveRightFinished = (duration) => props.user.excuseCredit - duration < 0;
     
     // Check if start date is greater than end date
     const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
@@ -177,10 +188,15 @@ export default function LeaveRequestEditForm(props) {
         setOpen(false);
     }
 
+    const formSubmissionConditions = () => (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && 
+    !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
+    !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() && 
+    !(watchFields.leaveType === '2' && !isExcuseLeaveRightFinished()));
+
+
     const onSubmit = async (data, e) => {
         e.preventDefault();
-        if (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
-        !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate()) {
+        if (formSubmissionConditions()) {
             const uid = props.auth().uid;
             const processedBy = "";
             const createdBy = uid;
@@ -359,16 +375,27 @@ export default function LeaveRequestEditForm(props) {
                                             name="leaveType"
                                             inputRef={register({ required: true, minLength: 1 })}
                                             error={errors.leaveType}
+                                            className={isExcuseLeaveRightFinished(duration) && watchFields.leaveType === '2' ? 'Mui-error' : ''}
                                         />
                                     }
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
-                                    return <option key={index} value={index}>{item.name}</option>
+                                    if (index === 2)
+                                    return <option 
+                                    className={isExcuseLeaveRightFinished(duration) ? classes.disabledLeaveType : ''} 
+                                    disabled={isExcuseLeaveRightFinished(duration)} 
+                                    key={index} 
+                                    value={index}>{(item.name + (isExcuseLeaveRightFinished(duration) ? " *You don't have any excuse leave": "")).toString()}
+                                    </option>
+                                    else return <option key={index} value={index}>{item.name}
+                                    </option>
                                 })}
                                 </Select>
                                 {(hourChanged) ?
-                                    <Error less={isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate} greater={isDurationGreaterThanTwoHoursAndLeaveTypeCompansate} /> : ''
+                                    <Error less={isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate} 
+                                    greater={isDurationGreaterThanTwoHoursAndLeaveTypeCompansate} /> 
+                                    : ''
                                 }
                             </FormControl>
                         </Box>
@@ -469,7 +496,7 @@ export default function LeaveRequestEditForm(props) {
                         name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description} InputLabelProps={{shrink: true}} />
                         
                         {(watchFields.leaveType === '2') ? 
-                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal" 
+                            <TextField className={classes.inputWidth} label="Report Protocol Number (Excuse)" variant="outlined" margin="normal" 
                             onChange={handleChange('protocolNumber')}  defaultValue={state.protocolNumber} value={state.protocolNumber} InputLabelProps={{shrink: true}}  /> : 
                         ''
                         }
@@ -486,7 +513,7 @@ export default function LeaveRequestEditForm(props) {
                         </Box>
                         <Box my={2}>
                             <Grid container spacing={2}>
-                            {(isLeaveCreditNegative(duration)) ?  
+                            {(isAnnualLeaveRightFinished(duration)) ?  
                                 <Grid item xs={12}>
                                     <Grid container direction="row" alignItems="center">
                                         <Grid item>

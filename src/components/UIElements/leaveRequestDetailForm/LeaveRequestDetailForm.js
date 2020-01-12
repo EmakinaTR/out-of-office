@@ -182,7 +182,7 @@ export default function  LeaveRequestForm(props)  {
                             <TextField className={classes.inputWidth} multiline rows="4" label="Description" variant="outlined" margin="normal" value={fields.description || ''}
                             InputProps={{readOnly: true}}
                             />
-                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" margin="normal" variant="outlined" value={fields.protocolNumber || ''} InputProps={{readOnly: true,}} />
+                            <TextField className={classes.inputWidth} label="Report Protocol Number (Excuse)" margin="normal" variant="outlined" value={fields.protocolNumber || ''} InputProps={{readOnly: true,}} />
                             <Box marginY={1}>
                                 <Typography variant="caption" component="div">Approver</Typography>
                                     {approvers.map((item, index) => {
