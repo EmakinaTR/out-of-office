@@ -17,7 +17,7 @@ import MoreDialog from "../moreDialog";
 import { FirebaseContext } from "../../firebase";
 import AuthContext from "../../session";
 import { useHistory } from "react-router-dom";
-moment().locale("tr");
+
 
 const useStyles = makeStyles(theme => ({
   /*     request: {

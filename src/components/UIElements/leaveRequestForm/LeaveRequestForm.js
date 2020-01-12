@@ -443,7 +443,7 @@ export default function LeaveRequestForm(props) {
                         name="description" inputRef={register({ required: checkIfRequired(watchFields.leaveType), minLength: 5 })} error={errors.description}/>
 
                         {(watchFields.leaveType == 2) ? 
-                            <TextField className={classes.inputWidth} label="Rapor Protokol No (Mazeret)" variant="outlined" margin="normal"
+                            <TextField className={classes.inputWidth} label="Report Protocol Number (Excuse)" variant="outlined" margin="normal"
                             value={state.protocolNumber} onChange={handleChange('protocolNumber')}/> : ''
                         }
                         

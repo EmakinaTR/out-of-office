@@ -30,10 +30,10 @@ import SnackBar from "../../components/UIElements/snackBar/SnackBar";
 import { snackbars } from "../../constants/snackbarContents";
 
 // String sources
-const NEW_LEAVE_REQUEST = "Yeni İzin Talebi Oluştur";
-const REMAINING_ANNUAL_LEAVE_REQUEST = "Kalan Yıllık İzin";
-const REMAINING_CASUAL_LEAVE_REQUEST = "Kalan Mazeret İzni";
-const PENDING_LEAVE_REQUEST = "Onay Bekleyen İzin";
+const NEW_LEAVE_REQUEST = "New Leave Reuest";
+const REMAINING_ANNUAL_LEAVE_REQUEST = "Remaining Annual Leave";
+const REMAINING_CASUAL_LEAVE_REQUEST = "Remaining Excuse Leave";
+const PENDING_LEAVE_REQUEST = "Pending Leave Requests";
 const MY_LEAVE_REQUEST = "My Leaves";
 const REQUESTED_LEAVES = "Incoming Requests";
 const LIST_ITEM_COUNT = 5;
