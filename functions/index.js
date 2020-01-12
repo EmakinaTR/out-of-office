@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-
+let globalLastDoc = {};
 exports.onCreateUser = functions.auth.user().onCreate(async (userRecord, context) => {
     displayName = userRecord.displayName.split(' ')
     userDoc = {
@@ -43,12 +43,12 @@ exports.getMyRequests = functions.https.onCall(async (queryData, context) => {
     const userID = context.auth.uid;
     let leaveRequestArray = [];
     const collection = admin.firestore().collection('leaveRequests').where("createdBy", "==", userID);
-    let query = _createQuery(collection,queryData)
+    let query = _createQuery(collection, queryData)
     queryData = data.queryData;
-    if(data.count && data.count > 0) {
+    if (data.count && data.count > 0) {
         query = query.limit(data.count);
     }
-    query = query.where(queryData.fieldPath,queryData.condition,userID)
+    query = query.where(queryData.fieldPath, queryData.condition, userID)
     await query.get().
         then(querySnapshot => {
             console.log("izin snapshot", querySnapshot);
@@ -85,18 +85,18 @@ exports.getMyRequests = functions.https.onCall(async (queryData, context) => {
 
 
 exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => {
-    const documentId = data; 
+    const documentId = data;
     await admin.firestore().doc('/leaveRequests/{documentId}').get()
-    .then( async querySnapshot => {
+        .then(async querySnapshot => {
             const leaveRequest = querySnapshot.data();
             await admin.firestore().doc(leaveRequest.leaveTypeRef.path).get()
-            .then(documentSnapshot => {
-                leaveRequest.leaveType = documentSnapshot.data();
-            });
-            
+                .then(documentSnapshot => {
+                    leaveRequest.leaveType = documentSnapshot.data();
+                });
+
         })
-        .catch(err => { console.log(err);return ("Document not found") }
-    )
+        .catch(err => { console.log(err); return ("Document not found") }
+        )
     return leaveRequest;
 });
 
@@ -120,8 +120,8 @@ exports.getLeaveRequestDetail = functions.https.onCall(async (data, context) => 
 // Team Leaves Test Method
 exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
     const userId = context.auth.uid;
-    const user = await _getUser(userId);    
-    const leaveRequestArray = await _getLeaves(userId,_isAdmin(user),data.queryData);
+    const user = await _getUser(userId);
+    const leaveRequestArray = await _getLeaves(userId, _isAdmin(user), data.queryData);
     // console.log("LEAVE ARRAY BEFORE:", leaveRequestArray);
     if (leaveRequestArray.length > 0) {
         await Promise.all(leaveRequestArray.data.map(async (item) => { // Retrieve leave types of the leave requests
@@ -129,27 +129,27 @@ exports.getTeamLeaves = functions.https.onCall(async (data, context) => {
                 item.leaveType = documentSnapshot.data();
             });
         }))
-    }    
+    }
     // console.log("LEAVE ARRAY AFTER:", leaveRequestArray);
-return leaveRequestArray;
+    return leaveRequestArray;
 });
 
-const _getLeaves = async (userid, isAdmin = false,queryData) => {
+const _getLeaves = async (userid, isAdmin = false, queryData) => {
     let leaves = []
     if (isAdmin) {
         leaves = _getAdminLeaves(queryData);
     } else {
-        leaves = _getTeamLeaves(userid,queryData);
-    }    
+        leaves = _getTeamLeaves(userid, queryData);
+    }
     console.log(leaves)
     return leaves;
 }
 
-const _getTeamLeaves = async (userid,queryData) => {
+const _getTeamLeaves = async (userid, queryData) => {
     let teamLeaves = {};
     let leaveRequestArray = [];
-    let teamMembers ;
-     await admin.firestore().collection('teams').where('leadUser', "==", userid).get()
+    let teamMembers;
+    await admin.firestore().collection('teams').where('leadUser', "==", userid).get()
         .then(snapshot => {
             if (!snapshot.empty) { // If he/she is, get members of the team
                 teamMembers = snapshot.docs[0].data().members;
@@ -161,27 +161,27 @@ const _getTeamLeaves = async (userid,queryData) => {
         }).catch(err => console.log(err))
     if (teamMembers.length > 0) {  // If the team has at least one memeber, retrieve their request data
         let collection = admin.firestore().collection('leaveRequests').where("createdBy", "in", teamMembers)
-        await _createQuery(collection,queryData)
+        await _createQuery(collection, queryData)
             .then(response => {
-                console.log("queryResult: ",response.data)
+                console.log("queryResult: ", response.data)
                 leaveRequestArray = response;
             })
-    }   
+    }
     // console.log("leaveRequestArray:",leaveRequestArray);   
     return leaveRequestArray;
 }
-const _getAdminLeaves = async(queryData) => {
-    let leaveResponse = {};    
+const _getAdminLeaves = async (queryData) => {
+    let leaveResponse = {};
     const collection = admin.firestore().collection("leaveRequests");
-    await _createQuery(collection,queryData).then(response => {
+    await _createQuery(collection, queryData).then(response => {
         leaveResponse = response;
-    })   
+    })
     return leaveResponse;
 }
 
 const _getSpecificLeaveType = docReference => {
     return admin.firestore().doc(docReference).get();
-  };
+};
 
 // Test Methods End
 
@@ -239,7 +239,7 @@ const _getLeaveTypeByRef = (ref) => {
         }).catch(error => {
             reject(error);
         });
-    });     
+    });
 }
 const _isAdmin = (user) => {
     return user.isAdmin === true;
@@ -249,72 +249,61 @@ const _isApprover = (user) => {
     return user.isApprover === true;
 }
 
-const _createQuery = (collectionRef, queryData) => {    
-      if(!queryData) {
-          queryData = {};
-      }            
-      console.log("hiii",queryData)
-      return new Promise((resolve, reject) => {
-        if(queryData.lastDocument != "end"){       
-        let query;
-        if(queryData.filterArray && queryData.filterArray.length > 0) {
-          for (const filter of queryData.filterArray) {
-            collectionRef = collectionRef.where(
-              filter.fieldPath,
-              filter.condition,
-              filter.value
-            );
-          }
-        }       
-        query = collectionRef;
-        if (
-          (queryData.orderBy && queryData.orderBy.type &&
-          queryData.orderBy.fieldPath)
-        ) {
-          query = query.orderBy(
-            queryData.orderBy.fieldPath,
-            queryData.orderBy.type
-          );
-        }
-        console.log("query", query)
+const _createQuery = (collectionRef, queryData) => {
+    if (!queryData) {
+        queryData = {};
+    }
+    return new Promise((resolve, reject) => {
+        if (queryData.lastDocument != "end") {
+            let query;
+            if (queryData.filterArray && queryData.filterArray.length > 0) {
+                for (const filter of queryData.filterArray) {
+                    collectionRef = collectionRef.where(
+                        filter.fieldPath,
+                        filter.condition,
+                        filter.value
+                    );
+                }
+            }
+            query = collectionRef;
+            if (
+                (queryData.orderBy && queryData.orderBy.type &&
+                    queryData.orderBy.fieldPath)
+            ) {
+                query = query.orderBy(
+                    queryData.orderBy.fieldPath,
+                    queryData.orderBy.type
+                );
+            }
+            if (queryData.lastDocument) {
+                console.log("IF SET GLOBAL DOC:", globalLastDoc);
+                console.log("MY SENT DOC:", queryData.lastDocument);
+                query = query.startAfter(globalLastDoc);
+            } else {
+                globalLastDoc = undefined;
+            }
 
-        console.log("as", queryData.lastDocument)
-        if (queryData.lastDocument) {
-            console.log("sa", queryData.lastDocument)
-            _getLeaveRequestFromdoc(queryData.lastDocument).then( resolve =>{
-                console.log("resolve ref:", resolve.ref)
-                console.log("resolve data", resolve.data())
-                console.log("resolve", resolve)
+            if (queryData.pageSize) {
+                query = query.limit(queryData.pageSize);
+            }
+            query.get().then(async querySnapshot => {
+                const dataArray = [];
+                for (const doc of querySnapshot.docs) {
+                    const leaveDoc = doc.data();
+                    leaveDoc.id = doc.id
+                    await _getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
+                        leaveDoc.leaveType = documentSnapShot.data();
+                    })
+                    dataArray.push(leaveDoc);
+                }
 
-                query = query.startAfter(resolve.doc)
-            })
+                const lastDoc = querySnapshot.docs[querySnapshot.size - 1];
+                globalLastDoc = lastDoc;
+                resolve({ data: dataArray, size: querySnapshot.size, lastDocument: lastDoc });
+            });
         }
-        console.log("query", query)
-
-        if (queryData.pageSize) {
-          query = query.limit(queryData.pageSize);
-        }
-        console.log(query)
-        query.get().then( async querySnapshot => {
-          const dataArray = [];         
-          for(const doc of querySnapshot.docs) {
-            const leaveDoc = doc.data();
-            leaveDoc.id = doc.id
-            await _getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
-              leaveDoc.leaveType = documentSnapShot.data();
-            })
-            dataArray.push(leaveDoc);
-          }
-            console.log("quersnapshot docs: ", querySnapshot.docs);
-            console.log("Firebase ref :", querySnapshot.docs[querySnapshot.size - 1].ref);
-            console.log("Firebase'in bize verdiği :", querySnapshot.docs[querySnapshot.size - 1]);
-            console.log("Bizim Firebase'e gönderdiğimiz : ", queryData.lastDocument)
-            // console.log("isEq: ", queryData.lastDocument === querySnapshot.docs[querySnapshot.size - 1].ref)
-            resolve({ data: dataArray, size: querySnapshot.size, lastDocument: querySnapshot.docs[querySnapshot.size - 1].ref.path});
-        });
-      }
-    });    
-  };
+    });
+};
 
 exports.Test = functions.https.onCall(async (data, context) => {
     let user;
@@ -335,7 +324,7 @@ const _getLeaveRequestFromID = (documentId) => {
         }).catch(error => {
             reject(error);
         });
-    });     
+    });
 }
 
 const _getLeaveRequestFromdoc = (doc) => {
@@ -356,22 +345,22 @@ const status = {
     CANCELLED: 3
 }
 
-const sendMailtoUser =() => {
+const sendMailtoUser = () => {
     console.log("User mail sent")
 }
 const sendMailtoApprover = () => {
     console.log("Approver mail sent")
 }
 
-const _setDocumentField =(collection,doc,field,fieldValue) => {
-    console.log({[field]:fieldValue})
+const _setDocumentField = (collection, doc, field, fieldValue) => {
+    console.log({ [field]: fieldValue })
     return new Promise((resolve, reject) => {
-        admin.firestore().collection(collection).doc(doc).set({[field]:fieldValue}, { merge: true }).then(response => {
+        admin.firestore().collection(collection).doc(doc).set({ [field]: fieldValue }, { merge: true }).then(response => {
             resolve(response)
         }).catch(error => {
             reject(error);
         });
-    });     
+    });
 }
 
 
@@ -381,10 +370,10 @@ const _insertUpdateLog = (documentId, processedBy, processedDate, processStatus)
         admin.firestore().collection('logs').doc(documentId)
             .set({ actions: [{ processedBy: processedBy, processedDate: new Date(), processStatus: processStatus }] },
                 { merge: true }).then(response => {
-            resolve(response)
-        }).catch(error => {
-            reject(error);
-        });
+                    resolve(response)
+                }).catch(error => {
+                    reject(error);
+                });
     });
 }
 exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
@@ -398,9 +387,8 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
     console.log(data);
     console.log("doc id ", documentId)
     console.log("status  ", newStatus)
-   
+
     await _getLeaveRequestFromID(documentId).then(async response => {
-        // console.log("LeaveRequest:: ", response);
         leaveRequest = response;
         oldStatus = response.status;
 
@@ -411,11 +399,11 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
         // console.log("documentOwner:: ", response);
         documentOwner = response;
         console.log(documentOwner)
-        
+
     }).catch(error => {
         console.log("Error: ", error);
     })
-    
+
 
     await _getLeaveTypeByRef(leaveRequest.leaveTypeRef.path).then(async response => {
         // console.log("leaveType:: ", response);
@@ -423,8 +411,8 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
     }).catch(error => {
         console.log("Error: ", error);
     })
-    console.log("WAİTİNG: ",status.WAITING)
-   
+    console.log("WAİTİNG: ", status.WAITING)
+
     await _setDocumentField("leaveRequests", documentId, "status", newStatus).then(async response => {
         // console.log("Form status has changed from" + oldStatus + " to " + newStatus);
     }).catch(error => {
@@ -435,18 +423,18 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
     }).catch(error => {
         console.log("Error while description: ", error);
     })
-    if(oldStatus === status.WAITING && newStatus === status.APPROVED){
+    if (oldStatus === status.WAITING && newStatus === status.APPROVED) {
 
-        if(leaveType.effectsTo =="Annual"){
+        if (leaveType.effectsTo == "Annual") {
             await _setDocumentField("users", leaveRequest.createdBy, "annualCredit", documentOwner.annualCredit - leaveRequest.duration).then(async response => {
                 // console.log("Annual credit of user decreased : " + documentOwner.annualCredit - leaveRequest.duration);
-                
+
             }).catch(error => {
                 console.log("Error: ", error);
             })
         }
-        else if (leaveType.effectsTo == "Excuse"){
-            await _setDocumentField("users", leaveRequest.createdBy, "excuseCredit",documentOwner.excuseCredit - leaveRequest.duration).then(async response => {
+        else if (leaveType.effectsTo == "Excuse") {
+            await _setDocumentField("users", leaveRequest.createdBy, "excuseCredit", documentOwner.excuseCredit - leaveRequest.duration).then(async response => {
                 // console.log("Excuse credit of user decreased : " + documentOwner.annualCredit - leaveRequest.duration);
 
                 leaveRequest = response;
@@ -458,7 +446,7 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
 
         else if (oldStatus === status.WAITING && newStatus === status.REJECTED) {
             console.log("Leave rejected")
-            }
+        }
 
     }
 
@@ -478,8 +466,8 @@ exports.changeLeaveStatus = functions.https.onCall(async (data, context) => {
             })
         }
     }
-    if(oldStatus === status.WAITING && newStatus ===status.CANCELLED){
-        
+    if (oldStatus === status.WAITING && newStatus === status.CANCELLED) {
+
     }
 
     sendMailtoUser();
