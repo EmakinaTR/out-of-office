@@ -15,7 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField,Slide
+  TextField, Slide
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
@@ -25,7 +25,7 @@ import { FirebaseContext } from "../../components/firebase";
 import AuthContext from "../../components/session";
 import { ROLE } from "../../constants/roles";
 import moment from "moment";
-import { useHistory } from "react-router-dom";
+import { useHistory, withRouter } from "react-router-dom";
 import SnackBar from "../../components/UIElements/snackBar/SnackBar";
 import { snackbars } from "../../constants/snackbarContents";
 
@@ -50,37 +50,39 @@ const useStyles = makeStyles(theme => ({
   newRequestButtonText: {
     flex: 1,
     textAlign: "left"
-  }  
+  }
 }));
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
+
 let selectedIncomingRequest;
-const Dashboard = () => {
+const Dashboard = (props) => {
+  console.log("Path Loc:", props.location.pathname);
   const classes = useStyles();
   const history = useHistory();
   const [snackbarState, setSnackbarState] = useState(false);
   const [snackbarType, setSnackbarType] = useState({});
   const [openMenu, setOpenMenu] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const initialState ={
-    processerDescription : '',
-    statusType : undefined,
-};
-const [state, setState] = useState(initialState);  
+  const initialState = {
+    processerDescription: '',
+    statusType: undefined,
+  };
+  const [state, setState] = useState(initialState);
   // Modal Handlers
   const closeDialog = () => {
     setOpenDialog(false);
-};
+  };
 
-const handleYesClick = () => {
-  changeFormStatusHandler(selectedIncomingRequest.id, 1, state.processerDescription);
-  closeDialog();
-}
+  const handleYesClick = () => {
+    changeFormStatusHandler(selectedIncomingRequest.id, 1, state.processerDescription);
+    closeDialog();
+  }
 
-const handleDescriptionChange = (e)=> {
-  setState({ ...state, processerDescription: e.target.value }); 
-}
+  const handleDescriptionChange = (e) => {
+    setState({ ...state, processerDescription: e.target.value });
+  }
   // My Request Detail Handler
   const detailHandler = document => {
     history.push({
@@ -89,7 +91,7 @@ const handleDescriptionChange = (e)=> {
     });
   };
   // Incoming Request Approve Handler
-   const onApproveButtonClick = (document) => {     
+  const onApproveButtonClick = (document) => {
     selectedIncomingRequest = document;
     setOpenDialog(true);
   }
@@ -104,13 +106,13 @@ const handleDescriptionChange = (e)=> {
       })
       .catch(err => console.log(err));
   };
-  const { currentUser, setIsLoading, setHasError } = useContext(AuthContext);  
+  const { currentUser, setIsLoading, setHasError } = useContext(AuthContext);
   const firebaseContext = useContext(FirebaseContext);
   const [myRequests, setMyRequests] = useState([]);
   const [_incomingRequests, setIncomingRequests] = useState([]);
   const isAdmin = currentUser.role >= ROLE.APPROVER;
-  
-  
+
+
 
   const _getMyRequests = async () => {
     setIsLoading(true);
@@ -125,24 +127,24 @@ const handleDescriptionChange = (e)=> {
         ],
         pageSize: LIST_ITEM_COUNT
       })
-      .then(result => {        
+      .then(result => {
         setMyRequests([...result.data]);
         setIsLoading(false);
       }).catch(error => {
-         setHasError(true);
+        setHasError(true);
       });
   };
 
   const _getIncomingRequest = async () => {
-    if (isAdmin) {    
-      setIsLoading(true);  
+    if (isAdmin) {
+      setIsLoading(true);
       const filterArray = [
         {
           fieldPath: "status",
           condition: "==",
           value: 0
         }
-      ];      
+      ];
       const queryData = {
         filterArray: filterArray,
         orderBy: { fieldPath: "requestedDate", type: "desc" },
@@ -189,8 +191,8 @@ const handleDescriptionChange = (e)=> {
               color="#008fd4"
             ></InfoCard>
           </Grid>
-            {/* Remaining Pending Leave */}
-            <Grid item xs={12} lg={6}>
+          {/* Remaining Pending Leave */}
+          <Grid item xs={12} lg={6}>
             <InfoCard
               text={PENDING_LEAVE_REQUEST}
               count={1}
@@ -204,7 +206,7 @@ const handleDescriptionChange = (e)=> {
               count={currentUser.excuseCredit}
               color="#ff7f41"
             ></InfoCard>
-          </Grid>        
+          </Grid>
 
           {/* Incoming Requests - Visible Only For Admin Users */}
           {isAdmin && (
@@ -309,8 +311,8 @@ const handleDescriptionChange = (e)=> {
             etmek istiyor musunuz ?
           </DialogContentText>
           <DialogContent>
-            <TextField      
-              onChange={handleDescriptionChange}        
+            <TextField
+              onChange={handleDescriptionChange}
               fullWidth
               id="outlined-multiline-static"
               label="Description"
@@ -343,4 +345,4 @@ const handleDescriptionChange = (e)=> {
     </Container>
   );
 };
-export default Dashboard;
+export default withRouter(Dashboard);

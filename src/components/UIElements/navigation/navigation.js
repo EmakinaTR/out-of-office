@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import protectedRoutes from "../../../constants/routes";
 import { Switch, Link, BrowserRouter as Router } from "react-router-dom";
 import AuthContext from "../../session";
@@ -26,12 +26,12 @@ import { Button } from "@material-ui/core";
 
 import app from "firebase";
 const drawerWidth = 240;
-const Navigation = props => {  
- 
+const Navigation = props => {
+
   const { isLoggedIn } = useContext(AuthContext);
   const firebase = useContext(FirebaseContext);
   const history = useHistory();
-  const { currentUser } = useContext(AuthContext);    
+  const { currentUser } = useContext(AuthContext);
   const userRoutes = protectedRoutes.filter(route => {
     return currentUser?.role >= route.level;
   });
@@ -48,8 +48,8 @@ const Navigation = props => {
     setSelectedIndex(activeIndex);
   });
 
-  const signOut = () => {       
-    firebase.auth.signOut();   
+  const signOut = () => {
+    firebase.auth.signOut();
     window.localStorage.clear()
   };
   const useStyles = makeStyles(theme => ({
@@ -102,13 +102,13 @@ const Navigation = props => {
     selectedIndex state indicates the active route
   */
   const activeIndex = _getCurrentRouteIndex(props.location.pathname);
-  const [mobileOpen, setMobileOpen] = React.useState(false);  
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(activeIndex);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
   const matches = useMediaQuery(theme.breakpoints.up("lg"));
-  
+
   const handlePopOverClose = () => {
     setAnchorEl(null);
   };
@@ -124,9 +124,15 @@ const Navigation = props => {
     setSelectedIndex(index);
     setMobileOpen(false);
   };
+
+  const handlePathChange = (location) => {
+    const index = _getCurrentRouteIndex(location.pathname);
+    setSelectedIndex(index);
+  }
+
   return (
-    <div className={classes.root}>    
-      <Router>   
+    <div className={classes.root}>
+      <Router>
         {/* AppBar */}
         <AppBar className={classes.appBar}>
           <Toolbar>
@@ -143,7 +149,7 @@ const Navigation = props => {
               {props.title}
             </Typography>
             {/* <Avatar className={classes.avatar}>{props.avatarText}</Avatar> */}
-            <Avatar onClick={onAvatarClick} src={user?.photoURL}></Avatar>   
+            <Avatar onClick={onAvatarClick} src={user?.photoURL}></Avatar>
             {/* Sign Out Pop Over */}
             <Popover
               className={classes.popover}
@@ -153,15 +159,15 @@ const Navigation = props => {
               onClose={handlePopOverClose}
               anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'left',               
+                horizontal: 'left',
               }}
               transformOrigin={{
                 vertical: 'top',
                 horizontal: 'left',
               }}
             >
-              <Button onClick={signOut} style={{padding:"0.5rem 1rem"}}>Sign Out</Button>
-      </Popover>         
+              <Button onClick={signOut} style={{ padding: "0.5rem 1rem" }}>Sign Out</Button>
+            </Popover>
           </Toolbar>
         </AppBar>
         {/* Side Nav Bar */}
@@ -201,14 +207,15 @@ const Navigation = props => {
             </List>
           </Drawer>
         ) : (
-          <LaunchScreen></LaunchScreen>
-        )}
-        
-        <main className={classes.content}>     
-          <div className={classes.toolbar} />         
+            <LaunchScreen></LaunchScreen>
+          )}
+
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
           <Switch>
             {userRoutes.map(route => (
               <ProtectedRouteHoc
+                onRouteChange={handlePathChange}
                 key={route.path}
                 isLoggedIn={isLoggedIn}
                 path={route.path}
