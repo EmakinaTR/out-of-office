@@ -28,6 +28,7 @@ import moment from "moment";
 import { useHistory, withRouter } from "react-router-dom";
 import SnackBar from "../../components/UIElements/snackBar/SnackBar";
 import { snackbars } from "../../constants/snackbarContents";
+import Alert from '@material-ui/lab/Alert';
 
 // String sources
 const NEW_LEAVE_REQUEST = "New Leave Request";
@@ -36,6 +37,8 @@ const REMAINING_CASUAL_LEAVE_REQUEST = "Remaining Excuse Leave";
 const PENDING_LEAVE_REQUEST = "Pending Leave Requests";
 const MY_LEAVE_REQUEST = "My Leaves";
 const REQUESTED_LEAVES = "Incoming Requests";
+const NO_INCOMING_REQUEST = "There is no incoming leave request";
+const NO_MY_LEAVES_REQUEST = "There is no leave request";
 const LIST_ITEM_COUNT = 5;
 
 const useStyles = makeStyles(theme => ({
@@ -112,8 +115,6 @@ const Dashboard = (props) => {
   const [_incomingRequests, setIncomingRequests] = useState([]);
   const isAdmin = currentUser.role >= ROLE.APPROVER;
 
-
-
   const _getMyRequests = async () => {
     setIsLoading(true);
     await firebaseContext
@@ -153,7 +154,7 @@ const Dashboard = (props) => {
       await firebaseContext
         .getIncomingRequests(queryData)
         .then(result => {
-          setIncomingRequests([...result.data]);
+         setIncomingRequests([...result.data]);        
           setIsLoading(false);
         }).catch(error => {
           setHasError(true);
@@ -227,8 +228,9 @@ const Dashboard = (props) => {
         </IconButton> */}
                   </Box>
                 </Box>
-                <Box>
-                  {_incomingRequests.map((data, index) => {
+                <Box>                  
+                  {(_incomingRequests.length > 0) ?
+                  _incomingRequests.map((data, index) => {
                     return (
                       <div key={index}>
                         <IncomingRequestBasicCard
@@ -253,8 +255,9 @@ const Dashboard = (props) => {
                         <Divider />
                       </div>
                     );
-                  })}
-                </Box>
+                  }):<Alert severity="info">{NO_INCOMING_REQUEST}</Alert>}                
+                </Box>         
+                
               </Paper>
             </Grid>
           )}
@@ -275,7 +278,8 @@ const Dashboard = (props) => {
                 </Box>
               </Box>
               <Box>
-                {myRequests.map((leave, index) => {
+                {(myRequests.length > 0) ?
+                myRequests.map((leave, index) => {
                   return (
                     <div key={index}>
                       <LeaveSummaryItem
@@ -288,7 +292,7 @@ const Dashboard = (props) => {
                       <Divider />
                     </div>
                   );
-                })}
+                  }): <Alert severity="info">{NO_MY_LEAVES_REQUEST}</Alert>}
               </Box>
             </Paper>
           </Grid>
