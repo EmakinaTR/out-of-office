@@ -15,6 +15,7 @@ import {
 import DateFull from "../date/DateFull";
 import MoreDialog from "../moreDialog";
 import CheckIcon from "@material-ui/icons/Check";
+import { printDayCount } from "../../../utils/displayUtils";
 const useStyles = makeStyles(theme => ({
   request: {
     "& > *": {
@@ -62,7 +63,7 @@ const IncomingRequestBasicCard = props => {
               <Chip
                 variant="outlined"
                 size="small"
-                label={props.duration + " gün"}
+                label={printDayCount(props.duration)}
               />
               <Chip
                 variant="outlined"
