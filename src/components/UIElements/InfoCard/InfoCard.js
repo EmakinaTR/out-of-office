@@ -23,7 +23,7 @@ const InfoCard = props => {
         style={{color: props.color, fontSize:"2.6rem", fontWeight:300, lineHeight:"2.6rem"}}
         className={classes.infoCount}
       >
-        {props.count}
+        {props.count || 0}
       </Typography>
     </Card>
   );

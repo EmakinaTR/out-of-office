@@ -30,7 +30,7 @@ import SnackBar from "../../components/UIElements/snackBar/SnackBar";
 import { snackbars } from "../../constants/snackbarContents";
 
 // String sources
-const NEW_LEAVE_REQUEST = "New Leave Reuest";
+const NEW_LEAVE_REQUEST = "New Leave Request";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Remaining Annual Leave";
 const REMAINING_CASUAL_LEAVE_REQUEST = "Remaining Excuse Leave";
 const PENDING_LEAVE_REQUEST = "Pending Leave Requests";
