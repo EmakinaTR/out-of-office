@@ -11,14 +11,14 @@ export default class Firebase {
     this.emailAuthProvider = app.auth.EmailAuthProvider;
     /* Firebase APIs */
     this.auth = app.auth();
-    this.db = app.firestore();   
+    this.db = app.firestore();
     this.storage = app.storage();
     /* Google Provider */
     app.googleProvider = new app.auth.GoogleAuthProvider();
   }
 
   /* Auth API */
-  doSignInWithGoogle = () => {       
+  doSignInWithGoogle = () => {
     return new Promise((resolve, reject) => {
       app
         .auth()
@@ -99,17 +99,21 @@ export default class Firebase {
     return this.db.collection("leaveRequests").get();
   };
 
-  getIncomingRequests = (queryData) => {
+  getIncomingRequests = queryData => {
     // console.log(queryData)
     return new Promise((resolve, reject) => {
-      const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
-      getTeamLeaves({queryData: queryData})
-        .then(result => {               
-          resolve(result.data);
-        })
-        .catch(error => {
-          reject(error);
-        });
+      if (queryData?.lastDocument === "end") {
+        resolve({data: [], lastDocument: "end"});
+      } else {
+        const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
+        getTeamLeaves({ queryData: queryData })
+          .then(result => {
+            resolve(result.data);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      }
     });
   };
   getLeaveRequestDetail = documentID => {
@@ -145,7 +149,11 @@ export default class Firebase {
       const changeLeaveStatus = app
         .functions()
         .httpsCallable("changeLeaveStatus");
-      changeLeaveStatus({ documentID: documentID, newStatus: newStatus, processerDescription : description })
+      changeLeaveStatus({
+        documentID: documentID,
+        newStatus: newStatus,
+        processerDescription: description
+      })
         .then(result => {
           resolve(result.data);
         })
@@ -155,28 +163,40 @@ export default class Firebase {
     });
   };
   sendNewLeaveRequest = leaveRequestObj => {
-    return new Promise((resolve,reject) => {
-      this.db.collection("leaveRequests").add(leaveRequestObj).then(response => {
-        resolve(response);
-      }).catch(error => {
-        reject(error);
-      })
-    });  
+    return new Promise((resolve, reject) => {
+      this.db
+        .collection("leaveRequests")
+        .add(leaveRequestObj)
+        .then(response => {
+          resolve(response);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
   };
 
   updateLeaveRequest = (uid, leaveRequestObj) => {
     return new Promise((resolve, reject) => {
-      this.db.collection("leaveRequests").doc(uid).update(leaveRequestObj).then(response => {
-        resolve(response);
-      }).catch(error => {
-        reject(error);
-      })
+      this.db
+        .collection("leaveRequests")
+        .doc(uid)
+        .update(leaveRequestObj)
+        .then(response => {
+          resolve(response);
+        })
+        .catch(error => {
+          reject(error);
+        });
     });
-  }
- 
-  getSpecificLeaveRequestWithId = (documentId) => {
-    return this.db.collection("leaveRequests").doc(documentId).get();
-  }
+  };
+
+  getSpecificLeaveRequestWithId = documentId => {
+    return this.db
+      .collection("leaveRequests")
+      .doc(documentId)
+      .get();
+  };
 
   getLeaveTypeOfGivenReference = ref => {
     return this.db.doc(ref).get();
@@ -199,31 +219,28 @@ export default class Firebase {
   };
 
   // Approvers
-  getApproversWithId = (uid) => {
-    const teamsRef = this.db.collection('teams');
-    const userSearch = teamsRef.where('members', 'array-contains', uid).get();
-    const management = teamsRef.doc('MANAGEMENT').get();
+  getApproversWithId = uid => {
+    const teamsRef = this.db.collection("teams");
+    const userSearch = teamsRef.where("members", "array-contains", uid).get();
+    const management = teamsRef.doc("MANAGEMENT").get();
     return [userSearch, management];
-  }
+  };
 
-  searchApprovers = (uid) => {
-    const usersRef = this.db.collection('users');
+  searchApprovers = uid => {
+    const usersRef = this.db.collection("users");
     return usersRef.doc(uid).get();
-  }
+  };
 
-
-
-  getMyRequests = (queryData) => {  
-  
+  getMyRequests = queryData => {
     const collectionRef = this.db.collection("leaveRequests");
     return this._createQuery(collectionRef, queryData);
   };
-  
-  listenForRequests = (queryData) => {
+
+  listenForRequests = queryData => {
     // return new Promise((resolve, reject) => {
     var collectionRef = this.db.collection("leaveRequests");
     let query;
-      let changedDocs = [];
+    let changedDocs = [];
     if (queryData.lastDocument != "end") {
       if (queryData.filterArray && queryData.filterArray.length > 0) {
         for (const filter of queryData.filterArray) {
@@ -235,14 +252,18 @@ export default class Firebase {
         }
       }
       query = collectionRef;
-      if (queryData.orderBy && queryData.orderBy.type && queryData.orderBy.fieldPath) {
+      if (
+        queryData.orderBy &&
+        queryData.orderBy.type &&
+        queryData.orderBy.fieldPath
+      ) {
         query = query.orderBy(
           queryData.orderBy.fieldPath,
           queryData.orderBy.type
         );
       }
       if (queryData.lastDocument) {
-        query = query.startAfter(queryData.lastDocument)
+        query = query.startAfter(queryData.lastDocument);
       }
       if (queryData.pageSize) {
         query = query.limit(queryData.pageSize);
@@ -250,27 +271,24 @@ export default class Firebase {
 
       query.onSnapshot(snapshot => {
         let changes = snapshot.docChanges();
-      
+
         changes.forEach(change => {
-          if(change.type == "modified"){
-            console.log(change.doc.data())
+          if (change.type == "modified") {
+            console.log(change.doc.data());
             changedDocs.push(change.doc.data());
           }
-        })
-        
+        });
       });
-
     }
-      return changedDocs;
-  // })
-
-  }
+    return changedDocs;
+    // })
+  };
   _createQuery = (collectionRef, queryData) => {
-    {     
+    {
       return new Promise((resolve, reject) => {
-        if(queryData.lastDocument != "end"){
+        if (queryData.lastDocument != "end") {
           let query;
-          if(queryData.filterArray && queryData.filterArray.length > 0) {
+          if (queryData.filterArray && queryData.filterArray.length > 0) {
             for (const filter of queryData.filterArray) {
               collectionRef = collectionRef.where(
                 filter.fieldPath,
@@ -278,11 +296,12 @@ export default class Firebase {
                 filter.value
               );
             }
-          }       
+          }
           query = collectionRef;
           if (
-            (queryData.orderBy && queryData.orderBy.type &&
-            queryData.orderBy.fieldPath)
+            queryData.orderBy &&
+            queryData.orderBy.type &&
+            queryData.orderBy.fieldPath
           ) {
             query = query.orderBy(
               queryData.orderBy.fieldPath,
@@ -290,27 +309,32 @@ export default class Firebase {
             );
           }
           if (queryData.lastDocument) {
-            query = query.startAfter(queryData.lastDocument)
+            query = query.startAfter(queryData.lastDocument);
           }
           if (queryData.pageSize) {
             query = query.limit(queryData.pageSize);
           }
-          query.get().then( async querySnapshot => {
+          query.get().then(async querySnapshot => {
             const dataArray = [];
-            // console.log(querySnapshot)     
-            for(const doc of querySnapshot.docs) {
+            // console.log(querySnapshot)
+            for (const doc of querySnapshot.docs) {
               const leaveDoc = doc.data();
               leaveDoc.id = doc.id;
-              await this.getSpecificLeaveType(doc.data().leaveTypeRef.path).then(documentSnapShot => {
+              await this.getSpecificLeaveType(
+                doc.data().leaveTypeRef.path
+              ).then(documentSnapShot => {
                 leaveDoc.leaveType = documentSnapShot.data();
-              })
+              });
               dataArray.push(leaveDoc);
             }
-            resolve({data: dataArray, size: querySnapshot.size,lastDocument: querySnapshot.docs[querySnapshot.size - 1]});
+            resolve({
+              data: dataArray,
+              size: querySnapshot.size,
+              lastDocument: querySnapshot.docs[querySnapshot.size - 1]
+            });
           });
-      }
-    });
+        }
+      });
     }
   };
 }
-
