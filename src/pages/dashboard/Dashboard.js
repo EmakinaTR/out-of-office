@@ -60,8 +60,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 let selectedIncomingRequest;
-const Dashboard = (props) => {
-  console.log("Path Loc:", props.location.pathname);
+const Dashboard = (props) => {  
   const classes = useStyles();
   const history = useHistory();
   const [snackbarState, setSnackbarState] = useState(false);
