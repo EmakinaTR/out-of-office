@@ -15,7 +15,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField, Slide
+  TextField,
+  Slide
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import LeaveSummaryItem from "../../components/UIElements/LeaveSummaryItem/LeaveSummaryItem";
@@ -28,8 +29,8 @@ import moment from "moment";
 import { useHistory, withRouter } from "react-router-dom";
 import SnackBar from "../../components/UIElements/snackBar/SnackBar";
 import { snackbars } from "../../constants/snackbarContents";
-import Alert from '@material-ui/lab/Alert';
-
+import Alert from "@material-ui/lab/Alert";
+import { getUserRole } from "../../constants/roles";
 // String sources
 const NEW_LEAVE_REQUEST = "New Leave Request";
 const REMAINING_ANNUAL_LEAVE_REQUEST = "Remaining Annual Leave";
@@ -60,7 +61,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 let selectedIncomingRequest;
-const Dashboard = (props) => {  
+const Dashboard = props => {
   const classes = useStyles();
   const history = useHistory();
   const [snackbarState, setSnackbarState] = useState(false);
@@ -68,8 +69,8 @@ const Dashboard = (props) => {
   const [openMenu, setOpenMenu] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const initialState = {
-    processerDescription: '',
-    statusType: undefined,
+    processerDescription: "",
+    statusType: undefined
   };
   const [state, setState] = useState(initialState);
   // Modal Handlers
@@ -78,13 +79,17 @@ const Dashboard = (props) => {
   };
 
   const handleYesClick = () => {
-    changeFormStatusHandler(selectedIncomingRequest.id, 1, state.processerDescription);
+    changeFormStatusHandler(
+      selectedIncomingRequest.id,
+      1,
+      state.processerDescription
+    );
     closeDialog();
-  }
+  };
 
-  const handleDescriptionChange = (e) => {
+  const handleDescriptionChange = e => {
     setState({ ...state, processerDescription: e.target.value });
-  }
+  };
   // My Request Detail Handler
   const detailHandler = document => {
     history.push({
@@ -93,10 +98,10 @@ const Dashboard = (props) => {
     });
   };
   // Incoming Request Approve Handler
-  const onApproveButtonClick = (document) => {
+  const onApproveButtonClick = document => {
     selectedIncomingRequest = document;
     setOpenDialog(true);
-  }
+  };
   const changeFormStatusHandler = async (documentID, type, description) => {
     setIsLoading(true);
     await firebaseContext
@@ -107,8 +112,20 @@ const Dashboard = (props) => {
         _getIncomingRequest();
       })
       .catch(err => console.log(err));
+    await firebaseContext
+      .getCurrentUser(currentUser.uid)
+      .then(async response => {
+        const user = response.data();
+        if (user) {
+          user.role = getUserRole(user);
+          user.uid = currentUser.uid;
+          await setCurrentUser(user);
+        }
+      });
   };
-  const { currentUser, setIsLoading, setHasError } = useContext(AuthContext);
+  const { currentUser, setCurrentUser, setIsLoading, setHasError } = useContext(
+    AuthContext
+  );
   const firebaseContext = useContext(FirebaseContext);
   const [myRequests, setMyRequests] = useState([]);
   const [_incomingRequests, setIncomingRequests] = useState([]);
@@ -130,7 +147,8 @@ const Dashboard = (props) => {
       .then(result => {
         setMyRequests([...result.data]);
         setIsLoading(false);
-      }).catch(error => {
+      })
+      .catch(error => {
         setHasError(true);
       });
   };
@@ -149,13 +167,14 @@ const Dashboard = (props) => {
         filterArray: filterArray,
         orderBy: { fieldPath: "requestedDate", type: "desc" },
         pageSize: LIST_ITEM_COUNT
-      }
+      };
       await firebaseContext
         .getIncomingRequests(queryData)
         .then(result => {
-         setIncomingRequests([...result.data]);        
+          setIncomingRequests([...result.data]);
           setIsLoading(false);
-        }).catch(error => {
+        })
+        .catch(error => {
           setHasError(true);
         });
     }
@@ -227,36 +246,38 @@ const Dashboard = (props) => {
         </IconButton> */}
                   </Box>
                 </Box>
-                <Box>                  
-                  {(_incomingRequests.length > 0) ?
-                  _incomingRequests.map((data, index) => {
-                    return (
-                      <div key={index}>
-                        <IncomingRequestBasicCard
-                          userName={data.requesterName}
-                          documentId={data.id}
-                          leaveTypeContent={data.leaveType.name}
-                          leaveTypeColor={data.leaveType.color}
-                          statusTypeContent={
-                            statusBadges[data.status].badgeContent
-                          }
-                          statusTypeColor={statusBadges[data.status].color}
-                          startDate={moment(
-                            data.startDate._seconds * 1000
-                          ).toDate()}
-                          endDate={moment(
-                            data.endDate._seconds * 1000
-                          ).toDate()}
-                          duration={data.duration}
-                          description={data.description}
-                          onApproveClick={() => onApproveButtonClick(data)}
-                        ></IncomingRequestBasicCard>
-                        <Divider />
-                      </div>
-                    );
-                  }):<Alert severity="info">{NO_INCOMING_REQUEST}</Alert>}                
-                </Box>         
-                
+                <Box>
+                  {_incomingRequests.length > 0 ? (
+                    _incomingRequests.map((data, index) => {
+                      return (
+                        <div key={index}>
+                          <IncomingRequestBasicCard
+                            userName={data.requesterName}
+                            documentId={data.id}
+                            leaveTypeContent={data.leaveType.name}
+                            leaveTypeColor={data.leaveType.color}
+                            statusTypeContent={
+                              statusBadges[data.status].badgeContent
+                            }
+                            statusTypeColor={statusBadges[data.status].color}
+                            startDate={moment(
+                              data.startDate._seconds * 1000
+                            ).toDate()}
+                            endDate={moment(
+                              data.endDate._seconds * 1000
+                            ).toDate()}
+                            duration={data.duration}
+                            description={data.description}
+                            onApproveClick={() => onApproveButtonClick(data)}
+                          ></IncomingRequestBasicCard>
+                          <Divider />
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <Alert severity="info">{NO_INCOMING_REQUEST}</Alert>
+                  )}
+                </Box>
               </Paper>
             </Grid>
           )}
@@ -277,21 +298,24 @@ const Dashboard = (props) => {
                 </Box>
               </Box>
               <Box>
-                {(myRequests.length > 0) ?
-                myRequests.map((leave, index) => {
-                  return (
-                    <div key={index}>
-                      <LeaveSummaryItem
-                        date={moment(leave.startDate.seconds * 1000).toDate()}
-                        statusTypeContent={leave.leaveType.name}
-                        statusTypeColor={leave.leaveType.color}
-                        leaveCount={leave.duration}
-                        onItemClick={() => detailHandler(leave.id)}
-                      ></LeaveSummaryItem>
-                      <Divider />
-                    </div>
-                  );
-                  }): <Alert severity="info">{NO_MY_LEAVES_REQUEST}</Alert>}
+                {myRequests.length > 0 ? (
+                  myRequests.map((leave, index) => {
+                    return (
+                      <div key={index}>
+                        <LeaveSummaryItem
+                          date={moment(leave.startDate.seconds * 1000).toDate()}
+                          statusTypeContent={leave.leaveType.name}
+                          statusTypeColor={leave.leaveType.color}
+                          leaveCount={leave.duration}
+                          onItemClick={() => detailHandler(leave.id)}
+                        ></LeaveSummaryItem>
+                        <Divider />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <Alert severity="info">{NO_MY_LEAVES_REQUEST}</Alert>
+                )}
               </Box>
             </Paper>
           </Grid>
@@ -306,11 +330,11 @@ const Dashboard = (props) => {
         aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle id="alert-dialog-slide-title">
-          {"İyice düşündünüz mü?"}
+          {"Iyice düsündünüz mü?"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description">
-            Form üzerinde yapmış olduğunuz değişiklikler kalıcı olacaktır. Devam
+            Form üzerinde yapmis oldugunuz degisiklikler kalici olacaktir. Devam
             etmek istiyor musunuz ?
           </DialogContentText>
           <DialogContent>

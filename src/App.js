@@ -7,43 +7,42 @@ import AuthContext from "./components/session";
 import { FirebaseContext } from "../src/components/firebase";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { getUserRole } from "./constants/roles";
-import moment from 'moment-business-days';
-import { HOLIDAYS } from './constants/holidays';
-import LinearProgress from '@material-ui/core/LinearProgress';
+import moment from "moment-business-days";
+import { HOLIDAYS } from "./constants/holidays";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import ErrorBoundary from "./pages/ErrorPage";
 let isSignedIn = false;
 
-function App(props) { 
+function App(props) {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(false);
-  const [isLoading,setIsLoading] = useState(false);  
-  const [hasError,setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const firebaseContext = useContext(FirebaseContext);
 
   // Moment week days initialization
-  moment.updateLocale('tr', {
+  moment.updateLocale("tr", {
     holidays: HOLIDAYS,
-    holidayFormat: 'MM-DD',
+    holidayFormat: "MM-DD",
     workingWeekdays: [1, 2, 3, 4, 5]
   });
 
   const signIn = () => {
-    firebaseContext.doSignInWithGoogle().then(user => {      
+    firebaseContext.doSignInWithGoogle().then(user => {
       setLoggedIn(true);
     });
   };
 
   firebaseContext.auth.onAuthStateChanged(user => {
-    window.currentUser = user;     
+    window.currentUser = user;
     if (user) {
       setLoggedIn(true);
     } else {
       signIn();
     }
-    if(!isSignedIn) {
-      setUser(user.uid); 
+    if (!isSignedIn) {
+      setUser(user.uid);
     }
- 
   });
 
   const breakpointValues = {
@@ -74,37 +73,58 @@ function App(props) {
   };
   function readSession() {
     const user = window.currentUser;
-    if (user) {      
+    if (user) {
       return user;
     }
   }
-  function setUser(userId) {  
-    if(userId && !isSignedIn) {
+  function setUser(userId) {
+    if (userId && !isSignedIn) {
       firebaseContext.getCurrentUser(userId).then(async response => {
         const user = response.data();
-        if(user) {
+        if (user) {
           user.role = getUserRole(user);
           user.uid = userId;
           await setCurrentUser(user);
           isSignedIn = true;
         }
-       });
-    }    
-   
+      });
+    }
   }
   useEffect(() => {
-    readSession();     
+    readSession();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setLoggedIn, readSession, currentUser, isLoading, setIsLoading, hasError, setHasError }}>
-      <MuiThemeProvider theme={theme}>       
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        setLoggedIn,
+        readSession,
+        currentUser,
+        setCurrentUser,
+        isLoading,
+        setIsLoading,
+        hasError,
+        setHasError
+      }}
+    >
+      <MuiThemeProvider theme={theme}>
         <Router>
-        <ErrorBoundary>
-         <LinearProgress hidden={!isLoading} style={{height: "6px", width: "100%", position: "absolute",top: "0", zIndex:3000 }} color="secondary"/>
-          <Navigation title="OOO" isLoggedIn={isLoggedIn}></Navigation>          
+          <ErrorBoundary>
+            <LinearProgress
+              hidden={!isLoading}
+              style={{
+                height: "6px",
+                width: "100%",
+                position: "absolute",
+                top: "0",
+                zIndex: 3000
+              }}
+              color="secondary"
+            />
+            <Navigation title="OOO" isLoggedIn={isLoggedIn}></Navigation>
           </ErrorBoundary>
-        </Router>               
+        </Router>
       </MuiThemeProvider>
     </AuthContext.Provider>
   );
