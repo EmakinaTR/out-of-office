@@ -184,7 +184,6 @@ const Dashboard = props => {
     _getMyRequests();
     _getIncomingRequest();
   }, []);
-
   return (
     <Container maxWidth="xl">
       <Box marginY={4}>
@@ -214,7 +213,11 @@ const Dashboard = props => {
           <Grid item xs={12} lg={6}>
             <InfoCard
               text={PENDING_LEAVE_REQUEST}
-              count={1}
+              count={
+                myRequests?.filter(item => {
+                  return item.status === 0;
+                }).length
+              }
               color="#8cc63f"
             ></InfoCard>
           </Grid>
