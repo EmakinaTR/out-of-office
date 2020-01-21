@@ -110,6 +110,7 @@ const Dashboard = props => {
         setSnackbarState(true);
         setSnackbarType(snackbars.success);
         _getIncomingRequest();
+        _getMyRequests();
       })
       .catch(err => console.log(err));
     await firebaseContext

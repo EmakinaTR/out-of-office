@@ -103,7 +103,7 @@ export default class Firebase {
     // console.log(queryData)
     return new Promise((resolve, reject) => {
       if (queryData?.lastDocument === "end") {
-        resolve({data: [], lastDocument: "end"});
+        resolve({ data: [], lastDocument: "end" });
       } else {
         const getTeamLeaves = app.functions().httpsCallable("getTeamLeaves");
         getTeamLeaves({ queryData: queryData })

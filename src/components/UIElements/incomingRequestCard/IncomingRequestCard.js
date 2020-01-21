@@ -1,4 +1,4 @@
-import React, { useContext} from "react";
+import React, { useContext } from "react";
 import {
   Paper,
   Avatar,
@@ -6,8 +6,7 @@ import {
   Typography,
   Box,
   Hidden,
-  Chip,
-
+  Chip
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import DateFull from "../date/DateFull";
@@ -17,7 +16,7 @@ import MoreDialog from "../moreDialog";
 import { FirebaseContext } from "../../firebase";
 import AuthContext from "../../session";
 import { useHistory } from "react-router-dom";
-
+import { printDayCount } from "../../../utils/displayUtils";
 
 const useStyles = makeStyles(theme => ({
   /*     request: {
@@ -30,7 +29,7 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.up("lg")]: {
       textAlign: "center"
     }
-  },
+  }
   //   paper: {
   //     padding: theme.spacing(1),
   //     color: theme.palette.text.secondary,
@@ -125,12 +124,12 @@ export const IncomingRequestCard = props => {
       search: "?formId=" + document
     });
   };
-  const editHandler = (document) => {
+  const editHandler = document => {
     history.push({
-      pathname: '/request-edit',
-      search: '?formId=' + document,
-    })
-  }
+      pathname: "/request-edit",
+      search: "?formId=" + document
+    });
+  };
   return (
     <Box marginY={2}>
       <Paper>
@@ -161,12 +160,14 @@ export const IncomingRequestCard = props => {
                     <Grid item xl={6}>
                       <Box display="flex" justify="space-between">
                         <Box flexGrow={1}>
-                          <Chip
-                            size="small"
-                            variant="outlined"
-                            label={props.duration + " day"}
-                            style={{ marginRight: ".5rem" }}
-                          />
+                          {props.duration > 0 && (
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              label={printDayCount(props.duration)}
+                              style={{ marginRight: ".5rem" }}
+                            />
+                          )}
                           <Chip
                             size="small"
                             variant="outlined"
@@ -190,17 +191,18 @@ export const IncomingRequestCard = props => {
                         </Box>
                       </Box>
                     </Grid>
-                    
+
                     {props.description ? (
                       <Grid item xs={12}>
-                      <Typography className={classes.description} variant="body2">
-                        {props.description}
-                      </Typography>                 
-                    </Grid>
-                  ) : null}
-                    
+                        <Typography
+                          className={classes.description}
+                          variant="body2"
+                        >
+                          {props.description}
+                        </Typography>
+                      </Grid>
+                    ) : null}
                   </Grid>
-                  
                 </Grid>
               </Grid>
             </Grid>
@@ -212,8 +214,8 @@ export const IncomingRequestCard = props => {
                 <MoreDialog
                   from="IncomingRequest"
                   isFormOwner={props.createdBy === currentUser.uid}
-                  leaveHasntBegin={new Date(props.startDate) >=new Date()}
-                  currentUserRole ={currentUser.ROLE}
+                  leaveHasntBegin={new Date(props.startDate) >= new Date()}
+                  currentUserRole={currentUser.ROLE}
                   changeFormStatusHandler={props.changeFormStatusHandler}
                   detailHandler={detailHandler}
                   editHandler={editHandler}
@@ -225,7 +227,6 @@ export const IncomingRequestCard = props => {
           </Grid>
         </Box>
       </Paper>
-      
     </Box>
   );
 };

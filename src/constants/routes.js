@@ -8,8 +8,6 @@ import LeaveRequestDetail from "../pages/leaveRequestDetail";
 import LeaveRequestEdit from "../pages/leaveRequestEdit";
 import { ROLE } from "./roles";
 
-
-
 const protectedRoutes = [
   {
     name: "Dashboard",
@@ -18,7 +16,7 @@ const protectedRoutes = [
     main: () => <Dashboard />,
     public: false,
     icon: "dashboard",
-    level: ROLE.USER       
+    level: ROLE.USER
   },
   {
     name: "New Leave Request",
@@ -27,7 +25,7 @@ const protectedRoutes = [
     main: props => <LeaveRequest {...props} />,
     public: false,
     icon: "post_add",
-    level: ROLE.USER       
+    level: ROLE.USER
   },
   {
     name: "My Requests",
@@ -36,7 +34,7 @@ const protectedRoutes = [
     main: props => <MyRequests {...props} />,
     public: false,
     icon: "date_range",
-    level: ROLE.USER       
+    level: ROLE.USER
   },
   {
     name: "Incoming Requests",
@@ -45,7 +43,7 @@ const protectedRoutes = [
     main: props => <IncomingRequests {...props} />,
     public: false,
     icon: "event_available",
-    level: ROLE.APPROVER       
+    level: ROLE.APPROVER
   },
   {
     name: "Reports",
@@ -60,13 +58,13 @@ const protectedRoutes = [
     path: "/request-detail",
     exact: true,
     main: props => <LeaveRequestDetail {...props} />,
-    level: ROLE.APPROVER
+    level: ROLE.USER
   },
   {
     path: "/request-edit",
     exact: true,
     main: props => <LeaveRequestEdit {...props} />,
-    level: ROLE.APPROVER
+    level: ROLE.USER
   },
   // Default Route; Sets unless none of the pathes are given
   {
@@ -75,7 +73,6 @@ const protectedRoutes = [
     main: () => <Dashboard />,
     icon: "dashboard",
     level: ROLE.USER
-    
   }
 ];
 
