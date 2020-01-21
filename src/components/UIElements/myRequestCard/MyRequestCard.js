@@ -5,6 +5,8 @@ import DateFull from '../date/DateFull';
 import AuthContext from "../../session";
 import MoreDialog from "../moreDialog";
 import { useHistory } from "react-router-dom";
+import { printDayCount } from "../../../utils/displayUtils";
+
 const useStyles = makeStyles(theme => ({
     paper: {
         padding: theme.spacing(1),
@@ -129,12 +131,14 @@ export const MyRequestCard = props => {
                 <Grid item xl={6}>
                   <Box display="flex" justify="space-between">
                     <Box flexGrow={1}>
+                    {props.duration > 0 && (
                       <Chip
                         size="small"
                         variant="outlined"
-                        label={props.duration + " day"}
+                        label={printDayCount(props.duration)}
                         style={{ marginRight: ".5rem" }}
                       />
+                      )}
                       <Chip
                         size="small"
                         variant="outlined"
