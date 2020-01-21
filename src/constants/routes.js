@@ -54,7 +54,7 @@ const protectedRoutes = [
     main: props => <Reports {...props} />,
     public: false,
     icon: "insert_chart_outlined",
-    level: ROLE.APPROVER
+    level: ROLE.ADMIN
   },
   {
     path: "/request-detail",

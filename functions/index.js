@@ -6,31 +6,46 @@ let globalLastDoc = {};
 exports.onCreateUser = functions.auth
   .user()
   .onCreate(async (userRecord, context) => {
+    const EMAKINA_TR_DOMAIN ="emakina.com.tr"
     displayName = userRecord.displayName.split(" ");
-    userDoc = {
-      email: userRecord.email,
-      firstName: displayName[0],
-      lastName: displayName[1],
-      avatarURL: userRecord.photoURL || "",
-      createdDate: admin.firestore.Timestamp.fromDate(new Date()),
-      isAdmin: false,
-      isApprover: false,
-      quitDate: ""
-    };
-    return admin
-      .firestore()
-      .collection("users")
-      .doc(userRecord.uid)
-      .set(userDoc)
-      .then(writeResult => {
-        console.log("User Created result:", writeResult);
-        return;
+	var email = userRecord.email;
+    var domain = email.substring(email.lastIndexOf("@") +1);
+
+    if(domain === EMAKINA_TR_DOMAIN){
+      if(user)
+      userDoc = {
+        email: userRecord.email,
+        firstName: displayName[0],
+        lastName: displayName[1],
+        avatarURL: userRecord.photoURL || "",
+        createdDate: admin.firestore.Timestamp.fromDate(new Date()),
+        isAdmin: false,
+        isApprover: false,
+        quitDate: ""
+      };
+      return admin
+        .firestore()
+        .collection("users")
+        .doc(userRecord.uid)
+        .set(userDoc)
+        .then(writeResult => {
+          console.log("User Created result:", writeResult);
+          return;
+        })
+        .catch(err => {
+          console.log(err);
+          return;
+        });
+    } else {
+      admin.auth().deleteUser(userRecord.uid)
+      .then(function() {
+        console.log('Successfully deleted user');
       })
-      .catch(err => {
-        console.log(err);
-        return;
+      .catch(function(error) {
+        console.log('Error deleting user:', error);
       });
-  });
+    }
+});
 
 exports.onTeamLeadChange = functions.firestore
   .document("teams/{leadUser}")
