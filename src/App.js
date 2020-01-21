@@ -52,6 +52,7 @@ function App(props) {
     lg: 992,
     xl: 1200
   };
+  
   let theme = createMuiTheme({
     palette: {
       primary: {

@@ -153,7 +153,7 @@ export default function LeaveRequestEditForm(props) {
     const isAnnualLeaveRightFinished = (duration) => props.user.annualCredit - duration < 0 && watchFields.leaveType === '0';
     
     // Check if user has right to demand excuse leave
-    const isExcuseLeaveRightFinished = (duration) => props.user.excuseCredit - duration < 0;
+    const isExcuseLeaveRightFinished = (duration) => props.user.excuseCredit - duration < 0 && watchFields.leaveType === '2';
     
     // Check if start date is greater than end date
     const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
@@ -191,7 +191,7 @@ export default function LeaveRequestEditForm(props) {
     const formSubmissionConditions = () => (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && 
     !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
     !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() && 
-    !(watchFields.leaveType === '2' && !isExcuseLeaveRightFinished()));
+    !isExcuseLeaveRightFinished(duration));
 
 
     const onSubmit = async (data, e) => {
@@ -375,7 +375,7 @@ export default function LeaveRequestEditForm(props) {
                                             name="leaveType"
                                             inputRef={register({ required: true, minLength: 1 })}
                                             error={errors.leaveType}
-                                            className={isExcuseLeaveRightFinished(duration) && watchFields.leaveType === '2' ? 'Mui-error' : ''}
+                                            className={isExcuseLeaveRightFinished(duration) ? 'Mui-error' : ''}
                                         />
                                     }
                                 >

@@ -152,7 +152,7 @@ export default function LeaveRequestForm(props) {
     const isAnnualLeaveRightFinished = (duration) => props.user.annualCredit - duration < 0 && watchFields.leaveType === '0';
     
     // Check if user has right to demand excuse leave
-    const isExcuseLeaveRightFinished = (duration) => props.user.excuseCredit - duration < 0;
+    const isExcuseLeaveRightFinished = (duration) => props.user.excuseCredit - duration < 0 && watchFields.leaveType === '2';
     
     // Check if start date is greater than end date
     const isSelectedStartDateGraterThanSelectedEndDate = (start, end) => moment(start).isAfter(moment(end));
@@ -190,12 +190,12 @@ export default function LeaveRequestForm(props) {
     const formSubmissionConditions = () => (!isSelectedStartDateGraterThanSelectedEndDate(selectedStartDate, selectedEndDate) && 
     !isDurationLessThanTwoHoursAndLeaveTypeIsNotCompansate() &&
     !isDurationGreaterThanTwoHoursAndLeaveTypeCompansate() && 
-    !(watchFields.leaveType === '2' && !isExcuseLeaveRightFinished()));
+    !isExcuseLeaveRightFinished(duration));
 
     const onSubmit = async (data, e) => {    
-        setIsLoading(true);
         e.preventDefault();
         if (formSubmissionConditions()) {
+            setIsLoading(true);
             const uid = props.auth().uid;
             const processedBy = "";
             const createdBy = uid;
@@ -309,8 +309,8 @@ export default function LeaveRequestForm(props) {
         getApproversWithId();
     }, []);
 
-    return (           
-        <Container maxWidth="lg">
+    return ( 
+        <Container maxWidth="lg">   
             <Box marginY={4}>
                 <Paper className={classes.root}>
                     <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
@@ -324,7 +324,7 @@ export default function LeaveRequestForm(props) {
                                 name="leaveType"
                                 inputRef={register({ required: true, minLength: 1 })}
                                 error={errors.leaveType}
-                                className={isExcuseLeaveRightFinished(duration) && watchFields.leaveType === '2' ? 'Mui-error' : ''}
+                                className={isExcuseLeaveRightFinished(duration) ? 'Mui-error' : ''}
                                 >
                                 <option value="" />
                                 {leaveTypes.map((item, index) => {
